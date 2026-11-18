@@ -92,7 +92,7 @@ async function loadFiles(){
   if(!currentUser)return;
   const {data,error}=await supabase.storage.from(BUCKET).list(currentUser.id,{limit:1000,sortBy:{column:"created_at",order:"desc"}});
   if(error)throw error;
-  myFiles=(data||[]).filter(x=>x.name&&!x.id===false).map(x=>({
+  myFiles=(data||[]).filter(x=>x.name&&x.id).map(x=>({
     name:x.metadata?.originalName||x.name.replace(/^[0-9a-f-]{36}-/i,""),
     size:Number(x.metadata?.size)||0,
     kind:kind(x.name,x.metadata?.mimetype||""),
@@ -113,7 +113,7 @@ async function uploadFiles(files){
     if(file.size>50*1024*1024){label.textContent+=" — 50MBを超えています";continue;}
     const path=currentUser.id+"/"+crypto.randomUUID()+"-"+safeName(file.name);
     try{
-      const {error}=await supabase.storage.from(BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||"application/octet-stream"});
+      const {error}=await supabase.storage.from(BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||"application/octet-stream",metadata:{originalName:file.name,size:file.size}});
       if(error)throw error;
       bar.style.width="100%";label.textContent=file.name+" — アップロード完了";
       toast("非公開で保存しました。共有する場合は一覧からURLを発行してください。");
