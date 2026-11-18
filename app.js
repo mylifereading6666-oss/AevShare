@@ -109,12 +109,17 @@ fileInput.addEventListener("change", () => uploadFiles([...fileInput.files]));
 dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("dragover"); });
 dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
 dropzone.addEventListener("drop", e => { e.preventDefault(); dropzone.classList.remove("dragover"); uploadFiles([...e.dataTransfer.files]); });
+function setMenuOpen(open) {
+  $("sidebar").classList.toggle("open", open);
+  document.body.classList.toggle("menu-open", open);
+  $("menuToggle").setAttribute("aria-expanded", String(open));
+  $("menuToggle").setAttribute("aria-label", open ? "メニューを閉じる" : "メニューを開く");
+}
 $("menuToggle").addEventListener("click", () => {
-  const opened = $("sidebar").classList.toggle("open");
-  $("menuToggle").setAttribute("aria-expanded", String(opened));
+  setMenuOpen(!$("sidebar").classList.contains("open"));
 });
-document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { showView(b.dataset.view); $("sidebar").classList.remove("open"); }));
-document.querySelectorAll("[data-filter]").forEach(b => b.addEventListener("click", () => { showLibrary(b.dataset.filter); $("sidebar").classList.remove("open"); }));
+document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { showView(b.dataset.view); setMenuOpen(false); }));
+document.querySelectorAll("[data-filter]").forEach(b => b.addEventListener("click", () => { showLibrary(b.dataset.filter); setMenuOpen(false); }));
 $("showAllBtn").addEventListener("click", () => showLibrary("all"));
 $("goUploadBtn").addEventListener("click", () => showView("upload"));
 loadLocal(); refresh();
