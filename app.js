@@ -195,7 +195,7 @@ $("showAllBtn").addEventListener("click",()=>showLibrary("all"));
 $("goUploadBtn").addEventListener("click",()=>showView("upload"));
 $("saveReceivedBtn")?.addEventListener("click",()=>{const url=$("receivedUrlInput").value.trim();if(!/^https:\/\//i.test(url)||!url.includes("supabase.co/storage/")){toast("Supabaseの共有URLを入力してください。");return;}const label=$("receivedLabelInput").value.trim()||"受信した共有ファイル";const items=getReceived();if(items.some(x=>x.url===url)){toast("このURLは登録済みです。");return;}items.unshift({url,label});saveReceived(items);$("receivedUrlInput").value="";$("receivedLabelInput").value="";toast("受信リストに追加しました。");});
 renderReceived();
-const consent=$("cookieConsent");if(consent){const accepted=document.cookie.split("; ").some(x=>x.startsWith("aevshare_consent=accepted"));consent.hidden=accepted;$("cookieAcceptBtn")?.addEventListener("click",()=>{document.cookie="aevshare_consent=accepted; Max-Age=31536000; Path=/; SameSite=Lax; Secure";consent.hidden=true;toast("Cookieへの同意を保存しました。");});}
+const consent=$("cookieConsent");if(consent){const choice=document.cookie.split("; ").find(x=>x.startsWith("aevshare_consent="));consent.hidden=!!choice;$("cookieAcceptBtn")?.addEventListener("click",()=>{document.cookie="aevshare_consent=accepted; Max-Age=31536000; Path=/; SameSite=Lax; Secure";consent.hidden=true;toast("Cookieへの同意を保存しました。");});$("cookieRejectBtn")?.addEventListener("click",()=>{document.cookie="aevshare_consent=declined; Max-Age=31536000; Path=/; SameSite=Lax; Secure";consent.hidden=true;toast("Cookieの任意利用には同意しない設定を保存しました。");});}
 $("connectionStatus")?.replaceChildren();
 const {data:{session}}=await supabase.auth.getSession();
 if(session?.user)await enterWorkspace(session.user);
