@@ -141,8 +141,23 @@ async function uploadFromUrl(){
   catch{toast("有効なHTTPSのファイルURLを入力してください。");return;}
   button.disabled=true;button.textContent="URLから取得中…";
   try{
+    if(/(^|\\.)youtube\\.com$/i.test(parsed.hostname) || /(^|\\.)youtu\\.be$/i.test(parsed.hostname)){
+      throw new Error("YouTubeの動画ページURLには対応していません。公開された直接ダウンロード可能なファイルURLを入力してください。");
+    }
     const {data,error}=await supabase.functions.invoke("aevshare-url-upload",{body:{url}});
-    if(error)throw error;
+    if(error){
+      let detail="";
+      try{
+        const response=error.context;
+        if(response && typeof response.clone==="function"){
+          const body=await response.clone().json();
+          detail=body?.error||"";
+        }else if(response?.json && typeof response.json==="object"){
+          detail=response.json.error||"";
+        }
+      }catch{}
+      throw new Error(detail||error.message||"ファイルを取得できませんでした。");
+    }
     if(!data?.success)throw new Error(data?.error||"ファイルを取得できませんでした。");
     toast("URLからファイルを保存しました: "+data.name);
     input.value="";
