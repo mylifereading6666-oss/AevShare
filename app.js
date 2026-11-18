@@ -57,12 +57,20 @@ async function renderRows(target,items) {
       catch(err){toast("URL発行に失敗: "+(err?.message||"エラー"));}
       finally{copy.disabled=false;copy.textContent="共有URLを発行・コピー";}
     });
-    const open=document.createElement("button");open.className="small-btn";open.textContent="開く";
+    const open=document.createElement("button");open.className="small-btn";open.textContent="閲覧";
     open.addEventListener("click",async()=>{
-      try{const url=await createShareUrl(item.path);window.open(url,"_blank","noopener");}
+      try{const url=await createShareUrl(item.path);window.location.assign(url);}
       catch(err){toast("ファイルを開けません: "+(err?.message||"エラー"));}
     });
-    actions.append(copy,open);row.append(icon,meta,actions);target.append(row);
+    const download=document.createElement("button");download.className="small-btn";download.textContent="ダウンロード";
+    download.addEventListener("click",async()=>{
+      try{
+        const {data,error}=await supabase.storage.from(BUCKET).createSignedUrl(item.path,SHARE_SECONDS,{download:item.name});
+        if(error)throw error;
+        window.location.assign(data.signedUrl);
+      }catch(err){toast("ダウンロードURLを発行できません: "+(err?.message||"エラー"));}
+    });
+    actions.append(copy,open,download);row.append(icon,meta,actions);target.append(row);
   }
 }
 function refresh(){
@@ -86,7 +94,7 @@ async function loadFiles(){
   if(error)throw error;
   myFiles=(data||[]).filter(x=>x.name&&!x.id===false).map(x=>({
     name:x.metadata?.originalName||x.name.replace(/^[0-9a-f-]{36}-/i,""),
-    size:x.metadata?.size||x.metadata?.mimetype&&x.metadata?.size||0,
+    size:Number(x.metadata?.size)||0,
     kind:kind(x.name,x.metadata?.mimetype||""),
     path:currentUser.id+"/"+x.name,
     createdAt:x.created_at||x.updated_at||new Date().toISOString()
@@ -156,9 +164,5 @@ document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click"
 $("showAllBtn").addEventListener("click",()=>showLibrary("all"));
 $("goUploadBtn").addEventListener("click",()=>showView("upload"));
 $("connectionStatus")?.replaceChildren();
-supabase.auth.onAuthStateChange((_event,session)=>{
-  if(session?.user&&!currentUser)enterWorkspace(session.user);
-  if(!session?.user&&currentUser)leaveWorkspace();
-});
 const {data:{session}}=await supabase.auth.getSession();
 if(session?.user)await enterWorkspace(session.user);
