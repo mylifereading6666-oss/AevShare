@@ -68,6 +68,7 @@ async function renderRows(target,items) {
     const download=document.createElement("button");download.className="small-btn";download.textContent="ダウンロード";
     download.addEventListener("click",async()=>{
       try{
+        if(Date.now() >= item.expiresAt) throw new Error("保存期限の30日を過ぎています。");
         const {data,error}=await supabase.storage.from(BUCKET).createSignedUrl(item.path,SHARE_SECONDS,{download:item.name});
         if(error)throw error;
         window.location.assign(data.signedUrl);
