@@ -1,0 +1,2 @@
+[functions.aevshare-cleanup]
+verify_jwt = false
