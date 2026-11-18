@@ -4,6 +4,8 @@ const SUPABASE_URL = "https://cbfkgosvqiltsikextxv.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_OWxhfU4hwbQz85zYoDOJSA_TWds3EZA";
 const BUCKET = "aevshare";
 const SHARE_SECONDS = 7 * 24 * 60 * 60;
+const RETENTION_DAYS = 30;
+const RETENTION_MS = RETENTION_DAYS * 24 * 60 * 60 * 1000;
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const $ = (id) => document.getElementById(id);
 const fileInput = $("fileInput"), dropzone = $("dropzone");
@@ -47,19 +49,19 @@ async function renderRows(target,items) {
     const icon=document.createElement("div");icon.className="file-icon";icon.textContent=iconFor(item.kind);
     const meta=document.createElement("div");meta.className="file-meta";
     const name=document.createElement("div");name.className="file-name";name.textContent=item.name;
-    const sub=document.createElement("div");sub.className="file-sub";sub.textContent=formatSize(item.size)+" · "+new Date(item.createdAt).toLocaleString("ja-JP");
+    const sub=document.createElement("div");sub.className="file-sub";sub.textContent=formatSize(item.size)+" · アップロード: "+new Date(item.createdAt).toLocaleString("ja-JP")+" · 削除予定: "+new Date(item.expiresAt).toLocaleDateString("ja-JP");
     meta.append(name,sub);
     const actions=document.createElement("div");actions.className="file-actions";
     const copy=document.createElement("button");copy.className="small-btn";copy.textContent="共有URLを発行・コピー";
     copy.addEventListener("click",async()=>{
       copy.disabled=true;copy.textContent="発行中…";
-      try{const url=await createShareUrl(item.path);try{await navigator.clipboard.writeText(url);toast("7日間有効な共有URLをコピーしました");}catch{window.prompt("7日間有効な共有URL",url);}}
+      try{const url=await createShareUrl(item);try{await navigator.clipboard.writeText(url);toast("7日間有効な共有URLをコピーしました");}catch{window.prompt("7日間有効な共有URL",url);}}
       catch(err){toast("URL発行に失敗: "+(err?.message||"エラー"));}
       finally{copy.disabled=false;copy.textContent="共有URLを発行・コピー";}
     });
     const open=document.createElement("button");open.className="small-btn";open.textContent="閲覧";
     open.addEventListener("click",async()=>{
-      try{const url=await createShareUrl(item.path);window.location.assign(url);}
+      try{const url=await createShareUrl(item);window.location.assign(url);}
       catch(err){toast("ファイルを開けません: "+(err?.message||"エラー"));}
     });
     const download=document.createElement("button");download.className="small-btn";download.textContent="ダウンロード";
@@ -116,7 +118,7 @@ async function uploadFiles(files){
       const {error}=await supabase.storage.from(BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||"application/octet-stream",metadata:{originalName:file.name,size:file.size}});
       if(error)throw error;
       bar.style.width="100%";label.textContent=file.name+" — アップロード完了";
-      toast("非公開で保存しました。共有する場合は一覧からURLを発行してください。");
+      toast("非公開で保存しました。保存期間はアップロードから30日間です。");
     }catch(err){label.textContent=file.name+" — 失敗: "+(err?.message||"接続エラー");}
   }
   await loadFiles();setTimeout(()=>$("uploadQueue").hidden=true,9000);fileInput.value="";
