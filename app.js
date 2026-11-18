@@ -3,129 +3,162 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const SUPABASE_URL = "https://cbfkgosvqiltsikextxv.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_OWxhfU4hwbQz85zYoDOJSA_TWds3EZA";
 const BUCKET = "aevshare";
+const SHARE_SECONDS = 7 * 24 * 60 * 60;
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-
 const $ = (id) => document.getElementById(id);
 const fileInput = $("fileInput"), dropzone = $("dropzone");
-let localFiles = [];
-let activeFilter = "all";
-let toastTimer;
-$("year").textContent = new Date().getFullYear();
+let currentUser = null, myFiles = [], activeFilter = "all", toastTimer;
 
+$("year").textContent = new Date().getFullYear();
 function toast(message) {
   const el = $("toast"); el.textContent = message; el.classList.add("show");
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
 }
-function kind(file) {
-  const name = file.name.toLowerCase();
-  if (file.type.startsWith("image/")) return "image";
-  if (file.type.startsWith("video/")) return "video";
-  if (file.type === "application/pdf" || name.endsWith(".pdf")) return "pdf";
-  if (/\.(zip|7z|rar|tar|gz)$/i.test(name)) return "archive";
+function authMessage(message) { $("authMessage").textContent = message; }
+function kind(name, mime="") {
+  const n = name.toLowerCase();
+  if (mime.startsWith("image/") || /\.(png|jpe?g|gif|webp|avif)$/i.test(n)) return "image";
+  if (mime.startsWith("video/") || /\.(mp4|webm|mov)$/i.test(n)) return "video";
+  if (mime === "application/pdf" || n.endsWith(".pdf")) return "pdf";
+  if (/\.(zip|7z|rar|tar|gz)$/i.test(n)) return "archive";
   return "other";
 }
 function iconFor(k) { return ({image:"▧",video:"▷",archive:"▣",pdf:"▤",other:"◇"})[k] || "◇"; }
-function formatSize(bytes) {
+function formatSize(bytes=0) {
   if (bytes < 1024) return bytes + " B";
-  const units = ["KB","MB","GB","TB"]; let n = bytes / 1024, i = 0;
-  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
-  return n.toFixed(1) + " " + units[i];
+  const units=["KB","MB","GB","TB"]; let n=bytes/1024,i=0;
+  while(n>=1024&&i<units.length-1){n/=1024;i++;}
+  return n.toFixed(1)+" "+units[i];
 }
-function safeName(name) { return name.replace(/[\\/]/g,"_").replace(/[^\p{L}\p{N}._ -]/gu,"_").slice(0,140) || "file"; }
-function loadLocal() {
-  try { localFiles = JSON.parse(localStorage.getItem("aevshare-files") || "[]"); } catch { localFiles = []; }
+function safeName(name) { return name.replace(/[\\/]/g,"_").replace(/[^\p{L}\p{N}._ -]/gu,"_").slice(0,140)||"file"; }
+function emptyState(target,message="まだファイルがありません") {
+  target.innerHTML='<div class="empty-state"><span>▤</span><strong>'+message+'</strong><small>アップロードしたファイルがここに表示されます。</small></div>';
 }
-function saveLocal() {
-  try { localStorage.setItem("aevshare-files", JSON.stringify(localFiles.slice(0,100))); } catch {}
+async function createShareUrl(path) {
+  const {data,error}=await supabase.storage.from(BUCKET).createSignedUrl(path,SHARE_SECONDS,{download:false});
+  if(error) throw error;
+  return data.signedUrl;
 }
-function emptyState(target, message="まだファイルがありません") {
-  target.innerHTML = '<div class="empty-state"><span>▤</span><strong>' + message + '</strong><small>アップロードしたファイルがここに表示されます。</small></div>';
+async function renderRows(target,items) {
+  target.innerHTML="";
+  if(!items.length){emptyState(target);return;}
+  for(const item of items){
+    const row=document.createElement("div");row.className="file-row";
+    const icon=document.createElement("div");icon.className="file-icon";icon.textContent=iconFor(item.kind);
+    const meta=document.createElement("div");meta.className="file-meta";
+    const name=document.createElement("div");name.className="file-name";name.textContent=item.name;
+    const sub=document.createElement("div");sub.className="file-sub";sub.textContent=formatSize(item.size)+" · "+new Date(item.createdAt).toLocaleString("ja-JP");
+    meta.append(name,sub);
+    const actions=document.createElement("div");actions.className="file-actions";
+    const copy=document.createElement("button");copy.className="small-btn";copy.textContent="共有URLを発行・コピー";
+    copy.addEventListener("click",async()=>{
+      copy.disabled=true;copy.textContent="発行中…";
+      try{const url=await createShareUrl(item.path);try{await navigator.clipboard.writeText(url);toast("7日間有効な共有URLをコピーしました");}catch{window.prompt("7日間有効な共有URL",url);}}
+      catch(err){toast("URL発行に失敗: "+(err?.message||"エラー"));}
+      finally{copy.disabled=false;copy.textContent="共有URLを発行・コピー";}
+    });
+    const open=document.createElement("button");open.className="small-btn";open.textContent="開く";
+    open.addEventListener("click",async()=>{
+      try{const url=await createShareUrl(item.path);window.open(url,"_blank","noopener");}
+      catch(err){toast("ファイルを開けません: "+(err?.message||"エラー"));}
+    });
+    actions.append(copy,open);row.append(icon,meta,actions);target.append(row);
+  }
 }
-function renderRows(target, items) {
-  target.innerHTML = "";
-  if (!items.length) { emptyState(target); return; }
-  items.forEach(item => {
-    const row = document.createElement("div"); row.className = "file-row";
-    const icon = document.createElement("div"); icon.className = "file-icon"; icon.textContent = iconFor(item.kind);
-    const meta = document.createElement("div"); meta.className = "file-meta";
-    const name = document.createElement("div"); name.className = "file-name"; name.textContent = item.name;
-    const sub = document.createElement("div"); sub.className = "file-sub"; sub.textContent = formatSize(item.size) + " · " + new Date(item.createdAt).toLocaleString("ja-JP");
-    meta.append(name, sub);
-    const actions = document.createElement("div"); actions.className = "file-actions";
-    const copy = document.createElement("button"); copy.className = "small-btn"; copy.textContent = "URLをコピー";
-    copy.addEventListener("click", async () => { try { await navigator.clipboard.writeText(item.url); toast("共有URLをコピーしました"); } catch { window.prompt("共有URL", item.url); } });
-    const open = document.createElement("button"); open.className = "small-btn"; open.textContent = "開く";
-    open.addEventListener("click", () => window.open(item.url, "_blank", "noopener"));
-    actions.append(copy, open); row.append(icon, meta, actions); target.append(row);
-  });
+function refresh(){
+  renderRows($("recentList"),myFiles.slice(0,4));
+  const filtered=activeFilter==="all"?myFiles:myFiles.filter(f=>f.kind===activeFilter);
+  renderRows($("libraryList"),filtered);
 }
-function refresh() {
-  renderRows($("recentList"), localFiles.slice(0,4));
-  const filtered = activeFilter === "all" ? localFiles : localFiles.filter(f => f.kind === activeFilter);
-  renderRows($("libraryList"), filtered);
-}
-function showView(view) {
-  $("uploadView").hidden = view !== "upload";
-  $("libraryView").hidden = view !== "library";
-  $("settingsView").hidden = view !== "settings";
-  document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("active", b.dataset.view === view || (view === "library" && b.dataset.filter === activeFilter)));
+function showView(view){
+  $("uploadView").hidden=view!=="upload";$("libraryView").hidden=view!=="library";$("settingsView").hidden=view!=="settings";
+  document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===view||(view==="library"&&b.dataset.filter===activeFilter)));
   $("main").scrollTo?.({top:0,behavior:"smooth"});
 }
-function showLibrary(filter) {
-  activeFilter = filter;
-  const titles = {all:"最近のファイル",image:"画像",video:"動画",archive:"ZIP・圧縮ファイル",pdf:"PDF",other:"その他"};
-  $("libraryTitle").textContent = titles[filter] || "ファイル";
-  refresh(); showView("library");
+function showLibrary(filter){
+  activeFilter=filter;
+  const titles={all:"すべてのファイル",image:"画像",video:"動画",archive:"ZIP・圧縮ファイル",pdf:"PDF",other:"その他"};
+  $("libraryTitle").textContent=titles[filter]||"ファイル";refresh();showView("library");
 }
-async function uploadFiles(files) {
-  if (!files.length) return;
-  $("uploadQueue").hidden = false; $("uploadQueue").innerHTML = "";
-  for (const file of files) {
-    const item = document.createElement("div"); item.className = "queue-item";
-    const label = document.createElement("div"); label.textContent = file.name + " · " + formatSize(file.size);
-    const progress = document.createElement("div"); progress.className = "progress";
-    const bar = document.createElement("i"); progress.append(bar); item.append(label, progress); $("uploadQueue").append(item);
-    if (file.size > 50 * 1024 * 1024) { label.textContent += " — 50MBを超えています"; continue; }
-    const path = new Date().toISOString().slice(0,10) + "/" + crypto.randomUUID() + "-" + safeName(file.name);
-    try {
-      const { error } = await supabase.storage.from(BUCKET).upload(path, file, {cacheControl:"3600", upsert:false, contentType:file.type || "application/octet-stream"});
-      if (error) throw error;
-      bar.style.width = "100%";
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
-      const record = {name:file.name,size:file.size,kind:kind(file),url:data.publicUrl,path,createdAt:new Date().toISOString()};
-      localFiles.unshift(record); saveLocal();
-      label.textContent = file.name + " — アップロード完了";
-      toast("アップロードが完了しました");
-    } catch (err) {
-      label.textContent = file.name + " — 失敗: " + (err?.message || "接続エラー");
-    }
-  }
+async function loadFiles(){
+  if(!currentUser)return;
+  const {data,error}=await supabase.storage.from(BUCKET).list(currentUser.id,{limit:1000,sortBy:{column:"created_at",order:"desc"}});
+  if(error)throw error;
+  myFiles=(data||[]).filter(x=>x.name&&!x.id===false).map(x=>({
+    name:x.metadata?.originalName||x.name.replace(/^[0-9a-f-]{36}-/i,""),
+    size:x.metadata?.size||x.metadata?.mimetype&&x.metadata?.size||0,
+    kind:kind(x.name,x.metadata?.mimetype||""),
+    path:currentUser.id+"/"+x.name,
+    createdAt:x.created_at||x.updated_at||new Date().toISOString()
+  }));
   refresh();
-  setTimeout(() => { $("uploadQueue").hidden = true; }, 9000);
-  fileInput.value = "";
 }
-$("chooseBtn").addEventListener("click", () => fileInput.click());
-fileInput.addEventListener("change", () => uploadFiles([...fileInput.files]));
-dropzone.addEventListener("dragover", e => { e.preventDefault(); dropzone.classList.add("dragover"); });
-dropzone.addEventListener("dragleave", () => dropzone.classList.remove("dragover"));
-dropzone.addEventListener("drop", e => { e.preventDefault(); dropzone.classList.remove("dragover"); uploadFiles([...e.dataTransfer.files]); });
-function setMenuOpen(open) {
-  $("sidebar").classList.toggle("open", open);
-  document.body.classList.toggle("menu-open", open);
-  $("menuToggle").setAttribute("aria-expanded", String(open));
-  $("menuToggle").setAttribute("aria-label", open ? "メニューを閉じる" : "メニューを開く");
+async function uploadFiles(files){
+  if(!currentUser){toast("先にログインしてください");return;}
+  if(!files.length)return;
+  $("uploadQueue").hidden=false;$("uploadQueue").innerHTML="";
+  for(const file of files){
+    const item=document.createElement("div");item.className="queue-item";
+    const label=document.createElement("div");label.textContent=file.name+" · "+formatSize(file.size);
+    const progress=document.createElement("div");progress.className="progress";const bar=document.createElement("i");
+    progress.append(bar);item.append(label,progress);$("uploadQueue").append(item);
+    if(file.size>50*1024*1024){label.textContent+=" — 50MBを超えています";continue;}
+    const path=currentUser.id+"/"+crypto.randomUUID()+"-"+safeName(file.name);
+    try{
+      const {error}=await supabase.storage.from(BUCKET).upload(path,file,{cacheControl:"3600",upsert:false,contentType:file.type||"application/octet-stream"});
+      if(error)throw error;
+      bar.style.width="100%";label.textContent=file.name+" — アップロード完了";
+      toast("非公開で保存しました。共有する場合は一覧からURLを発行してください。");
+    }catch(err){label.textContent=file.name+" — 失敗: "+(err?.message||"接続エラー");}
+  }
+  await loadFiles();setTimeout(()=>$("uploadQueue").hidden=true,9000);fileInput.value="";
 }
-$("menuToggle").addEventListener("click", () => {
-  setMenuOpen(!$("sidebar").classList.contains("open"));
+async function enterWorkspace(user){
+  currentUser=user;$("authPanel").hidden=true;$("workspace").hidden=false;$("accountEmail").textContent=user.email||"ログイン中";
+  try{await loadFiles();}catch(err){toast("ファイル一覧を取得できません: "+(err?.message||"エラー"));}
+}
+async function leaveWorkspace(){
+  currentUser=null;myFiles=[];$("workspace").hidden=true;$("authPanel").hidden=false;
+  $("loginPassword").value="";$("signupPassword").value="";
+}
+$("loginBtn").addEventListener("click",async()=>{
+  const email=$("loginEmail").value.trim(),password=$("loginPassword").value;
+  if(!email||!password){authMessage("メールアドレスとパスワードを入力してください。");return;}
+  $("loginBtn").disabled=true;
+  const {data,error}=await supabase.auth.signInWithPassword({email,password});
+  $("loginBtn").disabled=false;
+  if(error){authMessage("ログインできません: "+error.message);return;}
+  authMessage("ログインしました。");await enterWorkspace(data.user);
 });
-document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => { showView(b.dataset.view); setMenuOpen(false); }));
-document.querySelectorAll("[data-filter]").forEach(b => b.addEventListener("click", () => { showLibrary(b.dataset.filter); setMenuOpen(false); }));
-$("showAllBtn").addEventListener("click", () => showLibrary("all"));
-$("goUploadBtn").addEventListener("click", () => showView("upload"));
-loadLocal(); refresh();
-(async () => {
-  try {
-    const { error } = await supabase.storage.from(BUCKET).list("", {limit:1});
-    $("connectionStatus").textContent = error ? "接続確認待ち：Storageのバケット・権限設定が必要です。" : "Supabaseとの接続を確認しました。";
-  } catch { $("connectionStatus").textContent = "接続できません。Supabaseの設定を確認してください。"; }
-})();
+$("signupBtn").addEventListener("click",async()=>{
+  const email=$("signupEmail").value.trim(),password=$("signupPassword").value;
+  if(!email||password.length<6){authMessage("メールアドレスと6文字以上のパスワードを入力してください。");return;}
+  $("signupBtn").disabled=true;
+  const {data,error}=await supabase.auth.signUp({email,password});
+  $("signupBtn").disabled=false;
+  if(error){authMessage("登録できません: "+error.message);return;}
+  if(data.session){authMessage("アカウントを作成しました。");await enterWorkspace(data.user);}
+  else authMessage("確認メールを送信しました。メール内の確認リンクを開いてからログインしてください。");
+});
+$("logoutBtn").addEventListener("click",async()=>{const {error}=await supabase.auth.signOut();if(error){toast(error.message);return;}await leaveWorkspace();authMessage("ログアウトしました。");});
+$("chooseBtn").addEventListener("click",()=>fileInput.click());
+fileInput.addEventListener("change",()=>uploadFiles([...fileInput.files]));
+dropzone.addEventListener("dragover",e=>{e.preventDefault();dropzone.classList.add("dragover");});
+dropzone.addEventListener("dragleave",()=>dropzone.classList.remove("dragover"));
+dropzone.addEventListener("drop",e=>{e.preventDefault();dropzone.classList.remove("dragover");uploadFiles([...e.dataTransfer.files]);});
+function setMenuOpen(open){
+  $("sidebar").classList.toggle("open",open);document.body.classList.toggle("menu-open",open);
+  $("menuToggle").setAttribute("aria-expanded",String(open));$("menuToggle").setAttribute("aria-label",open?"メニューを閉じる":"メニューを開く");
+}
+$("menuToggle").addEventListener("click",()=>setMenuOpen(!$("sidebar").classList.contains("open")));
+document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",()=>{showView(b.dataset.view);setMenuOpen(false);}));
+document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{showLibrary(b.dataset.filter);setMenuOpen(false);}));
+$("showAllBtn").addEventListener("click",()=>showLibrary("all"));
+$("goUploadBtn").addEventListener("click",()=>showView("upload"));
+$("connectionStatus")?.replaceChildren();
+supabase.auth.onAuthStateChange((_event,session)=>{
+  if(session?.user&&!currentUser)enterWorkspace(session.user);
+  if(!session?.user&&currentUser)leaveWorkspace();
+});
+const {data:{session}}=await supabase.auth.getSession();
+if(session?.user)await enterWorkspace(session.user);
