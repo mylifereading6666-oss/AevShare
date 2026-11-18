@@ -63,6 +63,14 @@
           <button class="primary-btn" id="chooseBtn">ファイルを選択</button>
           <div class="file-hints">画像・動画・ZIP・PDF・その他のファイルに対応（1ファイル最大50MB）<br>保存期限はアップロードから30日間です。期限前に必要なファイルをダウンロードしてください。期限経過後も自動削除されません。期限内に手動で完全削除してください。削除後は復元できません。</div>
         </div>
+        <div class="info-card url-upload-card">
+          <h3>URLからアップロード</h3>
+          <p>HTTPSのファイル直リンクを入力すると、AevShareが取得してあなたの非公開領域に保存します。</p>
+          <label class="field-label" for="remoteFileUrl">ファイルURL</label>
+          <input class="text-input" id="remoteFileUrl" type="url" inputmode="url" placeholder="https://example.com/file.zip" autocomplete="url">
+          <button class="primary-btn" id="remoteUploadBtn">URLからアップロード</button>
+          <div class="file-hints">1ファイル最大50MB。ログイン必須。ログインが必要なサイト、アクセス制限のあるURL、動画配信ページなどの直接ファイルURLではないものは取得できない場合があります。</div>
+        </div>
         <div class="upload-queue" id="uploadQueue" hidden></div>
         <div class="section-heading recent-heading"><div><h2>最近のファイル</h2><p>あなたのアカウントに保存されたファイル</p></div><button class="text-btn" id="showAllBtn">すべて表示 →</button></div>
         <div class="file-list" id="recentList"></div>
