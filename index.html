@@ -76,12 +76,15 @@
         <div class="info-card"><h3>ログイン中のアカウント</h3><p id="accountEmail"></p><button class="small-btn" id="logoutBtn">ログアウト</button></div>
         <div class="info-card"><h3>共有URLについて</h3><p>ファイル自体は非公開で保存されます。発行した期限付きURLを知っている人だけが、そのファイルを閲覧・ダウンロードできます。URLを受け取った人が他人に転送した場合、その人も有効期限内はアクセスできます。</p></div>
         <div class="info-card"><h3>容量・利用制限</h3><p>容量は無制限ではありません。保存容量・通信量・ファイルサイズはSupabaseのプランと設定に従います。現在の上限は1ファイル50MBです。</p></div>
-        <div class="info-card"><h3>ファイルの保存期限・自動削除</h3><p>アップロードしたファイルの保存期間は、アップロード日時から30日間です。期限を過ぎたファイルは毎日の自動削除処理でStorageから完全に削除され、復元できません。必要なファイルは必ず期限前にダウンロードしてください。ファイル一覧には削除予定日が表示されます。</p></div>
+        <div class="info-card"><h3>ファイルの保存期限・手動削除</h3><p>アップロードしたファイルは、アップロード日時から30日以内に所有者が完全削除してください。ファイルごとに残り日数・時間・分を表示します。期限を過ぎても自動削除はされません。期限超過後は速やかに削除してください。完全削除すると復元できません。</p></div>
+        <div class="info-card"><h3>受信した共有URL</h3><p>他の人から受け取った共有URLをこの端末のリストに保存できます。ここから削除できるのは自分の受信リストの記録だけです。共有元のファイル本体は削除されません。</p><label class="field-label" for="receivedLabelInput">表示名（任意）</label><input class="text-input" id="receivedLabelInput" placeholder="例：受け取った資料"><label class="field-label" for="receivedUrlInput">共有URL</label><input class="text-input" id="receivedUrlInput" type="url" placeholder="https://..."><button class="primary-btn" id="saveReceivedBtn">受信リストに追加</button><div class="file-list" id="receivedList"></div></div>
+        <div class="info-card"><h3>公式文書</h3><p><a href="privacy-policy.html">プライバシーポリシー</a> · <a href="terms.html">利用規約</a></p></div>
         <div class="info-card"><h3>ファイル管理</h3><p>自分のアカウントでログインした場合のみ、自分のファイル一覧を確認できます。共有URLは7日間有効です。必要な場合は一覧から再発行してください。</p></div>
       </section>
     </section>
     <footer>© <span id="year"></span> AevShare <span class="footer-dot">·</span> Share files with ease.</footer>
   </main>
+  <section class="cookie-consent" id="cookieConsent" hidden aria-label="Cookieの同意"><div><strong>Cookieの利用について</strong><p>AevShareは同意状態を記録するCookieを使用します。詳細は<a href="privacy-policy.html">プライバシーポリシー</a>をご確認ください。</p></div><button class="primary-btn" id="cookieAcceptBtn">確認して同意する</button></section>
   <div class="toast" id="toast" role="status"></div>
   <script type="module" src="app.js"></script>
 </body>
