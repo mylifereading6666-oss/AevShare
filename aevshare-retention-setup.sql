@@ -37,14 +37,14 @@ $$;
 revoke all on function public.aevshare_expired_paths() from public, anon, authenticated;
 grant execute on function public.aevshare_expired_paths() to service_role;
 
--- Replace an existing job with the same name, then run daily at 03:15 UTC.
+-- Replace an existing job with the same name, then run hourly at minute 0 (UTC).
 select cron.unschedule(jobid)
 from cron.job
 where jobname = 'aevshare-delete-expired-files';
 
 select cron.schedule(
   'aevshare-delete-expired-files',
-  '15 3 * * *',
+  '0 * * * *',
   $job$
     select net.http_post(
       url := 'https://cbfkgosvqiltsikextxv.supabase.co/functions/v1/aevshare-cleanup',
