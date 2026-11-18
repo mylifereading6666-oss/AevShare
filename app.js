@@ -36,8 +36,9 @@ function safeName(name) { return name.replace(/[\\/]/g,"_").replace(/[^\p{L}\p{N
 function emptyState(target,message="まだファイルがありません") {
   target.innerHTML='<div class="empty-state"><span>▤</span><strong>'+message+'</strong><small>アップロードしたファイルがここに表示されます。</small></div>';
 }
-async function createShareUrl(path) {
-  const {data,error}=await supabase.storage.from(BUCKET).createSignedUrl(path,SHARE_SECONDS,{download:false});
+async function createShareUrl(item) {
+  if(Date.now() >= item.expiresAt) throw new Error("保存期限の30日を過ぎています。");
+  const {data,error}=await supabase.storage.from(BUCKET).createSignedUrl(item.path,SHARE_SECONDS,{download:false});
   if(error) throw error;
   return data.signedUrl;
 }
@@ -99,8 +100,9 @@ async function loadFiles(){
     size:Number(x.metadata?.size)||0,
     kind:kind(x.name,x.metadata?.mimetype||""),
     path:currentUser.id+"/"+x.name,
-    createdAt:x.created_at||x.updated_at||new Date().toISOString()
-  }));
+    createdAt:x.created_at||x.updated_at||new Date().toISOString(),
+    expiresAt:new Date(x.created_at||x.updated_at||new Date().toISOString()).getTime()+RETENTION_MS
+  })).filter(x=>x.expiresAt>Date.now());
   refresh();
 }
 async function uploadFiles(files){
