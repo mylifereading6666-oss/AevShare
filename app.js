@@ -131,6 +131,29 @@ function renderReceived(){
   if(!items.length){emptyState(target,"受信した共有URLはありません");return;}
   items.forEach((item,index)=>{const row=document.createElement("div");row.className="file-row";const meta=document.createElement("div");meta.className="file-meta";const name=document.createElement("div");name.className="file-name";name.textContent=item.label||"受信した共有ファイル";const sub=document.createElement("div");sub.className="file-sub";sub.textContent="この端末に保存された共有URL";meta.append(name,sub);const actions=document.createElement("div");actions.className="file-actions";const open=document.createElement("button");open.className="small-btn";open.textContent="共有ファイルを開く";open.addEventListener("click",()=>window.open(item.url,"_blank","noopener"));const remove=document.createElement("button");remove.className="small-btn danger-btn";remove.textContent="自分のリストから削除";remove.addEventListener("click",()=>{const next=getReceived();next.splice(index,1);saveReceived(next);toast("受信リストから削除しました。相手のファイル本体には影響しません。");});actions.append(open,remove);row.append(meta,actions);target.append(row);});
 }
+async function uploadFromUrl(){
+  if(!currentUser){toast("先にログインしてください");return;}
+  const input=$("remoteFileUrl"),button=$("remoteUploadBtn");
+  const url=input.value.trim();
+  if(!url){toast("ファイルのURLを入力してください。");return;}
+  let parsed;
+  try{parsed=new URL(url);if(parsed.protocol!=="https:"||parsed.username||parsed.password)throw new Error();}
+  catch{toast("有効なHTTPSのファイルURLを入力してください。");return;}
+  button.disabled=true;button.textContent="URLから取得中…";
+  try{
+    const {data,error}=await supabase.functions.invoke("aevshare-url-upload",{body:{url}});
+    if(error)throw error;
+    if(!data?.success)throw new Error(data?.error||"ファイルを取得できませんでした。");
+    toast("URLからファイルを保存しました: "+data.name);
+    input.value="";
+    await loadFiles();
+  }catch(err){
+    const message=err?.context?.json?.error||err?.message||"接続エラー";
+    toast("URLアップロード失敗: "+message);
+  }finally{button.disabled=false;button.textContent="URLからアップロード";}
+}
+$("remoteUploadBtn")?.addEventListener("click",uploadFromUrl);
+$("remoteFileUrl")?.addEventListener("keydown",e=>{if(e.key==="Enter")uploadFromUrl();});
 async function uploadFiles(files){
   if(!currentUser){toast("先にログインしてください");return;}
   if(!files.length)return;
