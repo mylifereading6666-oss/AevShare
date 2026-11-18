@@ -6,6 +6,7 @@ const BUCKET = "aevshare";
 const SHARE_SECONDS = 7 * 24 * 60 * 60;
 const RETENTION_DAYS = 30;
 const RETENTION_MS = RETENTION_DAYS * 24 * 60 * 60 * 1000;
+const RECEIVED_KEY = "aevshare_received_links_v1";
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const $ = (id) => document.getElementById(id);
 const fileInput = $("fileInput"), dropzone = $("dropzone");
@@ -37,7 +38,7 @@ function emptyState(target,message="まだファイルがありません") {
   target.innerHTML='<div class="empty-state"><span>▤</span><strong>'+message+'</strong><small>アップロードしたファイルがここに表示されます。</small></div>';
 }
 async function createShareUrl(item) {
-  if(Date.now() >= item.expiresAt) throw new Error("保存期限の30日を過ぎています。");
+  if(Date.now() >= item.expiresAt) throw new Error("30日間の削除期限を過ぎています。先にファイルを削除してください。");
   const {data,error}=await supabase.storage.from(BUCKET).createSignedUrl(item.path,SHARE_SECONDS,{download:false});
   if(error) throw error;
   return data.signedUrl;
@@ -50,7 +51,8 @@ async function renderRows(target,items) {
     const icon=document.createElement("div");icon.className="file-icon";icon.textContent=iconFor(item.kind);
     const meta=document.createElement("div");meta.className="file-meta";
     const name=document.createElement("div");name.className="file-name";name.textContent=item.name;
-    const sub=document.createElement("div");sub.className="file-sub";sub.textContent=formatSize(item.size)+" · アップロード: "+new Date(item.createdAt).toLocaleString("ja-JP")+" · 削除予定: "+new Date(item.expiresAt).toLocaleDateString("ja-JP");
+    const sub=document.createElement("div");sub.className="file-sub";sub.textContent=formatSize(item.size)+" · アップロード: "+new Date(item.createdAt).toLocaleString("ja-JP");
+    const countdown=document.createElement("div");countdown.className="file-countdown";countdown.dataset.expires=item.expiresAt;
     meta.append(name,sub);
     const actions=document.createElement("div");actions.className="file-actions";
     const copy=document.createElement("button");copy.className="small-btn";copy.textContent="共有URLを発行・コピー";
@@ -74,7 +76,14 @@ async function renderRows(target,items) {
         window.location.assign(data.signedUrl);
       }catch(err){toast("ダウンロードURLを発行できません: "+(err?.message||"エラー"));}
     });
-    actions.append(copy,open,download);row.append(icon,meta,actions);target.append(row);
+    const remove=document.createElement("button");remove.className="small-btn danger-btn";remove.textContent="完全削除";
+    remove.addEventListener("click",async()=>{
+      if(!confirm("このファイルを完全に削除しますか？\n削除後は復元できません。"))return;
+      remove.disabled=true;remove.textContent="削除中…";
+      try{const {error}=await supabase.storage.from(BUCKET).remove([item.path]);if(error)throw error;myFiles=myFiles.filter(f=>f.path!==item.path);refresh();toast("ファイル本体を完全に削除しました。");}
+      catch(err){toast("削除できません: "+(err?.message||"エラー"));remove.disabled=false;remove.textContent="完全削除";}
+    });
+    actions.append(copy,open,download,remove);meta.append(name,sub,countdown);row.append(icon,meta,actions);target.append(row);
   }
 }
 function refresh(){
@@ -103,8 +112,24 @@ async function loadFiles(){
     path:currentUser.id+"/"+x.name,
     createdAt:x.created_at||x.updated_at||new Date().toISOString(),
     expiresAt:new Date(x.created_at||x.updated_at||new Date().toISOString()).getTime()+RETENTION_MS
-  })).filter(x=>x.expiresAt>Date.now());
-  refresh();
+  }));
+  refresh();updateCountdowns();
+}
+function updateCountdowns(){
+  document.querySelectorAll(".file-countdown").forEach(el=>{
+    const left=Number(el.dataset.expires)-Date.now();
+    if(left<=0){el.textContent="⚠ 削除期限超過：速やかに完全削除してください";el.classList.add("expired");return;}
+    const total=Math.floor(left/1000),days=Math.floor(total/86400),hours=Math.floor((total%86400)/3600),minutes=Math.floor((total%3600)/60);
+    el.textContent="削除期限まで残り "+days+"日 "+hours+"時間 "+minutes+"分";el.classList.remove("expired");
+  });
+}
+setInterval(updateCountdowns,1000);
+function getReceived(){try{return JSON.parse(localStorage.getItem(RECEIVED_KEY)||"[]");}catch{return [];}}
+function saveReceived(items){localStorage.setItem(RECEIVED_KEY,JSON.stringify(items));renderReceived();}
+function renderReceived(){
+  const target=$("receivedList");if(!target)return;target.innerHTML="";const items=getReceived();
+  if(!items.length){emptyState(target,"受信した共有URLはありません");return;}
+  items.forEach((item,index)=>{const row=document.createElement("div");row.className="file-row";const meta=document.createElement("div");meta.className="file-meta";const name=document.createElement("div");name.className="file-name";name.textContent=item.label||"受信した共有ファイル";const sub=document.createElement("div");sub.className="file-sub";sub.textContent="この端末に保存された共有URL";meta.append(name,sub);const actions=document.createElement("div");actions.className="file-actions";const open=document.createElement("button");open.className="small-btn";open.textContent="共有ファイルを開く";open.addEventListener("click",()=>window.open(item.url,"_blank","noopener"));const remove=document.createElement("button");remove.className="small-btn danger-btn";remove.textContent="自分のリストから削除";remove.addEventListener("click",()=>{const next=getReceived();next.splice(index,1);saveReceived(next);toast("受信リストから削除しました。相手のファイル本体には影響しません。");});actions.append(open,remove);row.append(meta,actions);target.append(row);});
 }
 async function uploadFiles(files){
   if(!currentUser){toast("先にログインしてください");return;}
@@ -168,6 +193,9 @@ document.querySelectorAll("[data-view]").forEach(b=>b.addEventListener("click",(
 document.querySelectorAll("[data-filter]").forEach(b=>b.addEventListener("click",()=>{showLibrary(b.dataset.filter);setMenuOpen(false);}));
 $("showAllBtn").addEventListener("click",()=>showLibrary("all"));
 $("goUploadBtn").addEventListener("click",()=>showView("upload"));
+$("saveReceivedBtn")?.addEventListener("click",()=>{const url=$("receivedUrlInput").value.trim();if(!/^https:\/\//i.test(url)||!url.includes("supabase.co/storage/")){toast("Supabaseの共有URLを入力してください。");return;}const label=$("receivedLabelInput").value.trim()||"受信した共有ファイル";const items=getReceived();if(items.some(x=>x.url===url)){toast("このURLは登録済みです。");return;}items.unshift({url,label});saveReceived(items);$("receivedUrlInput").value="";$("receivedLabelInput").value="";toast("受信リストに追加しました。");});
+renderReceived();
+const consent=$("cookieConsent");if(consent){const accepted=document.cookie.split("; ").some(x=>x.startsWith("aevshare_consent=accepted"));consent.hidden=accepted;$("cookieAcceptBtn")?.addEventListener("click",()=>{document.cookie="aevshare_consent=accepted; Max-Age=31536000; Path=/; SameSite=Lax; Secure";consent.hidden=true;toast("Cookieへの同意を保存しました。");});}
 $("connectionStatus")?.replaceChildren();
 const {data:{session}}=await supabase.auth.getSession();
 if(session?.user)await enterWorkspace(session.user);
