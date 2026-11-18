@@ -1,15 +1,11 @@
--- AevShare Storage setup
--- Supabase SQL Editorで実行する前に内容を確認してください。
--- 公開バケット: URLを知っている人はファイルを閲覧・ダウンロードできます。
--- 匿名アップロードを許可するため、公開サイトから誰でもアップロードできます。
--- バケット上限は50MB。実際のプラン上限・通信量制限も適用されます。
+-- AevShare private Storage migration
+-- AevShare専用SupabaseプロジェクトのSQL Editorで実行してください。
+-- 既存の公開ポリシーを削除し、ログイン中の本人だけが自分のフォルダを操作できるようにします。
+-- 共有相手にはアプリが発行する期限付き署名URLを渡します（ログイン不要）。
 
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
-  'aevshare',
-  'aevshare',
-  true,
-  52428800,
+  'aevshare','aevshare',false,52428800,
   array[
     'image/jpeg','image/png','image/gif','image/webp','image/avif',
     'video/mp4','video/webm','video/quicktime',
@@ -19,19 +15,27 @@ values (
   ]
 )
 on conflict (id) do update set
-  public = excluded.public,
+  public = false,
   file_size_limit = excluded.file_size_limit,
   allowed_mime_types = excluded.allowed_mime_types;
 
--- Anyone can read files from this public bucket.
-create policy "AevShare public read"
-on storage.objects for select
-to anon, authenticated
-using (bucket_id = 'aevshare');
+drop policy if exists "AevShare public read" on storage.objects;
+drop policy if exists "AevShare anonymous upload" on storage.objects;
+drop policy if exists "AevShare owner read" on storage.objects;
+drop policy if exists "AevShare owner upload" on storage.objects;
+drop policy if exists "AevShare owner delete" on storage.objects;
 
--- Anyone can upload to this bucket without signing in.
--- This is convenient but can be abused; monitor storage usage and disable this policy if needed.
-create policy "AevShare anonymous upload"
+create policy "AevShare owner read"
+on storage.objects for select
+to authenticated
+using (bucket_id = 'aevshare' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "AevShare owner upload"
 on storage.objects for insert
-to anon, authenticated
-with check (bucket_id = 'aevshare');
+to authenticated
+with check (bucket_id = 'aevshare' and (storage.foldername(name))[1] = auth.uid()::text);
+
+create policy "AevShare owner delete"
+on storage.objects for delete
+to authenticated
+using (bucket_id = 'aevshare' and (storage.foldername(name))[1] = auth.uid()::text);
