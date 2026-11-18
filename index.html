@@ -56,12 +56,12 @@
     </section>
     <section id="workspace" hidden>
       <section class="view" id="uploadView">
-        <div class="section-heading"><div><h2>ファイルをアップロード</h2><p>ファイルを選択するか、ここにドラッグ＆ドロップしてください。</p></div><span class="subtle-tag">PRIVATE BY DEFAULT</span></div>
+        <div class="section-heading"><div><h2>ファイルをアップロード</h2><p>ファイルを選択するか、ここにドラッグ＆ドロップしてください。保存期間はアップロードから30日間です。</p></div><span class="subtle-tag">PRIVATE BY DEFAULT</span></div>
         <div class="dropzone" id="dropzone">
           <input id="fileInput" type="file" multiple hidden>
           <div class="upload-icon">↑</div><h3>ファイルをここにドロップ</h3><p>または</p>
           <button class="primary-btn" id="chooseBtn">ファイルを選択</button>
-          <div class="file-hints">画像・動画・ZIP・PDF・その他のファイルに対応（1ファイル最大50MB）</div>
+          <div class="file-hints">画像・動画・ZIP・PDF・その他のファイルに対応（1ファイル最大50MB）<br>保存期限はアップロードから30日間です。期限前に必要なファイルをダウンロードしてください。期限経過後は自動削除され、復元できません。</div>
         </div>
         <div class="upload-queue" id="uploadQueue" hidden></div>
         <div class="section-heading recent-heading"><div><h2>最近のファイル</h2><p>あなたのアカウントに保存されたファイル</p></div><button class="text-btn" id="showAllBtn">すべて表示 →</button></div>
@@ -76,7 +76,7 @@
         <div class="info-card"><h3>ログイン中のアカウント</h3><p id="accountEmail"></p><button class="small-btn" id="logoutBtn">ログアウト</button></div>
         <div class="info-card"><h3>共有URLについて</h3><p>ファイル自体は非公開で保存されます。発行した期限付きURLを知っている人だけが、そのファイルを閲覧・ダウンロードできます。URLを受け取った人が他人に転送した場合、その人も有効期限内はアクセスできます。</p></div>
         <div class="info-card"><h3>容量・利用制限</h3><p>容量は無制限ではありません。保存容量・通信量・ファイルサイズはSupabaseのプランと設定に従います。現在の上限は1ファイル50MBです。</p></div>
-        <div class="info-card"><h3>ファイル管理</h3><p>自分のアカウントでログインした場合のみ、自分のファイル一覧を確認できます。共有URLは7日間有効です。必要な場合は一覧から再発行してください。</p></div>
+        <div class="info-card"><h3>ファイルの保存期限・自動削除</h3><p>アップロードしたファイルの保存期間は、アップロード日時から30日間です。期限を過ぎたファイルは毎日の自動削除処理でStorageから完全に削除され、復元できません。必要なファイルは必ず期限前にダウンロードしてください。ファイル一覧には削除予定日が表示されます。</p></div>\n        <div class="info-card"><h3>ファイル管理</h3><p>自分のアカウントでログインした場合のみ、自分のファイル一覧を確認できます。共有URLは7日間有効です。必要な場合は一覧から再発行してください。</p></div>
       </section>
     </section>
     <footer>© <span id="year"></span> AevShare <span class="footer-dot">·</span> Share files with ease.</footer>
