@@ -52,7 +52,10 @@ select cron.schedule(
         'Content-Type', 'application/json',
         'apikey', (select decrypted_secret
                    from vault.decrypted_secrets
-                   where name = 'aevshare_admin_key')
+                   where name = 'aevshare_admin_key'),
+        'Authorization', 'Bearer ' || (select decrypted_secret
+                                        from vault.decrypted_secrets
+                                        where name = 'aevshare_admin_key')
       ),
       body := '{}'::jsonb,
       timeout_milliseconds := 120000
