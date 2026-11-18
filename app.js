@@ -141,7 +141,7 @@ async function uploadFromUrl(){
   catch{toast("有効なHTTPSのファイルURLを入力してください。");return;}
   button.disabled=true;button.textContent="URLから取得中…";
   try{
-    if(/(^|\\.)youtube\\.com$/i.test(parsed.hostname) || /(^|\\.)youtu\\.be$/i.test(parsed.hostname)){
+    if(/(^|\.)youtube\.com$/i.test(parsed.hostname) || /(^|\.)youtu\.be$/i.test(parsed.hostname)){
       throw new Error("YouTubeの動画ページURLには対応していません。公開された直接ダウンロード可能なファイルURLを入力してください。");
     }
     const {data,error}=await supabase.functions.invoke("aevshare-url-upload",{body:{url}});
