@@ -162,6 +162,9 @@ Deno.serve(async (req: Request) => {
     if (!body || typeof body.url !== "string" || body.url.length > 4096) {
       return json({ success: false, error: "ファイルURLを正しく入力してください。" }, 400);
     }
+    if (body.permissionConfirmed !== true) {
+      return json({ success: false, error: "ファイルを取得・保存する権利または許可の確認が必要です。" }, 400);
+    }
 
     const { bytes, name, contentType } = await fetchLimited(body.url);
     const path = userData.user.id + "/" + crypto.randomUUID() + "-" + name;
