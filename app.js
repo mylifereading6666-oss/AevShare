@@ -133,9 +133,10 @@ function renderReceived(){
 }
 async function uploadFromUrl(){
   if(!currentUser){toast("先にログインしてください");return;}
-  const input=$("remoteFileUrl"),button=$("remoteUploadBtn");
+  const input=$("remoteFileUrl"),button=$("remoteUploadBtn"),permission=$("remotePermission");
   const url=input.value.trim();
   if(!url){toast("ファイルのURLを入力してください。");return;}
+  if(!permission?.checked){toast("取得・保存する権利または許可を確認してください。");return;}
   let parsed;
   try{parsed=new URL(url);if(parsed.protocol!=="https:"||parsed.username||parsed.password)throw new Error();}
   catch{toast("有効なHTTPSのファイルURLを入力してください。");return;}
@@ -144,7 +145,7 @@ async function uploadFromUrl(){
     if(/(^|\.)youtube\.com$/i.test(parsed.hostname) || /(^|\.)youtu\.be$/i.test(parsed.hostname)){
       throw new Error("YouTubeの動画ページURLには対応していません。公開された直接ダウンロード可能なファイルURLを入力してください。");
     }
-    const {data,error}=await supabase.functions.invoke("aevshare-url-upload",{body:{url}});
+    const {data,error}=await supabase.functions.invoke("aevshare-url-upload",{body:{url,permissionConfirmed:true}});
     if(error){
       let detail="";
       try{
@@ -161,6 +162,7 @@ async function uploadFromUrl(){
     if(!data?.success)throw new Error(data?.error||"ファイルを取得できませんでした。");
     toast("URLからファイルを保存しました: "+data.name);
     input.value="";
+    permission.checked=false;
     await loadFiles();
   }catch(err){
     const message=err?.context?.json?.error||err?.message||"接続エラー";
