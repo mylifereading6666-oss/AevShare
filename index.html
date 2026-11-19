@@ -67,9 +67,10 @@
           <h3>URLからアップロード</h3>
           <p>HTTPSのファイル直リンクを入力すると、AevShareが取得してあなたの非公開領域に保存します。</p>
           <label class="field-label" for="remoteFileUrl">ファイルURL</label>
-          <input class="text-input" id="remoteFileUrl" type="url" inputmode="url" placeholder="https://example.com/file.zip" autocomplete="url">
+          <input class="text-input" id="remoteFileUrl" type="url" inputmode="url" placeholder="https://example.com/file.mp4" autocomplete="url">
+          <label class="field-label" for="remotePermission"><input id="remotePermission" type="checkbox"> このファイルを取得・保存する権利または投稿者・権利者の許可があり、配信サービスの規約にも違反しないことを確認しました。</label>
           <button class="primary-btn" id="remoteUploadBtn">URLからアップロード</button>
-          <div class="file-hints">1ファイル最大50MB。ログイン必須。ログインが必要なサイト、アクセス制限のあるURL、動画配信ページなどの直接ファイルURLではないものは取得できない場合があります。</div>
+          <div class="file-hints">1ファイル最大50MB。ログイン必須。対応するのはHTTPSの直接ファイルURLと、配信元が公式に提供するダウンロードURLです。YouTubeなどの動画ページURL、ログイン・アクセス制限の回避、DRM保護動画の抽出には対応しません。</div>
         </div>
         <div class="upload-queue" id="uploadQueue" hidden></div>
         <div class="section-heading recent-heading"><div><h2>最近のファイル</h2><p>あなたのアカウントに保存されたファイル</p></div><button class="text-btn" id="showAllBtn">すべて表示 →</button></div>
