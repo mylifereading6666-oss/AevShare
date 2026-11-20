@@ -140,7 +140,7 @@ async function renderWebArchives(){
         if(raw.trimStart().startsWith("{")){const archive=JSON.parse(raw);if(typeof archive?.html!=="string")throw new Error("保存データにHTML本文がありません。");html=archive.html;title=archive.title||title;}
         else if(!/<html[\s>]/i.test(raw)&&!/^<!doctype html/i.test(raw.trimStart()))throw new Error("保存データがHTML形式ではありません。");
         win.document.open();win.document.write("<!doctype html><html><head><meta charset=utf-8><title></title></head><body style='margin:0'></body></html>");win.document.close();win.document.title=title||"AevShare Archive";
-        const frame=win.document.createElement("iframe");frame.setAttribute("sandbox","");frame.style.cssText="display:block;border:0;width:100%;height:100vh;background:#fff";frame.srcdoc=html;win.document.body.append(frame);
+        const frame=win.document.createElement("iframe");frame.setAttribute("sandbox","allow-scripts allow-presentation");frame.style.cssText="display:block;border:0;width:100%;height:100vh;background:#fff";frame.srcdoc=html;win.document.body.append(frame);
       }catch(err){try{win.document.body.textContent="アーカイブを開けません: "+(err?.message||"エラー");}catch{}toast("アーカイブを開けません: "+(err?.message||"エラー"));}
     });
     const remove=document.createElement("button");remove.className="small-btn danger-btn";remove.textContent="完全削除";
