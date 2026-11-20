@@ -10,7 +10,7 @@ const RECEIVED_KEY = "aevshare_received_links_v1";
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const $ = (id) => document.getElementById(id);
 const fileInput = $("fileInput"), dropzone = $("dropzone");
-let currentUser = null, myFiles = [], activeFilter = "all", toastTimer;
+let currentUser = null, myFiles = [], webArchives = [], activeFilter = "all", toastTimer;
 
 $("year").textContent = new Date().getFullYear();
 function toast(message) {
@@ -38,7 +38,7 @@ function emptyState(target,message="まだファイルがありません") {
   target.innerHTML='<div class="empty-state"><span>▤</span><strong>'+message+'</strong><small>アップロードしたファイルがここに表示されます。</small></div>';
 }
 async function createShareUrl(item) {
-  if(Date.now() >= item.expiresAt) throw new Error("30日間の削除期限を過ぎています。先にファイルを削除してください。");
+  if(!item.isWebArchive && Date.now() >= item.expiresAt) throw new Error("30日間の削除期限を過ぎています。先にファイルを削除してください。");
   const {data,error}=await supabase.storage.from(BUCKET).createSignedUrl(item.path,SHARE_SECONDS,{download:false});
   if(error) throw error;
   return data.signedUrl;
@@ -92,7 +92,7 @@ function refresh(){
   renderRows($("libraryList"),filtered);
 }
 function showView(view){
-  $("uploadView").hidden=view!=="upload";$("libraryView").hidden=view!=="library";$("settingsView").hidden=view!=="settings";
+  $("uploadView").hidden=view!=="upload";$("libraryView").hidden=view!=="library";$("settingsView").hidden=view!=="settings";$("webarchiveView").hidden=view!=="webarchive";
   document.querySelectorAll(".nav-item").forEach(b=>b.classList.toggle("active",b.dataset.view===view||(view==="library"&&b.dataset.filter===activeFilter)));
   $("main").scrollTo?.({top:0,behavior:"smooth"});
 }
@@ -105,7 +105,15 @@ async function loadFiles(){
   if(!currentUser)return;
   const {data,error}=await supabase.storage.from(BUCKET).list(currentUser.id,{limit:1000,sortBy:{column:"created_at",order:"desc"}});
   if(error)throw error;
-  myFiles=(data||[]).filter(x=>x.name&&x.id).map(x=>({
+  const rows=(data||[]).filter(x=>x.name&&x.id);
+  webArchives=rows.filter(x=>x.metadata?.aevshareType==="web-archive").map(x=>({
+    name:x.metadata?.originalName||"保存したウェブページ",
+    size:Number(x.metadata?.size)||0,
+    path:currentUser.id+"/"+x.name,
+    createdAt:x.created_at||x.updated_at||new Date().toISOString(),
+    sourceUrl:x.metadata?.sourceUrl||""
+  }));
+  myFiles=rows.filter(x=>x.metadata?.aevshareType!=="web-archive").map(x=>({
     name:x.metadata?.originalName||x.name.replace(/^[0-9a-f-]{36}-/i,""),
     size:Number(x.metadata?.size)||0,
     kind:kind(x.name,x.metadata?.mimetype||""),
@@ -113,8 +121,62 @@ async function loadFiles(){
     createdAt:x.created_at||x.updated_at||new Date().toISOString(),
     expiresAt:new Date(x.created_at||x.updated_at||new Date().toISOString()).getTime()+RETENTION_MS
   }));
-  refresh();updateCountdowns();
+  refresh();renderWebArchives();updateCountdowns();
 }
+async function renderWebArchives(){
+  const target=$("webarchiveList");if(!target)return;target.replaceChildren();
+  if(!webArchives.length){emptyState(target,"保存済みウェブページはありません");return;}
+  for(const item of webArchives){
+    const row=document.createElement("div");row.className="file-row";
+    const icon=document.createElement("div");icon.className="file-icon";icon.textContent="▤";
+    const meta=document.createElement("div");meta.className="file-meta";
+    const name=document.createElement("div");name.className="file-name";name.textContent=item.name;
+    const sub=document.createElement("div");sub.className="file-sub";sub.textContent=item.sourceUrl+" · 保存: "+new Date(item.createdAt).toLocaleString("ja-JP")+" · 無期限";
+    meta.append(name,sub);
+    const actions=document.createElement("div");actions.className="file-actions";
+    const open=document.createElement("button");open.className="small-btn";open.textContent="閲覧";
+    open.addEventListener("click",async()=>{
+      try{
+        const {data,error}=await supabase.storage.from(BUCKET).download(item.path);if(error)throw error;
+        const archive=JSON.parse(await data.text());
+        const win=window.open("about:blank","_blank");
+        if(!win)throw new Error("ポップアップを許可してください。");
+        win.document.title=archive.title||"AevShare Archive";
+        const frame=win.document.createElement("iframe");frame.setAttribute("sandbox","");frame.style.cssText="border:0;width:100%;height:100vh";
+        frame.srcdoc=archive.html;win.document.body.style.margin="0";win.document.body.append(frame);
+      }catch(err){toast("アーカイブを開けません: "+(err?.message||"エラー"));}
+    });
+    const remove=document.createElement("button");remove.className="small-btn danger-btn";remove.textContent="完全削除";
+    remove.addEventListener("click",async()=>{
+      if(!confirm("このウェブアーカイブを完全に削除しますか？"))return;
+      remove.disabled=true;
+      try{const {error}=await supabase.storage.from(BUCKET).remove([item.path]);if(error)throw error;webArchives=webArchives.filter(x=>x.path!==item.path);renderWebArchives();toast("ウェブアーカイブを削除しました。");}
+      catch(err){toast("削除できません: "+(err?.message||"エラー"));remove.disabled=false;}
+    });
+    actions.append(open,remove);row.append(icon,meta,actions);target.append(row);
+  }
+}
+async function saveWebArchive(){
+  if(!currentUser){toast("先にログインしてください");return;}
+  const input=$("archiveUrl"),permission=$("archivePermission"),button=$("archiveSaveBtn"),url=input.value.trim();
+  if(!url){toast("保存するページのURLを入力してください。");return;}
+  if(!permission.checked){toast("保存する権利または許可を確認してください。");return;}
+  try{const parsed=new URL(url);if(parsed.protocol!=="https:"||parsed.username||parsed.password)throw new Error();}catch{toast("有効なHTTPSページURLを入力してください。");return;}
+  button.disabled=true;button.textContent="ページと画像を取得中…";
+  try{
+    const {data,error}=await supabase.functions.invoke("aevshare-web-archive",{body:{url,permissionConfirmed:true}});
+    if(error){
+      let detail="";try{const response=error.context;if(response?.clone){const body=await response.clone().json();detail=body?.error||"";}}catch{}
+      throw new Error(detail||error.message||"アーカイブを保存できませんでした。");
+    }
+    if(!data?.success)throw new Error(data?.error||"アーカイブを保存できませんでした。");
+    input.value="";permission.checked=false;await loadFiles();
+    toast("ウェブアーカイブを保存しました（"+data.imageCount+"枚の画像を保存）。");
+  }catch(err){toast("保存失敗: "+(err?.message||"接続エラー"));}
+  finally{button.disabled=false;button.textContent="ページをアーカイブ保存";}
+}
+$("archiveSaveBtn")?.addEventListener("click",saveWebArchive);
+$("archiveUrl")?.addEventListener("keydown",e=>{if(e.key==="Enter")saveWebArchive();});
 function updateCountdowns(){
   document.querySelectorAll(".file-countdown").forEach(el=>{
     const left=Number(el.dataset.expires)-Date.now();
@@ -196,7 +258,7 @@ async function enterWorkspace(user){
   try{await loadFiles();}catch(err){toast("ファイル一覧を取得できません: "+(err?.message||"エラー"));}
 }
 async function leaveWorkspace(){
-  currentUser=null;myFiles=[];$("workspace").hidden=true;$("authPanel").hidden=false;
+  currentUser=null;myFiles=[];webArchives=[];$("workspace").hidden=true;$("authPanel").hidden=false;
   $("loginPassword").value="";$("signupPassword").value="";
 }
 $("loginBtn").addEventListener("click",async()=>{
