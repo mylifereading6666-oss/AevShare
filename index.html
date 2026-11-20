@@ -19,16 +19,22 @@
     <div class="top-status"><i></i> PRIVATE STORAGE</div>
   </header>
   <aside class="sidebar" id="sidebar">
-    <div class="side-label">WORKSPACE</div>
-    <button class="nav-item active" data-view="upload"><span>＋</span> アップロード</button>
-    <div class="side-label">MY FILES</div>
-    <button class="nav-item" data-filter="image">▧ 画像</button>
-    <button class="nav-item" data-filter="video">▷ 動画</button>
-    <button class="nav-item" data-filter="archive">▣ ZIP・圧縮ファイル</button>
-    <button class="nav-item" data-filter="pdf">▤ PDF</button>
-    <button class="nav-item" data-filter="other">◇ その他</button>
-    <button class="nav-item" data-filter="all">◷ すべてのファイル</button>
-    <div class="side-bottom"><div class="side-label">SYSTEM</div><button class="nav-item" data-view="settings">⚙ 設定・情報</button><div class="side-note">AevShare <span>v1.1.0</span></div></div>
+    <details class="menu-group" open><summary>WORKSPACE</summary>
+      <button class="nav-item active" data-view="upload"><span>＋</span> アップロード</button>
+      <button class="nav-item" data-view="webarchive"><span>▤</span> ウェブアーカイブ</button>
+    </details>
+    <details class="menu-group" open><summary>MY FILES</summary>
+      <button class="nav-item" data-filter="image">▧ 画像</button>
+      <button class="nav-item" data-filter="video">▷ 動画</button>
+      <button class="nav-item" data-filter="archive">▣ ZIP・圧縮ファイル</button>
+      <button class="nav-item" data-filter="pdf">▤ PDF</button>
+      <button class="nav-item" data-filter="other">◇ その他</button>
+      <button class="nav-item" data-filter="all">◷ すべてのファイル</button>
+    </details>
+    <details class="menu-group side-bottom" open><summary>SYSTEM</summary>
+      <button class="nav-item" data-view="settings">⚙ 設定・情報</button>
+      <div class="side-note">AevShare <span>v1.2.0</span></div>
+    </details>
   </aside>
   <main class="main" id="main">
     <section class="hero">
@@ -75,6 +81,20 @@
         <div class="upload-queue" id="uploadQueue" hidden></div>
         <div class="section-heading recent-heading"><div><h2>最近のファイル</h2><p>あなたのアカウントに保存されたファイル</p></div><button class="text-btn" id="showAllBtn">すべて表示 →</button></div>
         <div class="file-list" id="recentList"></div>
+      </section>
+      <section class="view" id="webarchiveView" hidden>
+        <div class="section-heading"><div><h2>ウェブアーカイブ</h2><p>ウェブページ本文と取得可能な画像を保存します。手動で削除するまで無期限で保持します。</p></div></div>
+        <div class="info-card">
+          <h3>ウェブページを保存</h3>
+          <p>公開されているHTTPSページを取得し、本文とページ内画像をAevShareに保存します。ログインが必要なページ、アクセス制限のあるページ、動画・動的コンテンツなどは完全保存できません。</p>
+          <label class="field-label" for="archiveUrl">保存するページのURL</label>
+          <input class="text-input" id="archiveUrl" type="url" inputmode="url" placeholder="https://example.com/article">
+          <label class="field-label" for="archivePermission"><input id="archivePermission" type="checkbox"> このページと画像を保存する権利または許可があり、サイトの利用規約にも違反しないことを確認しました。</label>
+          <button class="primary-btn" id="archiveSaveBtn">ページをアーカイブ保存</button>
+          <div class="file-hints">1ページ最大20MB・画像最大30枚。外部画像の取得に失敗した場合は元URLのまま残ります。保存データは非公開です。</div>
+        </div>
+        <div class="section-heading recent-heading"><div><h2>保存済みウェブページ</h2><p>削除するまで無期限で保存されます。</p></div></div>
+        <div class="file-list" id="webarchiveList"></div>
       </section>
       <section class="view" id="libraryView" hidden>
         <div class="section-heading"><div><h2 id="libraryTitle">すべてのファイル</h2><p>あなたのアカウントのファイルだけが表示されます。</p></div><button class="primary-btn compact" id="goUploadBtn">＋ アップロード</button></div>
