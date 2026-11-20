@@ -49,6 +49,6 @@ doc.querySelectorAll("video").forEach(video=>{video.setAttribute("controls","");
 doc.querySelectorAll("style").forEach(s=>{if((s.textContent||"").length>200000)s.remove();});
 const html="<!doctype html>\n"+doc.documentElement.outerHTML;
 const bytes=new TextEncoder().encode(html);if(bytes.length>MAX_TOTAL)throw new Error("画像を含む保存データが50MBを超えました。");
-const path=user.user.id+"/webarchive-"+crypto.randomUUID()+".html";const{error:upErr}=await sb.storage.from(BUCKET).upload(path,bytes,{contentType:"text/plain; charset=utf-8",cacheControl:"3600",upsert:false,metadata:{aevshareType:"web-archive",originalName:title,size:bytes.length,mimetype:"text/html",sourceUrl:page.url.toString(),imageCount}});
+const path=user.user.id+"/webarchive-"+crypto.randomUUID()+".html";const{error:upErr}=await sb.storage.from(BUCKET).upload(path,bytes,{contentType:"text/plain; charset=utf-8",cacheControl:"3600",upsert:false,metadata:{aevshareType:"web-archive",originalName:body.url,pageTitle:title,size:bytes.length,mimetype:"text/html",sourceUrl:body.url,imageCount,videoCount}});
 if(upErr)throw new Error("アーカイブの保存に失敗しました: "+upErr.message);return json({success:true,title,imageCount,videoCount,size:bytes.length,path});
 }catch(e){const message=e instanceof Error?e.message:"予期しないエラーが発生しました。";return json({success:false,error:message},message.includes("URL")||message.includes("HTTPS")||message.includes("安全")||message.includes("容量")||message.includes("権利")?400:502);}});
