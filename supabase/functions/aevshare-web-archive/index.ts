@@ -27,11 +27,13 @@ const videoCandidates=[...doc.querySelectorAll("video,iframe")].filter(el=>{
   if(el.tagName.toLowerCase()==="video")return true;
   try{const u=new URL(el.getAttribute("src")||"",page.url);const h=u.hostname.toLowerCase();return u.protocol==="https:"&&((["youtube.com","www.youtube.com","youtube-nocookie.com","www.youtube-nocookie.com"].includes(h)&&u.pathname.startsWith("/embed/"))||(h==="player.vimeo.com"&&u.pathname.startsWith("/video/"));}catch{return false;}
 });
-const dimension=(el:string,attr:string)=>{
+const dimension=(el:Element,attr:string)=>{
   const raw=el.getAttribute(attr)||el.getAttribute("data-"+attr)||"";
+  const rawNumber=Number.parseFloat(raw);
+  if(Number.isFinite(rawNumber)&&rawNumber>0)return rawNumber;
   const style=el.getAttribute("style")||"";
-  const match=raw.match(/[0-9]+(?:\\.[0-9]+)?/)||style.match(new RegExp("(?:^|;)\\s*"+attr+"\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)px","i"));
-  return match?Number(match[0]):0;
+  const match=style.match(new RegExp("(?:^|;)\\s*"+attr+"\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)px","i"));
+  return match?Number(match[1]):0;
 };
 const videoArea=(el:Element)=>dimension(el,"width")*dimension(el,"height");
 let mainVideo:Element|null=null;
