@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { parseHTML } from "https://esm.sh/linkedom@0.18.12";
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")!;
 const BUCKET="aevshare",MAX_HTML=5*1024*1024,MAX_IMAGE=15*1024*1024,MAX_TOTAL=20*1024*1024,MAX_IMAGES=30,TIMEOUT_MS=25000;
 const ORIGIN="https://mylifereading6666-oss.github.io";
@@ -11,7 +12,7 @@ async function fetchBounded(raw:string,max:number,htmlOnly=false){let u=await ch
 function b64(bytes:Uint8Array){let s="";for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode(...bytes.subarray(i,i+0x8000));return btoa(s);}
 Deno.serve(async req=>{if(req.method==="OPTIONS")return new Response("ok",{headers:cors});if(req.method!=="POST")return json({success:false,error:"POSTのみ対応しています。"},405);if(req.headers.get("origin")!==ORIGIN)return json({success:false,error:"許可されていないアクセス元です。"},403);
 try{const auth=req.headers.get("authorization")||"",key=req.headers.get("apikey")||"";if(!auth.startsWith("Bearer ")||!key)return json({success:false,error:"ログインが必要です。"},401);const sb=createClient(SUPABASE_URL,key,{global:{headers:{Authorization:auth}},auth:{persistSession:false,autoRefreshToken:false}});const{data:user,error:userErr}=await sb.auth.getUser();if(userErr||!user.user)return json({success:false,error:"ログイン状態を確認できませんでした。"},401);const body=await req.json().catch(()=>null);if(!body||typeof body.url!=="string"||body.url.length>4096)return json({success:false,error:"ページURLを正しく入力してください。"},400);if(body.permissionConfirmed!==true)return json({success:false,error:"保存する権利または許可の確認が必要です。"},400);
-const page=await fetchBounded(body.url,MAX_HTML,true);const decoder=new TextDecoder("utf-8");const doc=new DOMParser().parseFromString(decoder.decode(page.bytes),"text/html");if(!doc)throw new Error("ページを解析できませんでした。");
+const page=await fetchBounded(body.url,MAX_HTML,true);const decoder=new TextDecoder("utf-8");const {document:doc}=parseHTML(decoder.decode(page.bytes));if(!doc)throw new Error("ページを解析できませんでした。");
 doc.querySelectorAll("script,iframe,frame,object,embed,form,base,link[rel=stylesheet],meta[http-equiv=refresh],noscript").forEach(n=>n.remove());
 for(const el of [...doc.querySelectorAll("*")]){for(const a of [...el.attributes]){const n=a.name.toLowerCase(),v=a.value.trim();if(n.startsWith("on")||n==="srcdoc"||((n==="href"||n==="src"||n==="xlink:href"||n==="action")&&/^\s*javascript:/i.test(v)))el.removeAttribute(a.name);}if(el.tagName==="A"){el.setAttribute("target","_blank");el.setAttribute("rel","noopener noreferrer");}}
 const title=(doc.querySelector("title")?.textContent||doc.querySelector("h1")?.textContent||page.url.hostname).trim().slice(0,180);
