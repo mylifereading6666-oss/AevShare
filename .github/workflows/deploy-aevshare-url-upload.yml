@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "supabase/functions/aevshare-url-upload/**"
+      - "supabase/functions/aevshare-web-archive/**"
       - "supabase/config.toml"
       - ".github/workflows/deploy-aevshare-url-upload.yml"
   workflow_dispatch:
@@ -30,3 +31,5 @@ jobs:
           version: latest
       - name: Deploy URL upload function
         run: supabase functions deploy aevshare-url-upload --project-ref "$SUPABASE_PROJECT_ID" --use-api --yes
+      - name: Deploy web archive function
+        run: supabase functions deploy aevshare-web-archive --project-ref "$SUPABASE_PROJECT_ID" --use-api --yes
