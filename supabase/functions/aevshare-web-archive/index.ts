@@ -20,9 +20,30 @@ const title=(doc.querySelector("title")?.textContent||doc.querySelector("h1")?.t
 const images=[...doc.querySelectorAll("img")];let total=page.bytes.length,imageCount=0;
 for(const img of images){const src=img.getAttribute("src")||img.getAttribute("data-src");if(!src||/^(data:|blob:)/i.test(src))continue;try{const asset=await fetchBounded(new URL(src,page.url).toString(),MAX_IMAGE,false);if(total+asset.bytes.length>MAX_TOTAL){img.removeAttribute("src");continue;}const mime=asset.type==="image/svg+xml"?"image/svg+xml":asset.type;img.setAttribute("src","data:"+mime+";base64,"+b64(asset.bytes));img.removeAttribute("srcset");img.removeAttribute("data-src");total+=asset.bytes.length;imageCount++;}catch{ /* leave original URL as a visible fallback */ }}
 doc.querySelectorAll("img").forEach(img=>{img.setAttribute("loading","lazy");img.setAttribute("referrerpolicy","no-referrer");});
-// 公開されているMP4・WebM・OGGの直接動画ファイルをアーカイブ内へ埋め込む。
+// メイン動画を1本だけ選択する。video要素と許可済みYouTube/Vimeo iframeを候補にし、
+// width/heightまたはstyleで判定できる表示面積が最大のものを優先（同点ならページ内で先に出るもの）。
+// サブ動画・広告動画などはアーカイブから除外する。
+const videoCandidates=[...doc.querySelectorAll("video,iframe")].filter(el=>{
+  if(el.tagName.toLowerCase()==="video")return true;
+  try{const u=new URL(el.getAttribute("src")||"",page.url);const h=u.hostname.toLowerCase();return u.protocol==="https:"&&((["youtube.com","www.youtube.com","youtube-nocookie.com","www.youtube-nocookie.com"].includes(h)&&u.pathname.startsWith("/embed/"))||(h==="player.vimeo.com"&&u.pathname.startsWith("/video/"));}catch{return false;}
+});
+const dimension=(el:string,attr:string)=>{
+  const raw=el.getAttribute(attr)||el.getAttribute("data-"+attr)||"";
+  const style=el.getAttribute("style")||"";
+  const match=raw.match(/[0-9]+(?:\\.[0-9]+)?/)||style.match(new RegExp("(?:^|;)\\s*"+attr+"\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)px","i"));
+  return match?Number(match[0]):0;
+};
+const videoArea=(el:Element)=>dimension(el,"width")*dimension(el,"height");
+let mainVideo:Element|null=null;
+if(videoCandidates.length){
+  mainVideo=videoCandidates.reduce((best,el)=>videoArea(el)>videoArea(best)?el:best,videoCandidates[0]);
+  for(const el of videoCandidates)if(el!==mainVideo)el.remove();
+}
+// 公開されているMP4・WebM・OGGの直接動画ファイルは、選ばれたメインvideo要素の分だけ保存。
 // HLS/DASH、DRM、ログイン必須の配信ストリームは対象外。
-const videoSources=[...doc.querySelectorAll("video[src],video source[src]")];
+const videoSources:Element[]=mainVideo?.tagName.toLowerCase()==="video"
+  ? [...(mainVideo.hasAttribute("src")?[mainVideo]:[]),...mainVideo.querySelectorAll("source[src]")]
+  : [];
 const videoCache=new Map<string,string>();
 let videoCount=0;
 for(const source of videoSources){
@@ -35,16 +56,16 @@ for(const source of videoSources){
       const asset=await fetchBounded(absolute,MAX_VIDEO,false,true);
       const encoded="data:"+asset.type+";base64,"+b64(asset.bytes);
       const estimated=encoded.length;
-      if(total+estimated>MAX_TOTAL)throw new Error("動画を含む保存データが50MBを超えます。");
+      if(total+estimated>MAX_TOTAL)throw new Error("メイン動画を含む保存データが50MBを超えます。");
       dataUrl=encoded;videoCache.set(absolute,dataUrl);total+=estimated;videoCount++;
     }
     source.setAttribute("src",dataUrl);
     if(source.tagName.toLowerCase()==="video"){source.setAttribute("controls","");source.setAttribute("playsinline","");source.setAttribute("preload","metadata");}
   }catch{
-    // 取得できない動画は元URLを残し、オンライン再生の可能性を維持する。
+    // 取得できないメイン動画は元URLを残し、オンライン再生の可能性を維持する。
   }
 }
-doc.querySelectorAll("video").forEach(video=>{video.setAttribute("controls","");video.setAttribute("playsinline","");video.setAttribute("preload","metadata");});
+if(mainVideo?.tagName.toLowerCase()==="video"){mainVideo.setAttribute("controls","");mainVideo.setAttribute("playsinline","");mainVideo.setAttribute("preload","metadata");}
 
 doc.querySelectorAll("style").forEach(s=>{if((s.textContent||"").length>200000)s.remove();});
 const html="<!doctype html>\n"+doc.documentElement.outerHTML;
