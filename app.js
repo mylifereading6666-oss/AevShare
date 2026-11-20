@@ -104,37 +104,18 @@ function showLibrary(filter){
 async function loadFiles(){
   if(!currentUser)return;
   const storage=supabase.storage.from(BUCKET);
-  const [{data:rootData,error:rootError},{data:archiveData,error:archiveError}]=await Promise.all([
-    storage.list(currentUser.id,{limit:1000,sortBy:{column:"created_at",order:"desc"}}),
-    storage.list(currentUser.id+"/web-archives",{limit:1000,sortBy:{column:"created_at",order:"desc"}})
-  ]);
+  const {data:rootData,error:rootError}=await storage.list(currentUser.id,{limit:1000,sortBy:{column:"created_at",order:"desc"}});
   if(rootError)throw rootError;
-  if(archiveError)throw archiveError;
   const rootRows=(rootData||[]).filter(x=>x.name&&x.id);
-  const dedicatedArchives=(archiveData||[]).filter(x=>x.name&&x.id).map(x=>({
-    name:x.metadata?.originalName||"保存したウェブページ",
-    size:Number(x.metadata?.size)||0,
-    path:currentUser.id+"/web-archives/"+x.name,
-    createdAt:x.created_at||x.updated_at||new Date().toISOString(),
-    sourceUrl:x.metadata?.sourceUrl||""
-  }));
-  const isLegacyArchive=x=>x.metadata?.aevshareType==="web-archive"||x.name?.endsWith("-webarchive.json");
-  const legacyArchives=rootRows.filter(isLegacyArchive).map(x=>({
-    name:x.metadata?.originalName||"保存したウェブページ",
-    size:Number(x.metadata?.size)||0,
-    path:currentUser.id+"/"+x.name,
-    createdAt:x.created_at||x.updated_at||new Date().toISOString(),
-    sourceUrl:x.metadata?.sourceUrl||""
-  }));
-  webArchives=[...dedicatedArchives,...legacyArchives].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
-  myFiles=rootRows.filter(x=>!isLegacyArchive(x)).map(x=>({
-    name:x.metadata?.originalName||x.name.replace(/^[0-9a-f-]{36}-/i,""),
-    size:Number(x.metadata?.size)||0,
-    kind:kind(x.name,x.metadata?.mimetype||""),
-    path:currentUser.id+"/"+x.name,
-    createdAt:x.created_at||x.updated_at||new Date().toISOString(),
-    expiresAt:new Date(x.created_at||x.updated_at||new Date().toISOString()).getTime()+RETENTION_MS
-  }));
+  let nestedRows=[];
+  try{const {data,error}=await storage.list(currentUser.id+"/web-archives",{limit:1000,sortBy:{column:"created_at",order:"desc"}});if(!error)nestedRows=(data||[]).filter(x=>x.name&&x.id);}
+  catch(err){console.warn("旧アーカイブフォルダの読み込みをスキップしました",err);}
+  const isArchive=x=>x.metadata?.aevshareType==="web-archive"||x.name?.startsWith("webarchive-")||x.name?.endsWith("-webarchive.json");
+  const makeArchive=(x,path)=>({name:x.metadata?.originalName||"保存したウェブページ",size:Number(x.metadata?.size)||0,path,createdAt:x.created_at||x.updated_at||new Date().toISOString(),sourceUrl:x.metadata?.sourceUrl||""});
+  const rootArchives=rootRows.filter(isArchive).map(x=>makeArchive(x,currentUser.id+"/"+x.name));
+  const nestedArchives=nestedRows.map(x=>makeArchive(x,currentUser.id+"/web-archives/"+x.name));
+  webArchives=[...rootArchives,...nestedArchives].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  myFiles=rootRows.filter(x=>!isArchive(x)).map(x=>({name:x.metadata?.originalName||x.name.replace(/^[0-9a-f-]{36}-/i,""),size:Number(x.metadata?.size)||0,kind:kind(x.name,x.metadata?.mimetype||""),path:currentUser.id+"/"+x.name,createdAt:x.created_at||x.updated_at||new Date().toISOString(),expiresAt:new Date(x.created_at||x.updated_at||new Date().toISOString()).getTime()+RETENTION_MS}));
   refresh();renderWebArchives();updateCountdowns();
 }
 async function renderWebArchives(){
