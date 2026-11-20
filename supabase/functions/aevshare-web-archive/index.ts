@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { parseHTML } from "https://esm.sh/linkedom@0.18.12";
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")!;
-const BUCKET="aevshare",MAX_HTML=5*1024*1024,MAX_IMAGE=15*1024*1024,MAX_TOTAL=20*1024*1024,TIMEOUT_MS=25000;
+const BUCKET="aevshare",MAX_HTML=10*1024*1024,MAX_IMAGE=25*1024*1024,MAX_TOTAL=50*1024*1024,TIMEOUT_MS=25000;
 const ORIGIN="https://mylifereading6666-oss.github.io";
 const cors={"Access-Control-Allow-Origin":ORIGIN,"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Vary":"Origin"};
 function json(body:Record<string,unknown>,status=200){return new Response(JSON.stringify(body),{status,headers:{...cors,"Content-Type":"application/json; charset=utf-8"}});}
@@ -21,7 +21,7 @@ for(const img of images){const src=img.getAttribute("src")||img.getAttribute("da
 doc.querySelectorAll("img").forEach(img=>{img.setAttribute("loading","lazy");img.setAttribute("referrerpolicy","no-referrer");});
 doc.querySelectorAll("style").forEach(s=>{if((s.textContent||"").length>200000)s.remove();});
 const html="<!doctype html>\n"+doc.documentElement.outerHTML;
-const bytes=new TextEncoder().encode(html);if(bytes.length>MAX_TOTAL)throw new Error("画像を含む保存データが20MBを超えました。");
+const bytes=new TextEncoder().encode(html);if(bytes.length>MAX_TOTAL)throw new Error("画像を含む保存データが50MBを超えました。");
 const path=user.user.id+"/webarchive-"+crypto.randomUUID()+".html";const{error:upErr}=await sb.storage.from(BUCKET).upload(path,bytes,{contentType:"text/plain; charset=utf-8",cacheControl:"3600",upsert:false,metadata:{aevshareType:"web-archive",originalName:title,size:bytes.length,mimetype:"text/html",sourceUrl:page.url.toString(),imageCount}});
 if(upErr)throw new Error("アーカイブの保存に失敗しました: "+upErr.message);return json({success:true,title,imageCount,size:bytes.length,path});
 }catch(e){const message=e instanceof Error?e.message:"予期しないエラーが発生しました。";return json({success:false,error:message},message.includes("URL")||message.includes("HTTPS")||message.includes("安全")||message.includes("容量")||message.includes("権利")?400:502);}});
