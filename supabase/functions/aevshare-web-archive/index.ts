@@ -25,7 +25,7 @@ doc.querySelectorAll("img").forEach(img=>{img.setAttribute("loading","lazy");img
 // サブ動画・広告動画などはアーカイブから除外する。
 const videoCandidates=[...doc.querySelectorAll("video,iframe")].filter(el=>{
   if(el.tagName.toLowerCase()==="video")return true;
-  try{const u=new URL(el.getAttribute("src")||"",page.url);const h=u.hostname.toLowerCase();return u.protocol==="https:"&&((["youtube.com","www.youtube.com","youtube-nocookie.com","www.youtube-nocookie.com"].includes(h)&&u.pathname.startsWith("/embed/"))||(h==="player.vimeo.com"&&u.pathname.startsWith("/video/"));}catch{return false;}
+  try{const u=new URL(el.getAttribute("src")||"",page.url);const h=u.hostname.toLowerCase();return u.protocol==="https:"&&((["youtube.com","www.youtube.com","youtube-nocookie.com","www.youtube-nocookie.com"].includes(h)&&u.pathname.startsWith("/embed/"))||(h==="player.vimeo.com"&&u.pathname.startsWith("/video/")));}catch{return false;}
 });
 const dimension=(el:Element,attr:string)=>{
   const raw=el.getAttribute(attr)||el.getAttribute("data-"+attr)||"";
