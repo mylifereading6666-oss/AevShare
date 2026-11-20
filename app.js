@@ -111,7 +111,7 @@ async function loadFiles(){
   try{const {data,error}=await storage.list(currentUser.id+"/web-archives",{limit:1000,sortBy:{column:"created_at",order:"desc"}});if(!error)nestedRows=(data||[]).filter(x=>x.name&&x.id);}
   catch(err){console.warn("旧アーカイブフォルダの読み込みをスキップしました",err);}
   const isArchive=x=>x.metadata?.aevshareType==="web-archive"||x.name?.startsWith("webarchive-")||x.name?.endsWith("-webarchive.json");
-  const makeArchive=(x,path)=>({name:x.metadata?.originalName||"保存したウェブページ",size:Number(x.metadata?.size)||0,path,createdAt:x.created_at||x.updated_at||new Date().toISOString(),sourceUrl:x.metadata?.sourceUrl||""});
+  const makeArchive=(x,path)=>({name:x.metadata?.sourceUrl||x.metadata?.originalName||"保存したウェブページ",size:Number(x.metadata?.size)||0,path,createdAt:x.created_at||x.updated_at||new Date().toISOString(),sourceUrl:x.metadata?.sourceUrl||""});
   const rootArchives=rootRows.filter(isArchive).map(x=>makeArchive(x,currentUser.id+"/"+x.name));
   const nestedArchives=nestedRows.map(x=>makeArchive(x,currentUser.id+"/web-archives/"+x.name));
   webArchives=[...rootArchives,...nestedArchives].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
@@ -122,11 +122,11 @@ async function renderWebArchives(){
   const target=$("webarchiveList");if(!target)return;target.replaceChildren();
   if(!webArchives.length){emptyState(target,"保存済みウェブページはありません");return;}
   for(const item of webArchives){
-    const row=document.createElement("div");row.className="file-row";
-    const icon=document.createElement("div");icon.className="file-icon";icon.textContent="▤";
+    const row=document.createElement("div");row.className="file-row archive-row";
+    const preview=document.createElement("div");preview.className="archive-preview";preview.textContent="WEB";
     const meta=document.createElement("div");meta.className="file-meta";
-    const name=document.createElement("div");name.className="file-name";name.textContent=item.name;
-    const sub=document.createElement("div");sub.className="file-sub";sub.textContent=item.sourceUrl+" · 保存: "+new Date(item.createdAt).toLocaleString("ja-JP")+" · 無期限";
+    const name=document.createElement("div");name.className="file-name archive-url-name";name.textContent=item.sourceUrl||item.name;name.title=item.sourceUrl||item.name;
+    const sub=document.createElement("div");sub.className="file-sub";sub.textContent="保存: "+new Date(item.createdAt).toLocaleString("ja-JP")+" · 無期限";
     meta.append(name,sub);
     const actions=document.createElement("div");actions.className="file-actions";
     const open=document.createElement("button");open.className="small-btn";open.textContent="閲覧";
@@ -136,34 +136,27 @@ async function renderWebArchives(){
       win.document.write("<!doctype html><meta charset=utf-8><title>読み込み中</title><body style='font:16px sans-serif;padding:24px'>アーカイブを読み込んでいます…</body>");
       try{
         const {data,error}=await supabase.storage.from(BUCKET).download(item.path);if(error)throw error;
-        const raw=await data.text();
-        let html=raw,title=item.name;
-        if(raw.trimStart().startsWith("{")){
-          const archive=JSON.parse(raw);
-          if(typeof archive?.html!=="string")throw new Error("保存データにHTML本文がありません。");
-          html=archive.html;title=archive.title||title;
-        }else if(!/<html[\s>]/i.test(raw)&&!/^<!doctype html/i.test(raw.trimStart())){
-          throw new Error("保存データがHTML形式ではありません。");
-        }
-        win.document.open();
-        win.document.write("<!doctype html><html><head><meta charset=utf-8><title></title></head><body style='margin:0'></body></html>");
-        win.document.close();
-        win.document.title=title||"AevShare Archive";
-        const frame=win.document.createElement("iframe");
-        frame.setAttribute("sandbox","");
-        frame.style.cssText="display:block;border:0;width:100%;height:100vh;background:#fff";
-        frame.srcdoc=html;
-        win.document.body.append(frame);
+        const raw=await data.text();let html=raw,title=item.name;
+        if(raw.trimStart().startsWith("{")){const archive=JSON.parse(raw);if(typeof archive?.html!=="string")throw new Error("保存データにHTML本文がありません。");html=archive.html;title=archive.title||title;}
+        else if(!/<html[\s>]/i.test(raw)&&!/^<!doctype html/i.test(raw.trimStart()))throw new Error("保存データがHTML形式ではありません。");
+        win.document.open();win.document.write("<!doctype html><html><head><meta charset=utf-8><title></title></head><body style='margin:0'></body></html>");win.document.close();win.document.title=title||"AevShare Archive";
+        const frame=win.document.createElement("iframe");frame.setAttribute("sandbox","");frame.style.cssText="display:block;border:0;width:100%;height:100vh;background:#fff";frame.srcdoc=html;win.document.body.append(frame);
       }catch(err){try{win.document.body.textContent="アーカイブを開けません: "+(err?.message||"エラー");}catch{}toast("アーカイブを開けません: "+(err?.message||"エラー"));}
     });
     const remove=document.createElement("button");remove.className="small-btn danger-btn";remove.textContent="完全削除";
-    remove.addEventListener("click",async()=>{
-      if(!confirm("このウェブアーカイブを完全に削除しますか？"))return;
-      remove.disabled=true;
-      try{const {error}=await supabase.storage.from(BUCKET).remove([item.path]);if(error)throw error;webArchives=webArchives.filter(x=>x.path!==item.path);renderWebArchives();toast("ウェブアーカイブを削除しました。");}
-      catch(err){toast("削除できません: "+(err?.message||"エラー"));remove.disabled=false;}
-    });
-    actions.append(open,remove);row.append(icon,meta,actions);target.append(row);
+    remove.addEventListener("click",async()=>{if(!confirm("このウェブアーカイブを完全に削除しますか？"))return;remove.disabled=true;try{const {error}=await supabase.storage.from(BUCKET).remove([item.path]);if(error)throw error;webArchives=webArchives.filter(x=>x.path!==item.path);renderWebArchives();toast("アーカイブを完全削除しました。");}catch(err){toast("削除失敗: "+(err?.message||"エラー"));remove.disabled=false;}});
+    actions.append(open,remove);row.append(preview,meta,actions);target.append(row);
+    supabase.storage.from(BUCKET).download(item.path).then(async({data,error})=>{
+      if(error||!data||!preview.isConnected)return;
+      try{
+        const raw=await data.text();let html=raw;
+        if(raw.trimStart().startsWith("{"))html=JSON.parse(raw).html||"";
+        const doc=new DOMParser().parseFromString(html,"text/html");
+        const img=doc.querySelector("img[src]");
+        const src=img?.getAttribute("src");
+        if(src){const image=document.createElement("img");image.alt="保存ページのプレビュー";image.src=src;preview.replaceChildren(image);}
+      }catch(err){console.warn("アーカイブのプレビューを取得できません",err);}
+    }).catch(err=>console.warn("アーカイブのプレビューを取得できません",err));
   }
 }
 async function saveWebArchive(){
@@ -182,7 +175,7 @@ async function saveWebArchive(){
     if(!data?.success)throw new Error(data?.error||"アーカイブを保存できませんでした。");
     input.value="";permission.checked=false;
     if(data.path){
-      webArchives.unshift({name:data.title||"保存したウェブページ",size:Number(data.size)||0,path:data.path,createdAt:new Date().toISOString(),sourceUrl:url});
+      webArchives.unshift({name:url,size:Number(data.size)||0,path:data.path,createdAt:new Date().toISOString(),sourceUrl:url});
       renderWebArchives();
     }
     try{await loadFiles();}catch(listErr){console.warn("保存後の一覧再取得に失敗しました",listErr);}
