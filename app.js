@@ -106,14 +106,15 @@ async function loadFiles(){
   const {data,error}=await supabase.storage.from(BUCKET).list(currentUser.id,{limit:1000,sortBy:{column:"created_at",order:"desc"}});
   if(error)throw error;
   const rows=(data||[]).filter(x=>x.name&&x.id);
-  webArchives=rows.filter(x=>x.metadata?.aevshareType==="web-archive").map(x=>({
+  const isWebArchive=x=>x.metadata?.aevshareType==="web-archive"||x.name?.endsWith("-webarchive.json");
+  webArchives=rows.filter(isWebArchive).map(x=>({
     name:x.metadata?.originalName||"保存したウェブページ",
     size:Number(x.metadata?.size)||0,
     path:currentUser.id+"/"+x.name,
     createdAt:x.created_at||x.updated_at||new Date().toISOString(),
     sourceUrl:x.metadata?.sourceUrl||""
   }));
-  myFiles=rows.filter(x=>x.metadata?.aevshareType!=="web-archive").map(x=>({
+  myFiles=rows.filter(x=>!isWebArchive(x)).map(x=>({
     name:x.metadata?.originalName||x.name.replace(/^[0-9a-f-]{36}-/i,""),
     size:Number(x.metadata?.size)||0,
     kind:kind(x.name,x.metadata?.mimetype||""),
