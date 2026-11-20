@@ -20,7 +20,7 @@ const images=[...doc.querySelectorAll("img")].slice(0,MAX_IMAGES);let total=page
 for(const img of images){const src=img.getAttribute("src")||img.getAttribute("data-src");if(!src||/^(data:|blob:)/i.test(src))continue;try{const asset=await fetchBounded(new URL(src,page.url).toString(),MAX_IMAGE,false);if(total+asset.bytes.length>MAX_TOTAL){img.removeAttribute("src");continue;}const mime=asset.type==="image/svg+xml"?"image/svg+xml":asset.type;img.setAttribute("src","data:"+mime+";base64,"+b64(asset.bytes));img.removeAttribute("srcset");img.removeAttribute("data-src");total+=asset.bytes.length;imageCount++;}catch{ /* leave original URL as a visible fallback */ }}
 doc.querySelectorAll("img").forEach(img=>{img.setAttribute("loading","lazy");img.setAttribute("referrerpolicy","no-referrer");});
 doc.querySelectorAll("style").forEach(s=>{if((s.textContent||"").length>200000)s.remove();});
-const html="<!doctype html>\\n"+doc.documentElement.outerHTML;
+const html="<!doctype html>\n"+doc.documentElement.outerHTML;
 const bytes=new TextEncoder().encode(html);if(bytes.length>MAX_TOTAL)throw new Error("画像を含む保存データが20MBを超えました。");
 const path=user.user.id+"/webarchive-"+crypto.randomUUID()+".html";const{error:upErr}=await sb.storage.from(BUCKET).upload(path,bytes,{contentType:"text/plain; charset=utf-8",cacheControl:"3600",upsert:false,metadata:{aevshareType:"web-archive",originalName:title,size:bytes.length,mimetype:"text/html",sourceUrl:page.url.toString(),imageCount}});
 if(upErr)throw new Error("アーカイブの保存に失敗しました: "+upErr.message);return json({success:true,title,imageCount,size:bytes.length,path});
