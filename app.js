@@ -136,16 +136,23 @@ async function renderWebArchives(){
       win.document.write("<!doctype html><meta charset=utf-8><title>読み込み中</title><body style='font:16px sans-serif;padding:24px'>アーカイブを読み込んでいます…</body>");
       try{
         const {data,error}=await supabase.storage.from(BUCKET).download(item.path);if(error)throw error;
-        const archive=JSON.parse(await data.text());
-        if(!archive||typeof archive.html!=="string")throw new Error("保存データにHTML本文がありません。");
+        const raw=await data.text();
+        let html=raw,title=item.name;
+        if(raw.trimStart().startsWith("{")){
+          const archive=JSON.parse(raw);
+          if(typeof archive?.html!=="string")throw new Error("保存データにHTML本文がありません。");
+          html=archive.html;title=archive.title||title;
+        }else if(!/<html[\\s>]/i.test(raw)&&!/^<!doctype html/i.test(raw.trimStart())){
+          throw new Error("保存データがHTML形式ではありません。");
+        }
         win.document.open();
         win.document.write("<!doctype html><html><head><meta charset=utf-8><title></title></head><body style='margin:0'></body></html>");
         win.document.close();
-        win.document.title=archive.title||"AevShare Archive";
+        win.document.title=title||"AevShare Archive";
         const frame=win.document.createElement("iframe");
         frame.setAttribute("sandbox","");
         frame.style.cssText="display:block;border:0;width:100%;height:100vh;background:#fff";
-        frame.srcdoc=archive.html;
+        frame.srcdoc=html;
         win.document.body.append(frame);
       }catch(err){try{win.document.body.textContent="アーカイブを開けません: "+(err?.message||"エラー");}catch{}toast("アーカイブを開けません: "+(err?.message||"エラー"));}
     });
@@ -173,7 +180,12 @@ async function saveWebArchive(){
       throw new Error(detail||error.message||"アーカイブを保存できませんでした。");
     }
     if(!data?.success)throw new Error(data?.error||"アーカイブを保存できませんでした。");
-    input.value="";permission.checked=false;await loadFiles();
+    input.value="";permission.checked=false;
+    if(data.path){
+      webArchives.unshift({name:data.title||"保存したウェブページ",size:Number(data.size)||0,path:data.path,createdAt:new Date().toISOString(),sourceUrl:url});
+      renderWebArchives();
+    }
+    try{await loadFiles();}catch(listErr){console.warn("保存後の一覧再取得に失敗しました",listErr);}
     toast("ウェブアーカイブを保存しました（"+data.imageCount+"枚の画像を保存）。");
   }catch(err){toast("保存失敗: "+(err?.message||"接続エラー"));}
   finally{button.disabled=false;button.textContent="ページをアーカイブ保存";}
