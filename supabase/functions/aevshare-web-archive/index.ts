@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { parseHTML } from "https://esm.sh/linkedom@0.18.12";
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")!;
-const BUCKET="aevshare",MAX_HTML=5*1024*1024,MAX_IMAGE=15*1024*1024,MAX_TOTAL=20*1024*1024,MAX_IMAGES=30,TIMEOUT_MS=25000;
+const BUCKET="aevshare",MAX_HTML=5*1024*1024,MAX_IMAGE=15*1024*1024,MAX_TOTAL=20*1024*1024,TIMEOUT_MS=25000;
 const ORIGIN="https://mylifereading6666-oss.github.io";
 const cors={"Access-Control-Allow-Origin":ORIGIN,"Access-Control-Allow-Headers":"authorization, apikey, content-type, x-client-info","Access-Control-Allow-Methods":"POST, OPTIONS","Vary":"Origin"};
 function json(body:Record<string,unknown>,status=200){return new Response(JSON.stringify(body),{status,headers:{...cors,"Content-Type":"application/json; charset=utf-8"}});}
@@ -16,7 +16,7 @@ const page=await fetchBounded(body.url,MAX_HTML,true);const decoder=new TextDeco
 doc.querySelectorAll("script,iframe,frame,object,embed,form,base,link[rel=stylesheet],meta[http-equiv=refresh],noscript").forEach(n=>n.remove());
 for(const el of [...doc.querySelectorAll("*")]){for(const a of [...el.attributes]){const n=a.name.toLowerCase(),v=a.value.trim();if(n.startsWith("on")||n==="srcdoc"||((n==="href"||n==="src"||n==="xlink:href"||n==="action")&&/^\s*javascript:/i.test(v)))el.removeAttribute(a.name);}if(el.tagName==="A"){el.setAttribute("target","_blank");el.setAttribute("rel","noopener noreferrer");}}
 const title=(doc.querySelector("title")?.textContent||doc.querySelector("h1")?.textContent||page.url.hostname).trim().slice(0,180);
-const images=[...doc.querySelectorAll("img")].slice(0,MAX_IMAGES);let total=page.bytes.length,imageCount=0;
+const images=[...doc.querySelectorAll("img")];let total=page.bytes.length,imageCount=0;
 for(const img of images){const src=img.getAttribute("src")||img.getAttribute("data-src");if(!src||/^(data:|blob:)/i.test(src))continue;try{const asset=await fetchBounded(new URL(src,page.url).toString(),MAX_IMAGE,false);if(total+asset.bytes.length>MAX_TOTAL){img.removeAttribute("src");continue;}const mime=asset.type==="image/svg+xml"?"image/svg+xml":asset.type;img.setAttribute("src","data:"+mime+";base64,"+b64(asset.bytes));img.removeAttribute("srcset");img.removeAttribute("data-src");total+=asset.bytes.length;imageCount++;}catch{ /* leave original URL as a visible fallback */ }}
 doc.querySelectorAll("img").forEach(img=>{img.setAttribute("loading","lazy");img.setAttribute("referrerpolicy","no-referrer");});
 doc.querySelectorAll("style").forEach(s=>{if((s.textContent||"").length>200000)s.remove();});
