@@ -142,7 +142,7 @@ async function renderWebArchives(){
           const archive=JSON.parse(raw);
           if(typeof archive?.html!=="string")throw new Error("保存データにHTML本文がありません。");
           html=archive.html;title=archive.title||title;
-        }else if(!/<html[\\s>]/i.test(raw)&&!/^<!doctype html/i.test(raw.trimStart())){
+        }else if(!/<html[\s>]/i.test(raw)&&!/^<!doctype html/i.test(raw.trimStart())){
           throw new Error("保存データがHTML形式ではありません。");
         }
         win.document.open();
