@@ -111,7 +111,7 @@ async function loadFiles(){
   try{const {data,error}=await storage.list(currentUser.id+"/web-archives",{limit:1000,sortBy:{column:"created_at",order:"desc"}});if(!error)nestedRows=(data||[]).filter(x=>x.name&&x.id);}
   catch(err){console.warn("旧アーカイブフォルダの読み込みをスキップしました",err);}
   const isArchive=x=>x.metadata?.aevshareType==="web-archive"||x.name?.startsWith("webarchive-")||x.name?.endsWith("-webarchive.json");
-  const makeArchive=(x,path)=>({name:x.metadata?.sourceUrl||x.metadata?.originalName||"保存したウェブページ",size:Number(x.metadata?.size)||0,path,createdAt:x.created_at||x.updated_at||new Date().toISOString(),sourceUrl:x.metadata?.sourceUrl||""});
+  const makeArchive=(x,path)=>{const meta={...(x.metadata||{}),...(x.user_metadata||{})};const sourceUrl=meta.sourceUrl||meta.originalName||"";return{name:sourceUrl||"保存したウェブページ",size:Number(meta.size)||0,path,createdAt:x.created_at||x.updated_at||new Date().toISOString(),sourceUrl};};
   const rootArchives=rootRows.filter(isArchive).map(x=>makeArchive(x,currentUser.id+"/"+x.name));
   const nestedArchives=nestedRows.map(x=>makeArchive(x,currentUser.id+"/web-archives/"+x.name));
   webArchives=[...rootArchives,...nestedArchives].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
