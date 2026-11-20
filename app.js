@@ -103,18 +103,31 @@ function showLibrary(filter){
 }
 async function loadFiles(){
   if(!currentUser)return;
-  const {data,error}=await supabase.storage.from(BUCKET).list(currentUser.id,{limit:1000,sortBy:{column:"created_at",order:"desc"}});
-  if(error)throw error;
-  const rows=(data||[]).filter(x=>x.name&&x.id);
-  const isWebArchive=x=>x.metadata?.aevshareType==="web-archive"||x.name?.endsWith("-webarchive.json");
-  webArchives=rows.filter(isWebArchive).map(x=>({
+  const storage=supabase.storage.from(BUCKET);
+  const [{data:rootData,error:rootError},{data:archiveData,error:archiveError}]=await Promise.all([
+    storage.list(currentUser.id,{limit:1000,sortBy:{column:"created_at",order:"desc"}}),
+    storage.list(currentUser.id+"/web-archives",{limit:1000,sortBy:{column:"created_at",order:"desc"}})
+  ]);
+  if(rootError)throw rootError;
+  if(archiveError)throw archiveError;
+  const rootRows=(rootData||[]).filter(x=>x.name&&x.id);
+  const dedicatedArchives=(archiveData||[]).filter(x=>x.name&&x.id).map(x=>({
+    name:x.metadata?.originalName||"保存したウェブページ",
+    size:Number(x.metadata?.size)||0,
+    path:currentUser.id+"/web-archives/"+x.name,
+    createdAt:x.created_at||x.updated_at||new Date().toISOString(),
+    sourceUrl:x.metadata?.sourceUrl||""
+  }));
+  const isLegacyArchive=x=>x.metadata?.aevshareType==="web-archive"||x.name?.endsWith("-webarchive.json");
+  const legacyArchives=rootRows.filter(isLegacyArchive).map(x=>({
     name:x.metadata?.originalName||"保存したウェブページ",
     size:Number(x.metadata?.size)||0,
     path:currentUser.id+"/"+x.name,
     createdAt:x.created_at||x.updated_at||new Date().toISOString(),
     sourceUrl:x.metadata?.sourceUrl||""
   }));
-  myFiles=rows.filter(x=>!isWebArchive(x)).map(x=>({
+  webArchives=[...dedicatedArchives,...legacyArchives].sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+  myFiles=rootRows.filter(x=>!isLegacyArchive(x)).map(x=>({
     name:x.metadata?.originalName||x.name.replace(/^[0-9a-f-]{36}-/i,""),
     size:Number(x.metadata?.size)||0,
     kind:kind(x.name,x.metadata?.mimetype||""),
@@ -137,15 +150,23 @@ async function renderWebArchives(){
     const actions=document.createElement("div");actions.className="file-actions";
     const open=document.createElement("button");open.className="small-btn";open.textContent="閲覧";
     open.addEventListener("click",async()=>{
+      const win=window.open("about:blank","_blank");
+      if(!win){toast("ポップアップを許可してください。");return;}
+      win.document.write("<!doctype html><meta charset=utf-8><title>読み込み中</title><body style='font:16px sans-serif;padding:24px'>アーカイブを読み込んでいます…</body>");
       try{
         const {data,error}=await supabase.storage.from(BUCKET).download(item.path);if(error)throw error;
         const archive=JSON.parse(await data.text());
-        const win=window.open("about:blank","_blank");
-        if(!win)throw new Error("ポップアップを許可してください。");
+        if(!archive||typeof archive.html!=="string")throw new Error("保存データにHTML本文がありません。");
+        win.document.open();
+        win.document.write("<!doctype html><html><head><meta charset=utf-8><title></title></head><body style='margin:0'></body></html>");
+        win.document.close();
         win.document.title=archive.title||"AevShare Archive";
-        const frame=win.document.createElement("iframe");frame.setAttribute("sandbox","");frame.style.cssText="border:0;width:100%;height:100vh";
-        frame.srcdoc=archive.html;win.document.body.style.margin="0";win.document.body.append(frame);
-      }catch(err){toast("アーカイブを開けません: "+(err?.message||"エラー"));}
+        const frame=win.document.createElement("iframe");
+        frame.setAttribute("sandbox","");
+        frame.style.cssText="display:block;border:0;width:100%;height:100vh;background:#fff";
+        frame.srcdoc=archive.html;
+        win.document.body.append(frame);
+      }catch(err){try{win.document.body.textContent="アーカイブを開けません: "+(err?.message||"エラー");}catch{}toast("アーカイブを開けません: "+(err?.message||"エラー"));}
     });
     const remove=document.createElement("button");remove.className="small-btn danger-btn";remove.textContent="完全削除";
     remove.addEventListener("click",async()=>{
