@@ -100,7 +100,7 @@ function renderCodeSnippets(list=codeSnippets){
  const shown=ranked.map(x=>x.item);
  root.innerHTML=shown.length?shown.map(x=>'<article class="code-snippet"><div class="code-snippet-top"><span class="code-tag">'+escapeHtml(x.category)+' · '+escapeHtml(x.difficulty||'')+'</span><span class="code-tag">'+escapeHtml(groupNames[x.group]||'その他')+'</span></div><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description||'')+'</p><pre>'+escapeHtml(x.code||'')+'</pre><div class="code-snippet-actions"><button data-copy-code="'+escapeHtml(x.id)+'">コードをコピー</button></div><details class="code-guide"><summary>使い方・説明・注意点</summary><div><p><b>使い方</b><br>'+escapeHtml(x.usage||'コードをページ内の対応する場所へ追加し、必要なIDやクラスをHTML側に用意してください。')+'</p><p><b>注意点</b><br>'+escapeHtml(x.caution||'実際のページ構成や利用環境に合わせて調整し、公開前に動作確認してください。')+'</p></div></details></article>').join(''):'<div class="empty">該当するコードがありません。名前の一部、別名、用途の言葉でも検索できます。</div>';
  $('#code-search-status').textContent=shown.length+' 件のコードを表示中'+(q?'（関連語・一部一致）':'');
- $('[data-copy-code]').forEach(b=>b.onclick=async()=>{const x=codeSnippets.find(s=>s.id===b.dataset.copyCode);if(x){try{await navigator.clipboard.writeText(x.code);b.textContent='コピーしました'}catch(e){b.textContent='コピーできませんでした。コードを選択してコピーしてください。'}}});
+ $$('[data-copy-code]').forEach(b=>b.onclick=async()=>{const x=codeSnippets.find(s=>s.id===b.dataset.copyCode);if(x){try{await navigator.clipboard.writeText(x.code);b.textContent='コピーしました'}catch(e){b.textContent='コピーできませんでした。コードを選択してコピーしてください。'}}});
 }
 let codeSnippetLoadPromise=null;
 async function loadCodeSnippets(){
@@ -273,7 +273,7 @@ $('#account-password-update')?.addEventListener('click',async()=>{
 });
 renderAccountPage();
 
-initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
+initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
 $('#start-new-project').onclick=showTemplatePicker;$('#back-to-hub').onclick=showHub;$('#back-project-hub').onclick=showHub;$('#continue-project').onclick=()=>$('#hub-project-list').scrollIntoView({behavior:'smooth'});$('#create-selected-project').onclick=()=>newProject(selectedTemplate);$$('[data-new-template]').forEach(b=>b.onclick=()=>{selectedTemplate=b.dataset.newTemplate;$$('[data-new-template]').forEach(x=>x.classList.toggle('selected',x===b))});$('#save-project').onclick=saveProject;$('#preview-project').onclick=()=>{refresh();$('#preview-frame').scrollIntoView({behavior:'smooth',block:'center'})};$('#refresh-preview').onclick=refresh;$$('.tab').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 ['project-name','visual-title','visual-description','visual-color','html-code','css-code'].forEach(id=>$('#'+id)?.addEventListener('input',()=>{ $('#save-status').textContent='変更を自動保存します...';clearTimeout(autosaveTimer);autosaveTimer=setTimeout(()=>saveProject(),700)}));
 $('#starter-template').onchange=e=>{let s=starter[e.target.value];if(s){$('#visual-title').value=s.title;$('#visual-description').value=s.description;$('#visual-color').value=s.color;refresh()}};
