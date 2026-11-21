@@ -269,3 +269,66 @@ body[data-page="create-project"] .template-card.selected:after{
  padding:5px 9px;border-radius:999px;background:#d8ccff;color:#17102d;
  font-size:11px;font-weight:900;box-shadow:0 3px 12px #0009;
 }
+
+
+/* Responsive template thumbnails: constrain images to their cards on every device. */
+.template-choice,
+.template-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+.template-choice img,
+.template-card img,
+img.template-thumb {
+  display: block;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0;
+  height: clamp(118px, 17vw, 176px);
+  flex: 0 0 auto;
+  object-fit: cover;
+  object-position: center;
+  border-radius: 9px;
+  margin: 0 0 10px;
+  box-sizing: border-box;
+}
+body[data-page="create-project"] .template-card .template-thumb {
+  width: 100% !important;
+  max-width: 100% !important;
+  height: clamp(105px, 16vw, 150px);
+  object-fit: cover;
+  object-position: center;
+  border-radius: 0;
+  margin: 0 0 12px;
+}
+.template-choice-grid,
+.template-grid {
+  min-width: 0;
+}
+@media (max-width: 850px) {
+  .template-choice img,
+  .template-card img,
+  img.template-thumb {
+    height: clamp(105px, 22vw, 145px);
+  }
+}
+@media (max-width: 560px) {
+  .template-choice img,
+  .template-card img,
+  img.template-thumb {
+    height: clamp(88px, 25vw, 118px);
+    border-radius: 7px;
+  }
+  body[data-page="create-project"] .template-card .template-thumb {
+    height: clamp(82px, 24vw, 112px);
+  }
+  .template-choice {
+    padding: 12px;
+  }
+}
+@media (max-width: 360px) {
+  body[data-page="create-project"] .template-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
