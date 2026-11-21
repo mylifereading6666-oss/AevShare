@@ -43,7 +43,6 @@ async function loadProjects(){
     const map=new Map(items.filter(p=>p&&p.id).map(p=>[String(p.id),p]));
     (result.data||[]).forEach(p=>{const old=map.get(String(p.id));if(!old||new Date(p.updated_at||0)>=new Date(old.updated_at||0))map.set(String(p.id),Object.assign({},old||{},p))});
     items=[...map.values()].sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
-    try{localStorage.setItem(KEY,JSON.stringify(items))}catch(_){}
     setStatus(status,'端末とクラウドのプロジェクトを確認しました。');
    }else{
     setStatus(status,'端末のプロジェクトを表示しています。クラウドのプロジェクトを見るにはログインしてください。');
