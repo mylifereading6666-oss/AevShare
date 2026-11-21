@@ -254,3 +254,18 @@ body[data-page="create-project"] .template-card .template-thumb{height:125px;bor
 body[data-page="create-project"] .template-card strong,body[data-page="create-project"] .template-card small{margin-left:13px;margin-right:13px}
 body[data-page="create-project"] .template-card small{display:block;margin-top:5px}
 @media(max-width:560px){body[data-page="create-project"] .template-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}body[data-page="create-project"] .template-card .template-thumb{height:88px}body[data-page="create-project"] .template-card strong{font-size:12px}body[data-page="create-project"] .template-card small{font-size:10px}}
+
+/* Strong selected-state contrast, including pages with local inline styles */
+body[data-page="create-project"] .template-card.selected,
+body[data-page="create-project"] .choice-card.selected,
+.template-picker .template-choice.selected{
+ border:2px solid #c4b5fd!important;
+ background:linear-gradient(145deg,#5542a5 0%,#202c49 100%)!important;
+ color:#fff!important;
+ box-shadow:0 0 0 4px #a78bfa45,0 12px 28px #0008,inset 0 0 0 1px #eee7ff55!important;
+}
+body[data-page="create-project"] .template-card.selected:after{
+ content:"✓ 選択中";position:absolute;top:9px;right:9px;z-index:3;
+ padding:5px 9px;border-radius:999px;background:#d8ccff;color:#17102d;
+ font-size:11px;font-weight:900;box-shadow:0 3px 12px #0009;
+}
