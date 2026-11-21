@@ -50,3 +50,6 @@
  .preview-panel iframe{height:360px;min-height:260px}
  .code-pane textarea{height:48vh;min-height:220px}
 }
+
+.preview-panel{overflow:auto}
+@media(max-width:1100px){.preview-panel{overflow:auto}}
