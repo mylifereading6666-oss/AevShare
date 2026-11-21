@@ -6,7 +6,7 @@
  const config=window.AEVSTUDIO_CONFIG||{};
  const ready=!!(window.supabase&&config.supabaseUrl&&config.supabaseAnonKey);
  const client=ready?window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey,{
-  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storageKey:'aevstudio-shared-auth'}
+  auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
  }):null;
  let currentSession=null;
  const api={
