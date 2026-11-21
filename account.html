@@ -39,69 +39,102 @@ body[data-page="account"] .hero,body[data-page="account"] #project-hub,body[data
 <dialog id="auth-dialog"><form method="dialog" class="dialog-card"><button class="close" type="button" aria-label="閉じる" onclick="this.closest('dialog').close()">×</button><span class="eyebrow">ACCOUNT</span><h2 id="auth-title">AevStudioにログイン</h2><p>プロジェクトをアカウントに保存します。</p><input id="auth-email" type="email" placeholder="メールアドレス" required><input id="auth-password" type="password" placeholder="パスワード" required><button class="btn btn-primary" id="auth-submit" type="button">ログイン</button><button class="text-button" id="auth-toggle" type="button">アカウントを新規登録</button><p id="auth-message" class="hint"></p></form></dialog>
 <script src="config.js"></script><script src="app.js?v=20261121-2"></script>
 <script>
-/* Independent authentication controller: runs even if page-specific app.js code stops. */
+/* Independent authentication controller for account status and login UI. */
 (function(){
  const cfg=window.AEVSTUDIO_CONFIG||{};
- const submit=document.getElementById('auth-submit');
- const toggle=document.getElementById('auth-toggle');
- const dialog=document.getElementById('auth-dialog');
- const email=document.getElementById('auth-email');
- const password=document.getElementById('auth-password');
- const message=document.getElementById('auth-message');
- const button=document.getElementById('auth-open');
+ const $=id=>document.getElementById(id);
+ const submit=$('auth-submit'),toggle=$('auth-toggle'),dialog=$('auth-dialog');
+ const email=$('auth-email'),password=$('auth-password'),message=$('auth-message');
+ const headerButton=$('auth-open'),accountButton=$('account-login-action');
+ const state=$('account-state'),accountEmail=$('account-email');
+ const accountId=$('account-user-id'),created=$('account-created');
  if(!submit||!dialog||!email||!password)return;
- let client=null,signup=false;
+ let client=null,signup=false,currentUser=null;
  try{
   if(window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey){
-   client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+   client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
+   });
   }
- }catch(error){if(message)message.textContent='認証サービスを初期化できませんでした。';}
- const showMessage=(value,isError=false)=>{
+ }catch(error){if(state)state.textContent='認証サービスに接続できません。';}
+ const say=(value,isError=false)=>{
   if(message){message.textContent=value;message.style.color=isError?'#ff9baf':'#9eadd0';}
  };
+ const paint=user=>{
+  currentUser=user||null;
+  const logged=!!currentUser;
+  if(state)state.textContent=logged?'ログイン中':'ログインしていません';
+  if(accountEmail)accountEmail.textContent=logged?(currentUser.email||'未設定'):'—';
+  if(accountId)accountId.textContent=logged?(currentUser.id||'—'):'—';
+  if(created)created.textContent=logged&&currentUser.created_at?new Date(currentUser.created_at).toLocaleString():'—';
+  if(headerButton)headerButton.textContent=logged?'ログアウト':'ログイン / 登録';
+  const label=$('account-label');
+  if(label)label.textContent=logged?(currentUser.email||'ログイン中'):'ゲストモード';
+  if(accountButton)accountButton.textContent=logged?'ログアウト':'ログイン';
+  const passwordButton=$('account-password-update');
+  if(passwordButton)passwordButton.disabled=!logged;
+ };
  const sync=async()=>{
-  if(!client)return;
-  const {data}=await client.auth.getSession();
-  const loggedIn=!!data.session?.user;
-  if(button){button.textContent=loggedIn?'ログアウト':'ログイン / 登録';}
-  const label=document.getElementById('account-label');
-  if(label)label.textContent=loggedIn?(data.session.user.email||'ログイン中'):'ゲストモード';
- };
- if(client)client.auth.onAuthStateChange(()=>{sync();});
- if(toggle)toggle.onclick=()=>{
-  signup=!signup;
-  document.getElementById('auth-title').textContent=signup?'アカウントを新規登録':'AevStudioにログイン';
-  submit.textContent=signup?'登録する':'ログイン';
-  toggle.textContent=signup?'ログインに戻る':'アカウントを新規登録';
-  showMessage('');
- };
- submit.onclick=async()=>{
-  if(!client){showMessage('Supabaseとの接続設定を確認してください。',true);return;}
-  const mail=email.value.trim(),pass=password.value;
-  if(!mail||!pass){showMessage('メールアドレスとパスワードを入力してください。',true);return;}
-  submit.disabled=true;submit.textContent=signup?'登録中...':'ログイン中...';showMessage('');
+  if(!client){
+   if(state)state.textContent='認証設定を確認してください';
+   if(accountEmail)accountEmail.textContent='—';
+   return;
+  }
   try{
-   const result=signup
-    ?await client.auth.signUp({email:mail,password:pass})
-    :await client.auth.signInWithPassword({email:mail,password:pass});
+   const result=await Promise.race([
+    client.auth.getSession(),
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('接続に時間がかかっています。再読み込みしてください。')),8000))
+   ]);
    if(result.error)throw result.error;
-   if(signup){
-    showMessage(result.data.session?'登録しました。':'確認メールを送信しました。メールを確認してください。');
-   }else{
-    showMessage('ログインしました。画面を更新します。');
-    await sync();
-    dialog.close();
-    setTimeout(()=>location.reload(),250);
-   }
+   paint(result.data.session?.user||null);
   }catch(error){
-   showMessage(error?.message||'ログインに失敗しました。入力内容と接続を確認してください。',true);
-  }finally{
-   submit.disabled=false;submit.textContent=signup?'登録する':'ログイン';
+   if(state)state.textContent=error.message||'ログイン状態を取得できませんでした';
+   if(accountEmail)accountEmail.textContent='取得できません';
+   if(accountButton)accountButton.textContent='再確認';
   }
  };
+ if(client)client.auth.onAuthStateChange((_event,session)=>paint(session?.user||null));
+ if(toggle)toggle.onclick=()=>{
+  signup=!signup;
+  $('auth-title').textContent=signup?'アカウントを新規登録':'AevStudioにログイン';
+  submit.textContent=signup?'登録する':'ログイン';
+  toggle.textContent=signup?'ログインに戻る':'アカウントを新規登録';
+  say('');
+ };
+ const doLogout=async()=>{
+  if(!client){say('認証サービスに接続できません。',true);return;}
+  try{
+   const {error}=await client.auth.signOut();
+   if(error)throw error;
+   paint(null);say('ログアウトしました。');
+  }catch(error){say(error.message||'ログアウトできませんでした。',true);}
+ };
+ if(accountButton)accountButton.onclick=()=>{
+  if(currentUser){doLogout();return;}
+  signup=false;
+  $('auth-title').textContent='AevStudioにログイン';
+  submit.textContent='ログイン';
+  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
+ };
+ if(headerButton)headerButton.onclick=()=>{
+  if(currentUser){doLogout();return;}
+  if(typeof dialog.showModal==='function')dialog.showModal();else dialog.setAttribute('open','');
+ };
+ submit.onclick=async()=>{
+  if(!client){say('Supabaseとの接続設定を確認してください。',true);return;}
+  const mail=email.value.trim(),pass=password.value;
+  if(!mail||!pass){say('メールアドレスとパスワードを入力してください。',true);return;}
+  submit.disabled=true;submit.textContent=signup?'登録中...':'ログイン中...';say('');
+  try{
+   const result=signup?await client.auth.signUp({email:mail,password:pass}):await client.auth.signInWithPassword({email:mail,password:pass});
+   if(result.error)throw result.error;
+   if(signup){say(result.data.session?'登録しました。':'確認メールを送信しました。メールを確認してください。');}
+   else{paint(result.data.user);say('ログインしました。');dialog.close();}
+  }catch(error){say(error?.message||'ログインに失敗しました。',true);}
+  finally{submit.disabled=false;submit.textContent=signup?'登録する':'ログイン';}
+ };
  sync();
-})();
-</script>
+})();</script>
 <script>
 (function(){
  const menu=document.getElementById('site-menu');
