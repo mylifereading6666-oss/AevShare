@@ -342,3 +342,19 @@ body[data-page="create-project"] .template-card .template-thumb {
 .code-source{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
 .code-source summary{color:#c9bcff;cursor:pointer;font-size:12px;font-weight:700;padding:5px 0}
 .code-source pre{max-height:260px;margin:8px 0;overflow:auto}
+
+
+/* Independently collapsible cards in the learning sections. */
+.learn-section .lesson-collapsible{min-width:0;align-self:start;overflow:hidden}
+.learn-section .lesson-card-summary{display:flex;flex-direction:column;gap:5px;position:relative;list-style:none;cursor:pointer;padding:2px 30px 2px 0;min-height:48px}
+.learn-section .lesson-card-summary::-webkit-details-marker{display:none}
+.learn-section .lesson-card-summary::marker{content:""}
+.learn-section .lesson-card-summary::after{content:"＋";position:absolute;right:2px;top:4px;display:grid;place-items:center;width:24px;height:24px;border:1px solid var(--line);border-radius:7px;color:var(--cyan);font-size:16px;line-height:1}
+.learn-section .lesson-collapsible[open]>.lesson-card-summary::after{content:"−"}
+.learn-section .lesson-card-summary h3{margin:4px 0 0}
+.learn-section .lesson-card-content{padding-top:10px;animation:lessonCardReveal .18s ease-out}
+.learn-section .lesson-card-content>:first-child{margin-top:0}
+.learn-section .learn-grid .lesson-collapsible{background:#101726;border:1px solid var(--line);border-radius:14px;padding:15px}
+.learn-section .learn-grid .lesson-collapsible[open]{border-color:#7566bd}
+@keyframes lessonCardReveal{from{opacity:.65;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.learn-section .lesson-card-content{animation:none}}
