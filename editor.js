@@ -93,6 +93,21 @@ const templates={
   ]},
   {nav:'Works',eyebrow:'OUR WORK',heading:'制作実績',text:'実績画像・担当内容・成果を掲載します。',image:img('photo-1497366754035-f200968a6e72'),alt:'制作スタジオ'},
   {nav:'Contact',eyebrow:'START A PROJECT',heading:'プロジェクトの相談',text:'相談フォームやメールアドレス、対応時間を掲載してください。',image:img('photo-1521737711867-e3b97375f902'),alt:'チームミーティング'}
+ ]),
+ account:siteTemplate('account','MEMBER SPACE','アカウントを管理する。','プロフィール・設定・セキュリティ情報をまとめる会員ページのデザインです。','#7566d8',img('photo-1521737711867-e3b97375f902'),'YOUR ACCOUNT CENTER','',[
+  {nav:'Profile',eyebrow:'YOUR PROFILE',heading:'プロフィール',text:'表示名・プロフィール画像・自己紹介などを掲載するエリアです。',image:img('photo-1521737711867-e3b97375f902'),alt:'プロフィールのイメージ'},
+  {nav:'Settings',eyebrow:'PREFERENCES',heading:'アカウント設定',text:'表示テーマ・言語・通知などの設定項目を整理します。',image:img('photo-1497366754035-f200968a6e72'),alt:'設定画面のイメージ'},
+  {nav:'Security',eyebrow:'SECURITY',heading:'セキュリティ',text:'パスワード変更・ログイン状態・アカウント削除案内などを配置します。',image:img('photo-1555949963-ff9fe0c870eb'),alt:'セキュリティのイメージ'}
+ ]),
+ dashboard:siteTemplate('dashboard','CONTROL CENTER','必要な情報をひと目で。','統計・最近の活動・ショートカットをまとめたダッシュボードです。','#3d79b7',img('photo-1460925895917-afdab827c52f'),'YOUR OVERVIEW','',[
+  {nav:'Overview',eyebrow:'OVERVIEW',heading:'利用状況',text:'合計数・進捗・達成状況などの概要をカード形式で見せます。',image:img('photo-1460925895917-afdab827c52f'),alt:'分析ダッシュボード'},
+  {nav:'Activity',eyebrow:'RECENT ACTIVITY',heading:'最近の活動',text:'更新履歴・最近開いた項目・通知などを一覧表示します。',image:img('photo-1497366754035-f200968a6e72'),alt:'作業履歴のイメージ'},
+  {nav:'Shortcuts',eyebrow:'QUICK ACTIONS',heading:'クイック操作',text:'よく使う機能へのリンクや新規作成ボタンを配置します。',image:img('photo-1516321318423-f06f85e504b3'),alt:'作業スペース'}
+ ]),
+ community:siteTemplate('community','CREATOR HUB','好きなことを、つながる場所に。','メンバー紹介・お知らせ・参加案内を備えたコミュニティサイトです。','#438c91',img('photo-1529156069898-49953e39b3ac'),'WELCOME TO THE COMMUNITY','',[
+  {nav:'Members',eyebrow:'OUR MEMBERS',heading:'メンバー紹介',text:'参加者や運営メンバーのプロフィールを紹介します。',image:img('photo-1529156069898-49953e39b3ac'),alt:'コミュニティのイメージ'},
+  {nav:'Updates',eyebrow:'LATEST UPDATES',heading:'お知らせ',text:'イベント・更新情報・重要なお知らせを掲載します。',image:img('photo-1517245386807-bb43f82c33c4'),alt:'お知らせのイメージ'},
+  {nav:'Join',eyebrow:'JOIN US',heading:'参加方法',text:'参加条件・ルール・問い合わせ先などをわかりやすく案内します。',image:img('photo-1521737711867-e3b97375f902'),alt:'参加案内のイメージ'}
  ])
 };
 function makeId(){if(window.crypto&&window.crypto.randomUUID)return window.crypto.randomUUID();const bytes=new Uint8Array(16);if(window.crypto&&window.crypto.getRandomValues)window.crypto.getRandomValues(bytes);else for(let i=0;i<16;i++)bytes[i]=Math.floor(Math.random()*256);bytes[6]=(bytes[6]&15)|64;bytes[8]=(bytes[8]&63)|128;const h=Array.from(bytes,x=>x.toString(16).padStart(2,'0')).join('');return h.slice(0,8)+'-'+h.slice(8,12)+'-'+h.slice(12,16)+'-'+h.slice(16,20)+'-'+h.slice(20)}
