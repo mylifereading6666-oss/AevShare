@@ -1,0 +1,1 @@
+(()=>{'use strict';document.addEventListener('click',event=>{const t=event.target instanceof Element?event.target.closest('[data-template]'):null;if(!t)return;event.preventDefault();event.stopImmediatePropagation();location.href='editor.html?template='+encodeURIComponent(t.dataset.template||'blank')},true)})();
