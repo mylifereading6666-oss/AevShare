@@ -1,41 +1,25 @@
--- AevShare private Storage migration
--- AevShare専用SupabaseプロジェクトのSQL Editorで実行してください。
--- 既存の公開ポリシーを削除し、ログイン中の本人だけが自分のフォルダを操作できるようにします。
--- 共有相手にはアプリが発行する期限付き署名URLを渡します（ログイン不要）。
-
-insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
-values (
-  'aevshare','aevshare',false,52428800,
-  array[
-    'image/jpeg','image/png','image/gif','image/webp','image/avif',
-    'video/mp4','video/webm','video/quicktime',
-    'application/zip','application/x-zip-compressed','application/x-7z-compressed',
-    'application/x-rar-compressed','application/pdf',
-    'application/octet-stream','text/plain'
-  ]
-)
-on conflict (id) do update set
-  public = false,
-  file_size_limit = excluded.file_size_limit,
-  allowed_mime_types = excluded.allowed_mime_types;
-
-drop policy if exists "AevShare public read" on storage.objects;
-drop policy if exists "AevShare anonymous upload" on storage.objects;
-drop policy if exists "AevShare owner read" on storage.objects;
-drop policy if exists "AevShare owner upload" on storage.objects;
-drop policy if exists "AevShare owner delete" on storage.objects;
-
-create policy "AevShare owner read"
-on storage.objects for select
-to authenticated
-using (bucket_id = 'aevshare' and (storage.foldername(name))[1] = auth.uid()::text);
-
-create policy "AevShare owner upload"
-on storage.objects for insert
-to authenticated
-with check (bucket_id = 'aevshare' and (storage.foldername(name))[1] = auth.uid()::text);
-
-create policy "AevShare owner delete"
-on storage.objects for delete
-to authenticated
-using (bucket_id = 'aevshare' and (storage.foldername(name))[1] = auth.uid()::text);
+-- AevStudio initial database setup
+-- Run once in Supabase SQL Editor after confirming the project is the intended AevStudio project.
+create extension if not exists pgcrypto;
+create table if not exists public.studio_projects (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null default 'Untitled Project',
+  title text not null default 'New page',
+  description text not null default '',
+  color text not null default '#8b6cff',
+  html text not null default '',
+  css text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+alter table public.studio_projects enable row level security;
+drop policy if exists "Users can view own studio projects" on public.studio_projects;
+create policy "Users can view own studio projects" on public.studio_projects for select using (auth.uid() = user_id);
+drop policy if exists "Users can create own studio projects" on public.studio_projects;
+create policy "Users can create own studio projects" on public.studio_projects for insert with check (auth.uid() = user_id);
+drop policy if exists "Users can update own studio projects" on public.studio_projects;
+create policy "Users can update own studio projects" on public.studio_projects for update using (auth.uid() = user_id) with check (auth.uid() = user_id);
+drop policy if exists "Users can delete own studio projects" on public.studio_projects;
+create policy "Users can delete own studio projects" on public.studio_projects for delete using (auth.uid() = user_id);
+create index if not exists studio_projects_user_updated_idx on public.studio_projects(user_id, updated_at desc);

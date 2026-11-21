@@ -1,7 +1,0 @@
-project_id = "cbfkgosvqiltsikextxv"
-
-[functions.aevshare-url-upload]
-verify_jwt = true
-
-[functions.aevshare-web-archive]
-verify_jwt = true
