@@ -396,3 +396,11 @@ body[data-page="create-project"] .template-card .template-thumb {
 .learn-section-fold:not([open])>.learn-section-summary .section-heading{margin-bottom:0}
 .learn-section-fold>.learn-section-summary:focus-visible{outline:2px solid var(--cyan);outline-offset:5px;border-radius:8px}
 @media(prefers-reduced-motion:reduce){.learn-section-fold>.learn-section-content{animation:none}}
+
+
+/* Local search and category filter for the integrated learning catalogue. */
+.learn-code-search{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,220px);gap:10px;align-items:center;margin:0 0 18px}
+.learn-code-search input,.learn-code-search select{width:100%;min-width:0;min-height:44px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#101726;color:var(--text)}
+.learn-code-search span{grid-column:1/-1;color:var(--muted);font-size:12px}
+.learn-code-card[hidden],.learn-code-category[hidden]{display:none!important}
+@media(max-width:560px){.learn-code-search{grid-template-columns:1fr}.learn-code-search span{grid-column:auto}}
