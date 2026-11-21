@@ -53,3 +53,21 @@
 
 .preview-panel{overflow:auto}
 @media(max-width:1100px){.preview-panel{overflow:auto}}
+
+/* Purpose-built template chooser and image manager */
+.template-choice-grid-rich{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:14px}
+.template-choice-grid-rich .template-choice{padding:0 0 14px;overflow:hidden;text-align:left;min-width:0}
+.template-choice-grid-rich img{display:block;width:100%;height:128px;object-fit:cover;margin-bottom:12px}
+.template-choice-grid-rich b,.template-choice-grid-rich span{display:block;margin:0 13px}
+.template-choice-grid-rich span{margin-top:6px;line-height:1.55}
+.media-manager{display:grid;gap:11px;padding:15px;border:1px solid var(--line);border-radius:13px;background:#10192a;min-width:0}
+.media-manager-head{display:grid;gap:4px}.media-manager-head b{color:var(--text);font-size:14px}.media-manager-head small,.media-status{color:var(--muted);font-size:11px;line-height:1.6}
+.media-manager label:not(.media-upload-button){display:grid;gap:6px;color:var(--muted);font-size:12px}
+.media-manager input[type=url],.media-manager input[type=text]{width:100%;min-width:0;max-width:100%;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:#0a1020;color:var(--text);font:inherit}
+.media-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.media-upload-button{display:inline-flex!important;align-items:center;justify-content:center;cursor:pointer;margin:0}
+.media-status.error{color:#ff9bad}
+.media-preview{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.media-preview:empty{display:none}
+.media-preview img{width:100%;height:58px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
+@media(max-width:560px){.template-choice-grid-rich{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.template-choice-grid-rich img{height:88px}.template-choice-grid-rich b{font-size:12px}.template-choice-grid-rich span{font-size:10px}.media-actions>*{flex:1 1 100%}.media-preview{grid-template-columns:repeat(3,minmax(0,1fr))}}
