@@ -143,4 +143,26 @@ body[data-page="learn"] .section{scroll-margin-top:90px}
  });
 })();
 </script>
+
+<script>
+/* Make each major learning section collapsible as a whole. */
+(function(){
+ document.querySelectorAll('main > section.learn-section').forEach(section=>{
+  if(section.querySelector(':scope > .learn-section-fold'))return;
+  const heading=section.querySelector(':scope > .section-heading');
+  if(!heading)return;
+  const fold=document.createElement('details');
+  fold.className='learn-section-fold';
+  fold.open=true;
+  const summary=document.createElement('summary');
+  summary.className='learn-section-summary';
+  summary.appendChild(heading);
+  const content=document.createElement('div');
+  content.className='learn-section-content';
+  [...section.children].forEach(child=>{if(child!==heading)content.appendChild(child);});
+  fold.append(summary,content);
+  section.appendChild(fold);
+ });
+})();
+</script>
 </body></html>
