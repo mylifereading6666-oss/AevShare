@@ -358,3 +358,17 @@ body[data-page="create-project"] .template-card .template-thumb {
 .learn-section .learn-grid .lesson-collapsible[open]{border-color:#7566bd}
 @keyframes lessonCardReveal{from{opacity:.65;transform:translateY(-3px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.learn-section .lesson-card-content{animation:none}}
+
+
+/* Major learning-section accordion: keeps the original section spacing and collapses all inner content. */
+.learn-section-fold{min-width:0}
+.learn-section-summary{display:block;list-style:none;cursor:pointer;position:relative;padding-right:42px}
+.learn-section-summary::-webkit-details-marker{display:none}
+.learn-section-summary::marker{content:""}
+.learn-section-summary::after{content:"−";position:absolute;right:2px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:30px;height:30px;border:1px solid var(--line);border-radius:9px;background:#ffffff08;color:var(--cyan);font-size:20px;line-height:1}
+.learn-section-fold:not([open])>.learn-section-summary::after{content:"＋"}
+.learn-section-fold .section-heading{margin-bottom:0}
+.learn-section-fold[open]>.learn-section-content{padding-top:26px;animation:lessonCardReveal .2s ease-out}
+.learn-section-fold:not([open])>.learn-section-summary .section-heading{margin-bottom:0}
+.learn-section-fold>.learn-section-summary:focus-visible{outline:2px solid var(--cyan);outline-offset:5px;border-radius:8px}
+@media(prefers-reduced-motion:reduce){.learn-section-fold>.learn-section-content{animation:none}}
