@@ -40,4 +40,69 @@
   document.documentElement.dataset.aevAuth='unavailable';
   console.error('AevStudio: Supabase config or SDK is unavailable.');
  }
+
+ /* Centralize login UI handling here. Capture phase prevents page scripts from
+    replacing or bypassing the shared login action. */
+ let signupMode=false;
+ document.addEventListener('click',async function(event){
+  const target=event.target;
+  if(!(target instanceof Element))return;
+  const submit=target.closest('#auth-submit');
+  const toggle=target.closest('#auth-toggle');
+  const open=target.closest('#auth-open');
+  const message=document.getElementById('auth-message');
+  const dialog=document.getElementById('auth-dialog');
+  const say=(value,isError=false)=>{
+   if(message){message.textContent=value;message.style.color=isError?'#ff9baf':'#9eadd0';}
+  };
+  if(open){
+   event.preventDefault();event.stopImmediatePropagation();
+   if(!dialog)return;
+   const {data,error}=client?await client.auth.getSession():{data:{session:null},error:new Error('Supabaseに接続できません。')};
+   if(error){say(error.message,true);return;}
+   if(data.session){
+    const result=await client.auth.signOut();
+    if(result.error)say(result.error.message,true);
+   }else if(typeof dialog.showModal==='function'&&!dialog.open)dialog.showModal();
+   else dialog.setAttribute('open','');
+   return;
+  }
+  if(toggle){
+   event.preventDefault();event.stopImmediatePropagation();
+   signupMode=!signupMode;
+   const title=document.getElementById('auth-title');
+   const button=document.getElementById('auth-submit');
+   if(title)title.textContent=signupMode?'アカウントを新規登録':'AevStudioにログイン';
+   if(button)button.textContent=signupMode?'登録する':'ログイン';
+   toggle.textContent=signupMode?'ログインに戻る':'アカウントを新規登録';
+   say('');
+   return;
+  }
+  if(submit){
+   event.preventDefault();event.stopImmediatePropagation();
+   if(!client){say('Supabaseに接続できません。ページを再読み込みしてください。',true);return;}
+   const email=document.getElementById('auth-email')?.value.trim()||'';
+   const password=document.getElementById('auth-password')?.value||'';
+   if(!email||!password){say('メールアドレスとパスワードを入力してください。',true);return;}
+   if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)){say('メールアドレスの形式を確認してください。',true);return;}
+   submit.disabled=true;submit.textContent=signupMode?'登録中...':'ログイン中...';say('');
+   try{
+    const result=signupMode
+     ?await client.auth.signUp({email,password})
+     :await client.auth.signInWithPassword({email,password});
+    if(result.error)throw result.error;
+    if(signupMode){
+     say(result.data.session?'アカウントを作成しました。':'確認メールを送信しました。メールを確認してください。');
+    }else{
+     render(result.data.session);
+     if(dialog?.open)dialog.close();
+     say('ログインしました。');
+    }
+   }catch(error){
+    say(error?.message||'ログインに失敗しました。',true);
+   }finally{
+    submit.disabled=false;submit.textContent=signupMode?'登録する':'ログイン';
+   }
+  }
+ },true);
 })();
