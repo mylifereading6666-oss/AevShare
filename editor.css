@@ -71,3 +71,21 @@
 .media-preview:empty{display:none}
 .media-preview img{width:100%;height:58px;object-fit:cover;border-radius:7px;border:1px solid var(--line)}
 @media(max-width:560px){.template-choice-grid-rich{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.template-choice-grid-rich img{height:88px}.template-choice-grid-rich b{font-size:12px}.template-choice-grid-rich span{font-size:10px}.media-actions>*{flex:1 1 100%}.media-preview{grid-template-columns:repeat(3,minmax(0,1fr))}}
+
+/* Live preview click inspector */
+.preview-inspector{margin-top:12px;padding:15px;border:1px solid var(--line);border-radius:13px;background:var(--panel);min-width:0;overflow:hidden}
+.inspector-heading{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.inspector-heading b{font-size:14px;color:var(--text)}
+.inspector-heading span{font-size:9px;letter-spacing:1.3px;color:#68d9e6}
+.inspector-empty{font-size:12px;line-height:1.7;color:var(--muted)}
+.inspector-details{display:none;min-width:0}
+.preview-inspector.has-selection .inspector-empty{display:none}
+.preview-inspector.has-selection .inspector-details{display:grid;gap:8px}
+.inspector-tag{display:inline-flex;width:max-content;max-width:100%;padding:4px 9px;border-radius:7px;background:#8b6cff20;color:#c5b4ff;font-weight:700;font-size:12px}
+.inspector-details code{display:block;max-width:100%;overflow-wrap:anywhere;white-space:normal;padding:9px;border-radius:8px;background:#080e1b;color:#8de5ef;font-size:11px}
+.inspector-details p{margin:0;color:var(--text);font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.inspector-details small{color:var(--muted);font-size:10px;overflow-wrap:anywhere}
+.inspector-details pre{max-height:110px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;padding:9px;border-radius:8px;background:#080e1b;color:#aebbd3;font-size:10px}
+.inspector-actions{display:flex;gap:8px;flex-wrap:wrap}
+.inspector-actions button:disabled{opacity:.4;cursor:not-allowed}
+@media(max-width:600px){.preview-inspector{padding:12px}.inspector-heading{align-items:flex-start;flex-direction:column;gap:3px}.inspector-actions button{flex:1 1 100%;min-height:42px}}
