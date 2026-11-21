@@ -332,3 +332,6 @@ body[data-page="create-project"] .template-card .template-thumb {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Keep the login button hidden on every viewport when a session is active. */
+.auth-open-button.hidden{display:none!important}
