@@ -188,42 +188,55 @@ async function load(){
   const q=split(p.html||'');
   return Object.assign({},p,{html:q.html,js:p.js||q.js||'',pages:p.pages||q.pages||[{name:'トップページ',title:p.title||'My Website',description:p.description||'',html:q.html,css:p.css||'',js:p.js||q.js||''}]})
  });
- const params=new URLSearchParams(location.search),pid=params.get('project'),hasTemplate=params.has('template'),t=params.get('template')||'blank';
- let session=null;
- if(client){
-  const authResult=await client.auth.getSession();
-  if(authResult.error)throw authResult.error;
-  session=authResult.data.session;
-  user=session&&session.user;
- }
- if(client&&user){
-  const r=await client.from('studio_projects').select('*').order('updated_at',{ascending:false});
-  if(!r.error&&r.data){
-   const cloud=r.data.map(x=>{
-    const q=split(x.html||'');
-    return {id:x.id,name:x.name,title:x.title||'My Website',description:x.description||'',color:x.color||'#8b6cff',html:q.html,js:q.js,css:x.css||'',pages:q.pages||[{name:'トップページ',title:x.title||'My Website',description:x.description||'',html:q.html,css:x.css||'',js:q.js||''}],updated_at:x.updated_at||new Date().toISOString()}
-   });
-   const m=new Map();
-   local.concat(cloud).forEach(p=>{const old=m.get(p.id);if(!old||new Date(p.updated_at||0)>=new Date(old.updated_at||0))m.set(p.id,p)});
-   projects=Array.from(m.values()).sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));
-   for(const lp of local){
-    normalizeCloudId(lp);
-    const cp=cloud.find(x=>x.id===lp.id);
-    if(!cp||new Date(lp.updated_at||0)>new Date(cp.updated_at||0)){
-     const payload={id:lp.id,user_id:user.id,name:lp.name,title:lp.title,description:lp.description,color:lp.color,html:packed(lp),css:lp.css||'',updated_at:lp.updated_at||new Date().toISOString()};
-     const up=await client.from('studio_projects').upsert(payload);
-     if(up.error)console.warn('Local project cloud migration failed',lp.id,up.error.message)
-    }
-   }
-   localSave()
-  }else say('クラウド読込失敗: '+(r.error?.message||'原因不明')+'。端末データを表示中',true)
- }
- // Cloud/local project loading must finish before creating the requested template.
- // This prevents the project merge from replacing the just-created template project.
+ const params=new URLSearchParams(location.search);
+ const pid=params.get('project');
+ const hasTemplate=params.has('template');
+ const t=params.get('template')||'blank';
+ // Create and render the selected template immediately, before any network/auth work.
+ // create() saves locally and replaces the URL with the new project ID.
+ let requestedProject=null;
  if(hasTemplate){
   const requestedCount=Math.max(1,Math.min(20,parseInt(params.get('pages')||'1',10)||1));
   create(templates[t]?t:'blank',requestedCount);
-  await save();
+  requestedProject=current;
+ }
+ // Cloud synchronization is secondary: it must never block or replace the new template.
+ try{
+  if(client){
+   const authResult=await client.auth.getSession();
+   if(authResult.error)throw authResult.error;
+   const session=authResult.data.session;
+   user=session&&session.user;
+  }
+  if(client&&user){
+   const r=await client.from('studio_projects').select('*').order('updated_at',{ascending:false});
+   if(!r.error&&r.data){
+    const cloud=r.data.map(x=>{
+     const q=split(x.html||'');
+     return {id:x.id,name:x.name,title:x.title||'My Website',description:x.description||'',color:x.color||'#8b6cff',html:q.html,js:q.js,css:x.css||'',pages:q.pages||[{name:'トップページ',title:x.title||'My Website',description:x.description||'',html:q.html,css:x.css||'',js:q.js||''}],updated_at:x.updated_at||new Date().toISOString()}
+    });
+    // Merge from the current in-memory list, which already contains the new template.
+    const merged=new Map();
+    projects.concat(cloud).forEach(p=>{
+     const old=merged.get(p.id);
+     if(!old||new Date(p.updated_at||0)>=new Date(old.updated_at||0))merged.set(p.id,p)
+    });
+    projects=Array.from(merged.values()).sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));
+    localSave();
+   }else say('クラウド読込失敗: '+(r.error?.message||'原因不明')+'。テンプレートは端末に保存されています',true);
+  }
+ }catch(syncError){
+  console.warn('AevStudio cloud sync deferred:',syncError);
+  say('クラウド同期を完了できませんでした。テンプレートは端末に保存されています。',true);
+ }
+ // Re-select the template after cloud merge so it remains the active project.
+ if(requestedProject){
+  const latest=projects.find(p=>p.id===requestedProject.id)||requestedProject;
+  if(!projects.some(p=>p.id===latest.id))projects.unshift(latest);
+  fill(latest);
+  history.replaceState({},'', 'editor.html?project='+encodeURIComponent(latest.id));
+  localSave();
+  if(client&&user)await save();
  }else if(pid){
   const p=projects.find(x=>x.id===pid);
   if(p)fill(p);else if(projects.length)fill(projects[0]);else create('blank')
