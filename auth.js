@@ -25,7 +25,7 @@
   const button=document.getElementById('auth-open');
   const badge=document.getElementById('auth-status');
   const label=document.getElementById('account-label');
-  if(button){button.classList.toggle('hidden',logged);button.textContent='ログイン / 登録';}
+  if(button){button.classList.toggle('hidden',logged);button.hidden=logged;button.setAttribute('aria-hidden',String(logged));button.style.setProperty('display',logged?'none':'inline-flex','important');button.textContent='ログイン / 登録';}
   if(badge)badge.classList.toggle('hidden',!logged);
   if(label)label.textContent=logged?(currentSession.user.email||'ログイン中'):'ゲストモード';
   document.documentElement.dataset.aevAuth=logged?'online':'offline';
