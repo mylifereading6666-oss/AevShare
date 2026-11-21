@@ -164,3 +164,40 @@ body.menu-is-open{overflow:hidden!important;overscroll-behavior:none}
   .menu-toggle { flex-basis: 40px !important; width: 40px !important; min-width: 40px !important; }
   .auth-open-button { padding: 9px 10px !important; font-size: 12px !important; }
 }
+
+
+/* Authenticated users see a live session status instead of a logout button. */
+.auth-status-badge {
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  min-height:42px;
+  padding:10px 15px;
+  border:1px solid #1d8b63;
+  border-radius:999px;
+  background:linear-gradient(135deg,#103c31,#102b2b);
+  color:#83f2bd;
+  font-size:12px;
+  font-weight:850;
+  letter-spacing:1.5px;
+  white-space:nowrap;
+  box-shadow:0 0 18px #28d98a20,inset 0 0 12px #28d98a0c;
+}
+.auth-status-badge i {
+  display:block;
+  width:9px;
+  height:9px;
+  flex:0 0 9px;
+  border-radius:50%;
+  background:#35e58f;
+  box-shadow:0 0 0 3px #35e58f22,0 0 12px #35e58fbb;
+  animation:aev-online-pulse 1.8s ease-in-out infinite;
+}
+@keyframes aev-online-pulse {
+  0%,100% { opacity:1; box-shadow:0 0 0 3px #35e58f22,0 0 12px #35e58f99; }
+  50% { opacity:.65; box-shadow:0 0 0 5px #35e58f12,0 0 18px #35e58fcc; }
+}
+@media(max-width:850px){
+ .auth-status-badge{min-height:40px;padding:9px 12px;font-size:11px;gap:7px}
+}
