@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d18">
+<meta name="description" content="AevStudioの全機能を項目ごとに説明する公式利用ガイド。">
+<title>サイトの使い方・全機能ガイド | AevStudio</title>
+<link rel="stylesheet" href="style.css?v=20261121-guide1">
+<style>
+.guide-shell{width:min(1040px,calc(100% - 32px));margin:34px auto 80px}
+.guide-hero,.guide-group,.guide-item{border:1px solid var(--line);border-radius:16px;background:#101726}
+.guide-hero{padding:clamp(22px,4vw,38px);margin-bottom:22px;background:linear-gradient(135deg,#171d36,#101726 70%)}
+.guide-hero h1{font-size:clamp(28px,5vw,43px);margin:10px 0}
+.guide-hero p,.guide-group-intro,.guide-item p,.guide-item li{color:#b4bfd4;line-height:1.85}
+.guide-nav{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.guide-nav a{color:#d5ccff;text-decoration:none;border:1px solid var(--line);background:#ffffff08;border-radius:9px;padding:8px 11px;font-size:12px}
+.guide-group{padding:clamp(16px,3vw,25px);margin:18px 0;scroll-margin-top:90px}
+.guide-group h2{font-size:clamp(20px,3vw,25px);margin:0 0 7px}
+.guide-group-intro{margin:0 0 16px}
+.guide-item{background:#0d1422;margin:10px 0;overflow:hidden;border-radius:12px}
+.guide-item summary{cursor:pointer;list-style:none;padding:15px 17px;font-weight:750;display:flex;align-items:center;gap:10px}
+.guide-item summary::-webkit-details-marker{display:none}
+.guide-item summary:after{content:"＋";margin-left:auto;color:#a995ff;font-size:18px}
+.guide-item[open] summary:after{content:"−"}
+.guide-item-body{padding:0 18px 18px;border-top:1px solid #ffffff10}
+.guide-item-body h3{font-size:14px;margin:17px 0 5px;color:#d9d2ff}
+.guide-item-body ul,.guide-item-body ol{padding-left:22px}
+.guide-note{border-left:3px solid #9b86ff;background:#191b35;border-radius:7px;padding:11px 13px;color:#d7d3ef;margin:12px 0}
+.guide-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.guide-links a{color:#c8baff}
+.guide-small{font-size:12px;color:var(--muted)}
+@media(max-width:600px){.guide-shell{margin-top:18px}.guide-item summary{padding:13px;font-size:13px}.guide-item-body{padding:0 13px 15px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+<a class="brand" href="./"><span class="brand-mark">A</span><span>AevStudio<small>WEB CREATION STUDIO</small></span></a>
+<button class="menu-toggle" id="menu-toggle" type="button" aria-label="メニューを開く" aria-expanded="false"><span class="menu-toggle-lines"><span></span><span></span><span></span></span><span class="menu-toggle-label">メニュー</span></button>
+<nav class="site-menu hidden" id="site-menu" aria-label="メインメニュー">
+<div class="menu-head"><b>MENU</b><button id="menu-close" type="button" aria-label="閉じる">×</button></div>
+<details open><summary>制作</summary><a href="projects.html">プロジェクト</a><a href="editor.html">制作エディタ</a><a href="templates.html">テンプレート</a></details>
+<details open><summary>学習・資料</summary><a href="learn.html">Web制作を学ぶ</a><a href="usage-guide.html">サイトの使い方・全機能ガイド</a><a href="code-library.html">応用コード一覧</a><a href="code-library-guide.html">応用コード一覧 公式ドキュメント</a></details>
+<details><summary>アカウント</summary><a href="account.html">アカウント管理</a></details>
+</nav><div class="menu-backdrop hidden" id="menu-backdrop"></div>
+<div class="account"><span id="account-label">ゲストモード</span><button class="btn btn-primary auth-open-button" id="auth-open" type="button">ログイン / 登録</button><span class="auth-status-badge hidden" id="auth-status"><i></i><span>ONLINE</span></span></div>
+</header>
+<main class="guide-shell">
+<section class="guide-hero">
+<span class="eyebrow">OFFICIAL USER GUIDE</span>
+<h1>AevStudio<br>サイトの使い方・全機能ガイド</h1>
+<p>初めて使うときの基本操作から、プロジェクト作成、複数ページ編集、コード確認、保存・書き出し、学習機能までを項目別に説明します。各項目を押すと説明を開閉できます。</p>
+<div class="guide-links"><a class="btn btn-primary" href="projects.html">プロジェクトを始める →</a><a class="btn btn-ghost" href="learn.html">学習コンテンツを見る</a></div>
+<nav class="guide-nav" aria-label="ガイド内目次">
+<a href="#basics">基本操作</a><a href="#account">アカウント</a><a href="#projects">プロジェクト</a><a href="#editor">制作エディタ</a><a href="#save-export">保存・書き出し</a><a href="#learning">学習・コード</a><a href="#security">安全・注意事項</a><a href="#trouble">困ったとき</a>
+</nav>
+</section>
+
+<section class="guide-group" id="basics">
+<h2>1. 基本操作・画面の見方</h2><p class="guide-group-intro">AevStudioの共通画面と、最初に覚えておく操作です。</p>
+<details class="guide-item" open><summary>1-1. ロゴ・ホームへ戻る</summary><div class="guide-item-body"><p>画面左上のAevStudioロゴを押すとホームへ戻ります。作業中の内容がある場合は、移動前に保存状態を確認してください。</p></div></details>
+<details class="guide-item"><summary>1-2. 三本線メニュー</summary><div class="guide-item-body"><p>画面上部の「メニュー」を押すとナビゲーションが開きます。項目は「制作」「学習・資料」「アカウント」に分類されています。分類名を押すと中のリンクを折り畳めます。背景部分、閉じるボタン、Escキーでも閉じられます。</p><p>スマートフォンではメニュー内をスクロールして目的の項目を探してください。</p></div></details>
+<details class="guide-item"><summary>1-3. ログイン状態の表示</summary><div class="guide-item-body"><p>未ログイン時は「ゲストモード」と表示され、ログイン／登録ボタンが表示されます。ログイン後はアカウントのメールアドレスなどが表示され、オンライン状態の表示に切り替わります。</p></div></details>
+<details class="guide-item"><summary>1-4. スマートフォン・タブレット・PCでの利用</summary><div class="guide-item-body"><p>画面幅に合わせてレイアウトが変わります。エディタではプレビュー幅を「自動（画面幅）」「PC」「タブレット」「スマホ」から選び、各サイズで表示を確認できます。</p><div class="guide-note">画面サイズを切り替えた後は、文字の折り返し、画像のはみ出し、ボタンの押しやすさも確認してください。</div></div></details>
+</section>
+
+<section class="guide-group" id="account">
+<h2>2. アカウント・ログイン</h2><p class="guide-group-intro">ログインすると、アカウント単位でプロジェクトをクラウド管理できます。</p>
+<details class="guide-item"><summary>2-1. 新規登録</summary><div class="guide-item-body"><ol><li>画面上部の「ログイン / 登録」を押します。</li><li>ログイン画面内の「アカウントを新規登録」を選びます。</li><li>メールアドレスとパスワードを入力して登録します。</li><li>確認メールが届いた場合は、メール内の案内に従って確認を完了します。</li></ol><p class="guide-note">登録確認の方法はSupabase側の認証設定によって異なる場合があります。</p></div></details>
+<details class="guide-item"><summary>2-2. ログイン</summary><div class="guide-item-body"><p>「ログイン / 登録」からメールアドレスとパスワードを入力し、「ログイン」を押します。ログイン状態はブラウザーに保持され、次回アクセス時にもセッションが有効であれば引き継がれます。</p></div></details>
+<details class="guide-item"><summary>2-3. ログアウト</summary><div class="guide-item-body"><p>ログイン中にアカウント操作ボタンを押すとログアウトできます。ログアウト後はゲストモードになります。クラウドに保存したプロジェクトはアカウントに残りますが、再び開くには同じアカウントでログインしてください。</p></div></details>
+<details class="guide-item"><summary>2-4. アカウント管理ページ</summary><div class="guide-item-body"><p>メニューの「アカウント管理」から開きます。ログイン情報欄ではログイン状態、メールアドレス、ユーザーID、アカウント作成日を確認できます。</p><p><a href="account.html">アカウント管理を開く →</a></p></div></details>
+<details class="guide-item"><summary>2-5. パスワード変更</summary><div class="guide-item-body"><ol><li>アカウント管理ページを開き、ログインしていることを確認します。</li><li>「新しいパスワード」と「新しいパスワード（確認）」に同じ内容を入力します。</li><li>「パスワードを変更」を押します。</li></ol><p>入力欄は6文字以上が条件です。確認欄と一致しない場合や未ログインの場合は変更できません。</p></div></details>
+</section>
+
+<section class="guide-group" id="projects">
+<h2>3. プロジェクトの作成・管理</h2><p class="guide-group-intro">Webサイトは「プロジェクト」として管理します。最初にプロジェクト名・用途・ページ数を決めます。</p>
+<details class="guide-item"><summary>3-1. プロジェクト一覧</summary><div class="guide-item-body"><p>メニューの「プロジェクト」から一覧を開きます。新規作成、保存済みプロジェクトの確認、制作の再開を行う場所です。</p><p><a href="projects.html">プロジェクト一覧を開く →</a></p></div></details>
+<details class="guide-item"><summary>3-2. 新しいプロジェクト</summary><div class="guide-item-body"><ol><li>「新しいプロジェクト」を押します。</li><li>「新しいプロジェクト」を選びます。</li><li>用途に合うテンプレートを選びます。</li><li>プロジェクト名を入力します。</li><li>必要なページ数を1〜10ページから選びます。</li><li>「プロジェクトを作成」を押します。</li></ol><p>作成後は制作エディタで内容を編集できます。</p></div></details>
+<details class="guide-item"><summary>3-3. プロジェクトの種類・テンプレート</summary><div class="guide-item-body"><ul><li><b>空白のWebサイト：</b>決まった構成を使わず自由に作る土台。</li><li><b>ポートフォリオ：</b>プロフィール、作品、制作実績の紹介。</li><li><b>サービス紹介・LP：</b>サービスや商品の特徴を伝えるページ。</li><li><b>ブログ・メディア：</b>記事やお知らせを掲載する構成。</li><li><b>オンラインショップ：</b>商品を紹介するサイトの土台。決済機能そのものが自動で有効になるわけではありません。</li><li><b>レストラン・カフェ：</b>店舗情報やメニューの紹介。</li><li><b>イベント・告知：</b>開催情報、プログラム、会場案内。</li><li><b>写真・ギャラリー：</b>写真や作品の展示。</li><li><b>ゲーム・コミュニティ：</b>ゲーム関連情報やコミュニティ案内。</li><li><b>制作会社・ビジネス：</b>事業内容、サービス、実績の紹介。</li></ul><p>テンプレートは初期構成です。実際の文章・画像・機能は用途に合わせて編集してください。</p></div></details>
+<details class="guide-item"><summary>3-4. ページ数の選び方</summary><div class="guide-item-body"><p>作成時に1〜10ページを選択します。1ページのサイトなら1、ホーム・紹介・問い合わせなどを分ける場合は必要な数を選びます。ページ数はサイト全体のページ構成の初期値です。</p></div></details>
+<details class="guide-item"><summary>3-5. 続きから制作</summary><div class="guide-item-body"><ol><li>プロジェクト開始画面で「続きから」を選びます。</li><li>端末内に保存されたプロジェクトと、ログイン中ならクラウドのプロジェクトが一覧に表示されます。</li><li>再開したいプロジェクトを選択します。</li><li>「選択したプロジェクトを開く」を押します。</li></ol><p>クラウドのプロジェクトを開く場合は、保存時と同じアカウントでログインしてください。</p></div></details>
+<details class="guide-item"><summary>3-6. プロジェクトを切り替える・新規作成する</summary><div class="guide-item-body"><p>制作エディタ左側の「マイプロジェクト」から編集対象を切り替えられます。「＋ 新規」から別のプロジェクトを作成できます。切り替え前に保存状態を確認してください。</p></div></details>
+</section>
+
+<section class="guide-group" id="editor">
+<h2>4. 制作エディタの使い方</h2><p class="guide-group-intro">制作エディタは、ビジュアル編集とHTML・CSS・JavaScript編集を切り替えながらWebサイトを作る画面です。</p>
+<details class="guide-item"><summary>4-1. エディタ画面の構成</summary><div class="guide-item-body"><ul><li><b>左側：</b>マイプロジェクト一覧と新規作成。</li><li><b>上部：</b>プロジェクト名、保存状態、保存、ZIP書き出し。</li><li><b>ページ構成：</b>ページの選択と追加。</li><li><b>編集タブ：</b>ビジュアル、HTML、CSS、JavaScript。</li><li><b>プレビュー：</b>編集中のページの表示確認。</li></ul><p><a href="editor.html">制作エディタを開く →</a></p></div></details>
+<details class="guide-item"><summary>4-2. プロジェクト名</summary><div class="guide-item-body"><p>エディタ上部の入力欄で名前を変更します。プロジェクト一覧で識別しやすい名前を付けてください。</p></div></details>
+<details class="guide-item"><summary>4-3. ページ構成・ページを追加</summary><div class="guide-item-body"><p>「ページ構成」にはプロジェクト内のページが並びます。編集したいページを選択すると、そのページの内容が編集対象になります。「＋ ページを追加」でページを増やせます。</p><p>複数ページのサイトでは、各ページに分かりやすいタイトルを設定し、ページ間の移動リンクも用意してください。</p></div></details>
+<details class="guide-item"><summary>4-4. ビジュアル編集</summary><div class="guide-item-body"><p>コードを直接書かずに基本情報を編集するモードです。</p><ul><li><b>ページタイトル：</b>ページの見出し・タイトルに使う文字。</li><li><b>紹介文：</b>ページの内容を説明する文章。</li><li><b>アクセントカラー：</b>ボタンや強調箇所などの基調色。</li><li><b>テンプレート：</b>空白、ポートフォリオ、サービス・LP、ブログ、ショップ、店舗、イベント、写真、ゲーム、ビジネスなどの構成を選びます。</li></ul><p>テンプレートを切り替えるとページ構成が変更されるため、必要な文章や内容を確認し直してください。</p></div></details>
+<details class="guide-item"><summary>4-5. 画像・写真を追加</summary><div class="guide-item-body"><ol><li>画像URLを使う場合は「画像URL」に画像のアドレスを入力します。</li><li>必要に応じて「画像の説明」に画像の内容を入力します。</li><li>「URL画像を追加」を押します。</li><li>端末内の画像を使う場合は「端末から画像を選択」を押し、画像ファイルを選びます。</li></ol><p>追加した画像はページ末尾のギャラリーに追加されます。JPEG・PNG・WebPに対応し、アップロード画像は自動で軽量化されます。</p><div class="guide-note">画像の利用権限を確認してください。個人情報や他人の写真を、許可なく公開しないでください。</div></div></details>
+<details class="guide-item"><summary>4-6. HTML編集</summary><div class="guide-item-body"><p>「HTML」タブではページの構造を編集します。見出し、段落、リンク、ボタン、画像、フォームなどの要素を記述します。HTML内のIDやクラス名をJavaScript・CSS側と一致させてください。</p></div></details>
+<details class="guide-item"><summary>4-7. CSS編集</summary><div class="guide-item-body"><p>「CSS」タブでは色、文字サイズ、余白、配置、枠線、レスポンシブ表示などを設定します。HTMLのクラス名やIDをセレクターとして指定します。</p></div></details>
+<details class="guide-item"><summary>4-8. JavaScript編集</summary><div class="guide-item-body"><p>「JavaScript」タブではボタン操作、メニュー開閉、入力チェックなどの動作を追加します。対象となるHTML要素が存在しているか、イベントが重複登録されていないか確認してください。</p></div></details>
+<details class="guide-item"><summary>4-9. コード診断・エラー表示</summary><div class="guide-item-body"><p>コード編集時は診断欄を確認します。エラーや注意が表示された場合は、対象コードの構文、閉じタグ、括弧、ID・クラス名、要素の存在を確認してください。診断で問題が見つからなくても、実際の動作が正しいとは限らないためプレビューで確認します。</p></div></details>
+<details class="guide-item"><summary>4-10. ライブプレビュー</summary><div class="guide-item-body"><p>編集内容をプレビュー領域で確認できます。「更新」で表示を再読み込みします。画面幅の選択からPC・タブレット・スマートフォン相当の表示を確認してください。</p></div></details>
+<details class="guide-item"><summary>4-11. 閲覧モード</summary><div class="guide-item-body"><p>プレビュー内のメニュー、ボタン、リンクなどを通常の利用者と同じように操作するモードです。ページ移動や開閉など、サイトとしての操作感を確認します。</p></div></details>
+<details class="guide-item"><summary>4-12. コード確認モード</summary><div class="guide-item-body"><p>プレビュー内の要素を確認し、どの部分を編集するか調べるためのモードです。通常操作を試すときは「閲覧モード」に戻してください。</p></div></details>
+<details class="guide-item"><summary>4-13. プレビューで別ページへ移動するとき</summary><div class="guide-item-body"><p>プレビューは安全のため隔離された領域で表示されます。外側のエディタとプレビュー内ページではブラウザーの制限が異なります。プレビュー内のリンク動作が外部ブラウザーと完全に同じとは限らないため、書き出したファイルでも確認してください。</p></div></details>
+</section>
+
+<section class="guide-group" id="save-export">
+<h2>5. 保存・同期・書き出し</h2><p class="guide-group-intro">制作内容を失わないように、保存状態を確認し、必要に応じてファイルを書き出します。</p>
+<details class="guide-item"><summary>5-1. 自動保存と保存状態</summary><div class="guide-item-body"><p>エディタは変更内容を端末側に保存し、ログイン中はアカウントのクラウド同期にも対応しています。画面上部の保存状態を確認してください。ネットワークが不安定な場合は、同期が完了するまで待ってからページを閉じてください。</p><p class="guide-note">重要な変更の直後は「保存」も押し、保存完了表示を確認することをおすすめします。</p></div></details>
+<details class="guide-item"><summary>5-2. 手動保存</summary><div class="guide-item-body"><p>上部の「保存」を押すと現在のプロジェクトを保存します。保存状態が更新されたことを確認してください。</p></div></details>
+<details class="guide-item"><summary>5-3. ゲスト保存とクラウド保存の違い</summary><div class="guide-item-body"><ul><li><b>ゲスト：</b>利用中の端末・ブラウザーに保存されます。別端末や別ブラウザーへ自動では引き継がれません。</li><li><b>ログイン中：</b>端末内の保存に加え、同じアカウントのクラウドデータと同期します。</li></ul><p>端末を変更する予定がある場合は、ログインして同期が完了していることを確認してください。</p></div></details>
+<details class="guide-item"><summary>5-4. ZIP書き出し</summary><div class="guide-item-body"><p>「ZIP書き出し」を押すと、Webサイトのファイル一式をZIP形式で保存します。現在の書き出し構成には <code>index.html</code>、<code>style.css</code>、<code>script.js</code> が含まれます。ダウンロード後に解凍し、内容を確認してからGitHub Pagesなどのホスティング先へ配置します。</p><div class="guide-note">ZIPを書き出しただけではインターネット上に公開されません。公開先へのアップロード・設定は別途必要です。</div></div></details>
+<details class="guide-item"><summary>5-5. HTML保存</summary><div class="guide-item-body"><p>「HTML保存」は現在のページのHTMLをファイルとして保存するための機能です。CSS・JavaScriptも含めた一式が必要な場合はZIP書き出しを利用してください。</p></div></details>
+<details class="guide-item"><summary>5-6. 書き出し後の確認</summary><div class="guide-item-body"><ol><li>ZIPを解凍します。</li><li>ファイル構成と画像などの参照先を確認します。</li><li>index.htmlをブラウザーで開き、表示と操作を確認します。</li><li>公開先へ配置した後、PCとスマートフォンの両方で確認します。</li></ol></div></details>
+</section>
+
+<section class="guide-group" id="learning">
+<h2>6. 学習・テンプレート・応用コード</h2><p class="guide-group-intro">制作の基礎を学び、必要な機能のサンプルコードを探すための機能です。</p>
+<details class="guide-item"><summary>6-1. Web制作を学ぶ</summary><div class="guide-item-body"><p>「Web制作を学ぶ」では、HTML・CSS・JavaScriptの基礎、複数ページ構成、アカウント画面、三本線メニュー、よく使われる機能の教材などを確認できます。大きな教材項目と個別カードは折り畳んで、必要な説明だけを表示できます。</p><p><a href="learn.html">Web制作を学ぶを開く →</a></p></div></details>
+<details class="guide-item"><summary>6-2. HTML・CSS・JavaScriptの基礎</summary><div class="guide-item-body"><ul><li><b>HTML：</b>ページの骨組み。見出し、文章、画像、リンクなど。</li><li><b>CSS：</b>見た目。色、配置、余白、文字、画面幅への対応。</li><li><b>JavaScript：</b>動作。クリック、入力、表示切り替え、データ処理。</li></ul></div></details>
+<details class="guide-item"><summary>6-3. 複数ページのWebサイト教材</summary><div class="guide-item-body"><p>ページごとに役割を分け、ページ一覧からページを追加し、リンクで相互に移動できるようにします。例：ホーム、サービス紹介、問い合わせの3ページ構成です。</p></div></details>
+<details class="guide-item"><summary>6-4. 応用機能・実践コード教材</summary><div class="guide-item-body"><p>実際のWebサイトで使う機能を、説明・用途・サンプルコード・注意点と合わせて学ぶ項目です。教材内のコード検索リンクを押すと、応用コード一覧へ移動し、関連する検索語が自動入力されます。</p></div></details>
+<details class="guide-item"><summary>6-5. 応用コード一覧</summary><div class="guide-item-body"><p>HTML・CSS・JavaScriptのサンプルを検索し、用途別に探せます。コード名の一部、用途、関連語で検索し、分類ボタンで絞り込めます。</p><p><a href="code-library.html">応用コード一覧を開く →</a></p></div></details>
+<details class="guide-item"><summary>6-6. 応用コードの分類</summary><div class="guide-item-body"><ul><li><b>ナビゲーション：</b>メニュー、ヘッダー、ページ移動。</li><li><b>デザイン・レイアウト：</b>カード、配色、背景、レスポンシブ。</li><li><b>フォーム・入力：</b>入力チェック、文字数、フォーム操作。</li><li><b>アカウント：</b>ログイン、セッション、プロフィール。</li><li><b>画像・メディア：</b>画像プレビュー、拡大、スライダー。</li><li><b>操作・表示：</b>モーダル、タブ、通知、ローディング。</li><li><b>検索・データ：</b>一覧検索、お気に入り、ページ分割。</li></ul></div></details>
+<details class="guide-item"><summary>6-7. コードの説明・ソース表示</summary><div class="guide-item-body"><p>各コードカードの「使い方・説明・注意点」を開いて、必要なHTML要素や導入条件を確認します。「コードを表示」からソースを確認・コピーし、HTML・CSS・JavaScriptの適切な場所へ追加します。</p><p>サンプルは完成済みのWebサイトではなく機能部品です。既存プロジェクトの構成に合わせてID・クラス名・参照先などを調整してください。</p></div></details>
+<details class="guide-item"><summary>6-8. 公式ドキュメント</summary><div class="guide-item-body"><p>応用コード一覧の検索、分類、導入手順、セキュリティ、互換性について詳しい説明を掲載しています。</p><p><a href="code-library-guide.html">応用コード一覧 公式ドキュメント →</a></p></div></details>
+<details class="guide-item"><summary>6-9. テンプレートページ</summary><div class="guide-item-body"><p>テンプレートの一覧から用途に合うデザインの土台を選べます。テンプレートを適用した後は、文章、画像、ページ構成を自分の内容に置き換えてください。</p><p><a href="templates.html">テンプレート一覧を開く →</a></p></div></details>
+</section>
+
+<section class="guide-group" id="security">
+<h2>7. 安全に利用するための注意事項</h2><p class="guide-group-intro">Webサイトの見た目だけでなく、データやアカウントを守る設定も必要です。</p>
+<details class="guide-item"><summary>7-1. パスワード・APIキーをコードに書かない</summary><div class="guide-item-body"><p>パスワード、秘密鍵、Supabaseのservice_roleキーなどをHTML・CSS・JavaScriptへ直接記載しないでください。ブラウザーに配信されるコードは利用者が確認できるため、秘密情報を置く場所ではありません。</p></div></details>
+<details class="guide-item"><summary>7-2. ログイン画面だけではデータを保護できない</summary><div class="guide-item-body"><p>画面上でログイン状態を確認するだけでは、データベースの保護にはなりません。Supabaseなどを使う場合は、テーブル・Storageのアクセス権限とRow Level Security（RLS）を適切に設定し、ユーザーごとにアクセス範囲を制限してください。</p></div></details>
+<details class="guide-item"><summary>7-3. 入力フォーム・アップロード</summary><div class="guide-item-body"><p>フォームの入力値はブラウザー側だけでなく、サーバー側でも検証してください。ファイルを受け付ける場合は、ファイル形式・サイズ・保存先・閲覧権限を確認します。</p></div></details>
+<details class="guide-item"><summary>7-4. 外部サービス・画像の利用</summary><div class="guide-item-body"><p>外部APIや画像URLを使う場合は、サービスの利用規約、公開範囲、利用権限を確認してください。APIキーを公開コードへ埋め込む必要がある設計は避けてください。</p></div></details>
+<details class="guide-item"><summary>7-5. 保存・バックアップ</summary><div class="guide-item-body"><p>大きな変更を行う前に保存し、必要ならZIPを書き出してバックアップしてください。テンプレートの切り替えやコードの一括置換を行った後は、ページ内容が残っているか確認します。</p></div></details>
+</section>
+
+<section class="guide-group" id="trouble">
+<h2>8. よくある問題と確認方法</h2><p class="guide-group-intro">画面が正しく動かない場合は、次の順番で確認してください。</p>
+<details class="guide-item"><summary>8-1. プロジェクトが一覧に表示されない</summary><div class="guide-item-body"><ul><li>保存状態が完了になっているか確認します。</li><li>クラウド保存した場合は、保存時と同じアカウントでログインしているか確認します。</li><li>ゲスト保存の場合は、保存した端末・ブラウザーを使っているか確認します。</li><li>通信が不安定な場合は、接続を確認してから再読み込みします。</li></ul></div></details>
+<details class="guide-item"><summary>8-2. 保存・クラウド同期が進まない</summary><div class="guide-item-body"><p>ネットワーク接続とログイン状態を確認し、保存状態が完了するまで待ちます。ログイン期限が切れている場合は再ログインしてください。保存完了前にページを閉じないでください。</p></div></details>
+<details class="guide-item"><summary>8-3. プレビューが真っ白・更新されない</summary><div class="guide-item-body"><ul><li>HTMLの閉じタグ、CSSの括弧、JavaScriptの構文エラーを確認します。</li><li>JavaScriptが存在しないIDの要素を取得していないか確認します。</li><li>「更新」を押してプレビューを再読み込みします。</li><li>閲覧モードとコード確認モードを切り替えて挙動を比較します。</li><li>エディタ内の制限とブラウザーのセキュリティ制限により、プレビュー内で一部の外部遷移が制限されることがあります。</li></ul></div></details>
+<details class="guide-item"><summary>8-4. コードを追加したら動かなくなった</summary><div class="guide-item-body"><p>追加したコードが必要とするHTML要素、ID、クラス、CSS、イベント処理が揃っているか確認します。同じIDを複数作らないでください。直前の変更を戻し、少しずつ追加して原因を切り分けます。</p></div></details>
+<details class="guide-item"><summary>8-5. 画像が表示されない</summary><div class="guide-item-body"><p>画像URLが正しいか、URLが直接画像ファイルを指しているか、外部サイト側が埋め込み表示を許可しているか確認します。端末から追加した画像の場合は、追加処理の完了表示も確認してください。</p></div></details>
+<details class="guide-item"><summary>8-6. 公開したサイトが編集画面と違う</summary><div class="guide-item-body"><p>ZIPの内容を最新状態で書き出したか、公開先へ正しいファイルを配置したか確認します。ブラウザーキャッシュの影響も考えられるため、再読み込みして確認してください。</p></div></details>
+</section>
+<p class="guide-small">このガイドは現在のAevStudio画面にある機能を基準にしています。外部サービスの設定や公開先の操作は、それぞれの公式ドキュメントも確認してください。</p>
+</main>
+<footer><a class="brand" href="./"><span class="brand-mark">A</span><span>AevStudio<small>BUILD YOUR NEXT IDEA</small></span></a><span>© 2026 AevStudio</span><span>サイトの使い方・全機能ガイド</span></footer>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="auth.js?v=20261121-guide1"></script>
+<script>
+(()=>{const menu=document.getElementById('site-menu'),toggle=document.getElementById('menu-toggle'),close=document.getElementById('menu-close'),backdrop=document.getElementById('menu-backdrop');if(!menu||!toggle||!backdrop)return;document.body.append(menu,backdrop);const set=open=>{menu.classList.toggle('hidden',!open);backdrop.classList.toggle('hidden',!open);toggle.setAttribute('aria-expanded',String(open));};toggle.addEventListener('click',()=>set(menu.classList.contains('hidden')));close?.addEventListener('click',()=>set(false));backdrop.addEventListener('click',()=>set(false));menu.querySelectorAll('a[href]').forEach(a=>a.addEventListener('click',()=>set(false)));document.addEventListener('keydown',e=>{if(e.key==='Escape')set(false)});set(false);})();
+</script>
+</body></html>
