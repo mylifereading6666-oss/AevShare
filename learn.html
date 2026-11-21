@@ -18,7 +18,7 @@ body[data-page="learn"] .section{scroll-margin-top:90px}
 </style>
 </head>
 <body data-page="learn">
-<header class="topbar"><a class="brand" href="https://mylifereading6666-oss.github.io/AevStudio/"><span class="brand-mark">A</span><span>AevStudio<small>WEB CREATION STUDIO</small></span></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="メニューを開く" aria-expanded="false"><span class="menu-toggle-lines"><span></span><span></span><span></span></span><span class="menu-toggle-label">メニュー</span></button><nav class="site-menu hidden" id="site-menu" aria-label="メインメニュー"><div class="menu-head"><b>MENU</b><button id="menu-close" aria-label="閉じる">×</button></div><details open><summary>制作</summary><a href="https://mylifereading6666-oss.github.io/AevStudio/projects.html">プロジェクト</a></details><details open><summary>学習・資料</summary><a href="https://mylifereading6666-oss.github.io/AevStudio/learn.html">Web制作を学ぶ</a><a href="https://mylifereading6666-oss.github.io/AevStudio/code-library.html">応用コード一覧</a></details><details><summary>アカウント</summary><a href="https://mylifereading6666-oss.github.io/AevStudio/account.html">アカウント管理</a></details></nav><div class="menu-backdrop hidden" id="menu-backdrop"></div><div class="account"><span id="account-label">ゲストモード</span><button class="btn btn-primary auth-open-button" id="auth-open" type="button">ログイン / 登録</button><span class="auth-status-badge hidden" id="auth-status" role="status" aria-label="オンライン"><i></i><span>ONLINE</span></span></div></header>
+<header class="topbar"><a class="brand" href="https://mylifereading6666-oss.github.io/AevStudio/"><span class="brand-mark">A</span><span>AevStudio<small>WEB CREATION STUDIO</small></span></a><button class="menu-toggle" id="menu-toggle" type="button" aria-label="メニューを開く" aria-expanded="false"><span class="menu-toggle-lines"><span></span><span></span><span></span></span><span class="menu-toggle-label">メニュー</span></button><nav class="site-menu hidden" id="site-menu" aria-label="メインメニュー"><div class="menu-head"><b>MENU</b><button id="menu-close" aria-label="閉じる">×</button></div><details open><summary>制作</summary><a href="https://mylifereading6666-oss.github.io/AevStudio/projects.html">プロジェクト</a></details><details open><summary>学習・資料</summary><a href="https://mylifereading6666-oss.github.io/AevStudio/learn.html">Web制作を学ぶ</a><a href="https://mylifereading6666-oss.github.io/AevStudio/learn.html#advanced-code-lessons">応用コード教材</a></details><details><summary>アカウント</summary><a href="https://mylifereading6666-oss.github.io/AevStudio/account.html">アカウント管理</a></details></nav><div class="menu-backdrop hidden" id="menu-backdrop"></div><div class="account"><span id="account-label">ゲストモード</span><button class="btn btn-primary auth-open-button" id="auth-open" type="button">ログイン / 登録</button><span class="auth-status-badge hidden" id="auth-status" role="status" aria-label="オンライン"><i></i><span>ONLINE</span></span></div></header>
 <main>
 <section class="hero"><div class="hero-copy"><span class="eyebrow">LEARN · BUILD · PUBLISH</span><h1>アイデアを、<em>動くWebサイト</em>に。</h1><p>AevStudioは、学習から制作・プレビュー・公開準備までをひとつにまとめたWeb制作スタジオです。</p><div class="hero-actions"><a class="btn btn-primary" href="https://mylifereading6666-oss.github.io/AevStudio/projects.html" id="hero-start">制作をはじめる <span>→</span></a><a class="btn btn-ghost" href="https://mylifereading6666-oss.github.io/AevStudio/learn.html">学習コンテンツを見る</a></div><div class="hero-meta"><span>● 初心者から上級者まで</span><span>● スマホ・タブレット・PC対応</span></div></div><div class="hero-art"><div class="orb orb-a"></div><div class="orb orb-b"></div><div class="code-window"><div class="window-head"><i></i><i></i><i></i><span>your-idea.html</span></div><pre><b>&lt;section</b> class=<i>"future"</i><b>&gt;</b>
   <b>&lt;h1&gt;</b>Hello, World!<b>&lt;/h1&gt;</b>
@@ -32,11 +32,11 @@ body[data-page="learn"] .section{scroll-margin-top:90px}
 <div class="panel editor-panel"><div class="editor-top"><input id="project-name" value="Untitled Project" aria-label="プロジェクト名"><div class="editor-actions"><button class="btn btn-small" id="save-project">保存</button><button class="btn btn-small btn-primary" id="preview-project">プレビュー ↗</button></div></div><div class="editor-toolbar"><div class="tabs"><button class="tab active" data-mode="visual">ビジュアル</button><button class="tab" data-mode="code">コード</button></div><select id="starter-template" aria-label="テンプレート"><option value="blank">空白から作成</option><option value="portfolio">ポートフォリオ</option><option value="landing">サービス紹介</option><option value="blog">ブログ</option></select></div><div class="editor-body"><div id="visual-editor" class="visual-editor"><div class="visual-hint">ビジュアル編集</div><label>ページ見出し<input id="visual-title" value="Hello, AevStudio!"></label><label>説明文<textarea id="visual-description">ここからあなたのWebサイトを作りましょう。</textarea></label><label>アクセントカラー<input id="visual-color" type="color" value="#8b6cff"></label><button class="btn btn-primary" id="add-section">＋ セクションを追加</button><div id="sections"></div></div><div id="code-editor" class="code-editor hidden"><div class="code-label">index.html</div><textarea id="html-code" spellcheck="false" aria-label="HTMLコード"></textarea><div class="code-label">style.css</div><textarea id="css-code" spellcheck="false" aria-label="CSSコード"></textarea><p class="hint">コードはプレビュー用の隔離された領域で実行されます。</p></div><div class="preview-pane"><div class="preview-head"><span>PREVIEW</span><button id="refresh-preview">↻</button></div><iframe id="preview-frame" title="サイトプレビュー" sandbox="allow-scripts"></iframe></div></div><div class="editor-status"><span id="save-status">未保存の変更</span><span>HTML · CSS · JavaScript対応準備中</span></div></div></div></section>
 <section class="section code-library-section" id="code-library"><div class="section-heading"><div><span class="eyebrow">CODE LIBRARY</span><h2>応用コード一覧</h2><p>目的に合うコードを検索し、制作中のプロジェクトに活用できます。検索処理はこの端末内で行い、外部AI APIやモデルのダウンロードは不要です。</p></div></div><div class="code-search-panel"><div class="code-search-row"><input id="code-search-input" type="search" placeholder="例：画像をクリックして拡大表示したい"><button class="btn btn-primary" id="code-search-button">検索</button><button class="btn btn-ai" id="ai-code-search-button">✦ ローカルAI検索</button><label class="ai-language-label" for="ai-response-language">回答言語 <select id="ai-response-language"><option value="ja" selected>日本語</option><option value="en">English</option></select></label></div><div class="code-search-meta"><span id="code-search-status">コード一覧を読み込み中...</span><div class="code-filters" id="code-filters"><button class="code-filter active" data-code-category="all">すべて</button><button class="code-filter" data-code-category="HTML">HTML</button><button class="code-filter" data-code-category="CSS">CSS</button><button class="code-filter" data-code-category="JavaScript">JavaScript</button></div></div><div id="ai-code-answer" class="ai-code-answer hidden"></div><div id="code-snippet-list" class="code-snippet-list"><div class="empty">コードを読み込んでいます...</div></div></div></section><section class="section" id="templates"><div class="section-heading"><div><span class="eyebrow">START FASTER</span><h2>テンプレート</h2><p>デザインの土台を選んで、内容を自分のものに。</p></div></div><div class="cards"><article class="template-card"><div class="template-visual portfolio">A<span>PORTFOLIO</span></div><h3>ポートフォリオ</h3><p>作品やプロフィールを紹介するサイト。</p><button data-template="portfolio">このテンプレートを使う →</button></article><article class="template-card"><div class="template-visual landing">LAUNCH<span>YOUR IDEA</span></div><h3>サービス紹介</h3><p>アプリやサービスの魅力を伝えるページ。</p><button data-template="landing">このテンプレートを使う →</button></article><article class="template-card"><div class="template-visual blog">Journal<span>記事を書く</span></div><h3>ブログ</h3><p>記事やお知らせを発信するサイト。</p><button data-template="blog">このテンプレートを使う →</button></article></div></section>
 <section class="section learn-section" id="multi-page-learning"><div class="section-heading"><div><span class="eyebrow">MULTI-PAGE WEBSITE</span><h2>複数ページのWebサイトを作る</h2><p>Webサイトは1ページだけでも、複数ページに分けても作れます。内容の量と目的に合わせて構成しましょう。</p></div></div><div class="learn-grid"><article><b>01 / ページを追加</b><h3>ページ一覧から追加</h3><p>制作エディターの「＋ ページを追加」を押します。新しいページが作られたら、ページ一覧から選んでタイトル・文章・HTMLを編集します。</p><code>index.html / page-2.html</code></article><article><b>02 / ページを分ける</b><h3>内容ごとに整理</h3><p>トップページには概要、別ページには詳細・作品一覧・料金・お問い合わせなどを配置すると、情報を探しやすくなります。</p><code>トップ / About / Contact</code></article><article><b>03 / ページをつなぐ</b><h3>リンクで移動</h3><p>ページ間の移動にはaタグを使います。ファイル名を正しく指定すると、クリックして別ページへ移動できます。</p><code>&lt;a href="page-2.html"&gt;詳細&lt;/a&gt;</code></article></div><div class="panel page-learning-note"><b>ページ数を決める目安</b><p>簡単な案内やプロフィールなら1ページ、サービス紹介なら2〜4ページ、ブログ・ショップ・大規模サイトなら用途に応じてページを増やします。ページ数を増やすこと自体を目的にせず、1ページに情報を詰め込みすぎないことが大切です。</p></div></section><section class="section learn-section" id="learn"><div class="section-heading"><div><span class="eyebrow">LEARN THE BASICS</span><h2>Web制作を学ぶ</h2><p>基礎を知り、実際に手を動かしながら身につけよう。</p></div></div><div class="learn-grid"><article><b>01 / HTML</b><h3>ページの骨組み</h3><p>見出し、文章、画像、リンクなど、Webページの構造を作ります。</p><code>&lt;h1&gt;Hello!&lt;/h1&gt;</code></article><article><b>02 / CSS</b><h3>見た目をデザイン</h3><p>色、余白、配置、文字サイズなどを調整します。</p><code>h1 { color: purple; }</code></article><article><b>03 / JavaScript</b><h3>動きをつける</h3><p>ボタン操作や入力に応じた処理など、ページに機能を追加します。</p><code>button.addEventListener(...)</code></article></div></section>
-<section class="section learn-section advanced-lessons" id="account-page-tutorial">
+<section class="section learn-section" id="advanced-code-lessons"><div class="section-heading"><div><span class="eyebrow">PRACTICAL CODE COLLECTION</span><h2>応用機能・実践コード</h2><p>応用コード一覧の内容をこのページ内で直接学べます。端末内の教材データから表示するため、外部一覧の読み込みを待ちません。各カードを開くと使い方・応用例・注意点・コードを確認できます。</p></div></div><div id="learn-code-groups" class="learn-code-groups"><div class="empty">教材を準備しています...</div></div><p class="lesson-warning">注意：サンプルコードはページ構成に合わせて調整してください。認証・個人情報・データ保存などは、画面側だけでなくサーバーやデータベース側の安全設定も必要です。</p></section><section class="section learn-section advanced-lessons" id="account-page-tutorial">
  <div class="section-heading"><div><span class="eyebrow">ACCOUNT PAGE</span><h2>アカウントページの作り方</h2><p>プロフィールを見せるページと、実際にログイン・登録できる仕組みは別です。順番に作りましょう。</p></div></div>
  <div class="lesson-steps">
   <article class="lesson-card"><b>STEP 01 · ページの土台</b><h3>必要な項目を整理する</h3><p>プロフィール画像・表示名・メールアドレス・設定・ログアウトなどをカード単位に分けます。アカウントページのテンプレートから始めることもできます。</p><a href="templates.html">アカウントページのテンプレートを見る →</a></article>
-  <article class="lesson-card"><b>STEP 02 · 認証機能</b><h3>新規登録・ログインを接続する</h3><p>Supabase Authなどの認証サービスを使います。ログイン後はセッションからユーザー情報を取得し、画面に反映します。</p><code>client.auth.getSession()</code><p><a href="code-library.html">コード一覧：認証・プロフィール →</a></p></article>
+  <article class="lesson-card"><b>STEP 02 · 認証機能</b><h3>新規登録・ログインを接続する</h3><p>Supabase Authなどの認証サービスを使います。ログイン後はセッションからユーザー情報を取得し、画面に反映します。</p><code>client.auth.getSession()</code><p><a href="#advanced-code-lessons">コード一覧：認証・プロフィール →</a></p></article>
   <article class="lesson-card"><b>STEP 03 · プロフィール編集</b><h3>入力内容を保存する</h3><p>表示名やプロフィール画像を編集できるようにします。画像はStorageなどにアップロードし、公開範囲を適切に設定します。</p><code>client.auth.updateUser({ data: { display_name } })</code></article>
   <article class="lesson-card"><b>STEP 04 · データ保護</b><h3>ユーザーごとに閲覧権限を分ける</h3><p>DBのRLSを有効にし、本人の行だけ読み書きできるポリシーを設定します。画面でボタンを隠すだけではアクセス制御になりません。</p><p class="lesson-warning">service_roleキーや秘密鍵をHTML・JavaScriptに書かないでください。公開用キーを使い、権限はDB側で制限します。</p></article>
  </div>
@@ -51,24 +51,24 @@ body[data-page="learn"] .section{scroll-margin-top:90px}
 &lt;/nav&gt;</code></pre></article>
   <article class="lesson-card"><b>STEP 02 · CSS</b><h3>画面端に固定する</h3><p>position:fixed、z-index、max-height、overflow-y:autoを組み合わせ、画面が小さくてもメニュー内をスクロールできるようにします。</p><pre><code>.site-menu{position:fixed;inset:0 0 0 auto;width:min(86vw,360px);max-height:100dvh;overflow-y:auto;z-index:100}
 .menu-backdrop{position:fixed;inset:0;z-index:99;background:#0009}</code></pre></article>
-  <article class="lesson-card"><b>STEP 03 · JavaScript</b><h3>開閉・閉じる動作を実装</h3><p>ボタン・背景・リンク・Escキーのどれからでも閉じられるようにします。開いている間の背景スクロールも必要に応じて止めます。</p><p><a href="code-library.html">コード一覧：三本線メニュー →</a></p></article>
+  <article class="lesson-card"><b>STEP 03 · JavaScript</b><h3>開閉・閉じる動作を実装</h3><p>ボタン・背景・リンク・Escキーのどれからでも閉じられるようにします。開いている間の背景スクロールも必要に応じて止めます。</p><p><a href="#advanced-code-lessons">コード一覧：三本線メニュー →</a></p></article>
   <article class="lesson-card"><b>STEP 04 · よく使うメニュー機能</b><h3>項目を整理する</h3><p>details/summaryの折り畳み、現在ページの強調表示、ログイン状態による項目切り替え、未読数バッジ、管理者専用項目などを追加できます。</p></article>
  </div>
 </section>
 <section class="section learn-section advanced-lessons" id="common-features-tutorial">
  <div class="section-heading"><div><span class="eyebrow">POPULAR WEB FEATURES</span><h2>よく使われる機能の教材</h2><p>実際のWebサイトやWebアプリでよく見かける機能を、目的・仕組み・コード例に分けて学べます。</p></div></div>
  <div class="feature-learning-grid">
-  <article class="lesson-card"><b>検索・発見</b><h3>検索／カテゴリ絞り込み／並べ替え</h3><p>入力語やカテゴリで一覧を絞り、名前・日付・人気順に並べ替える機能です。</p><a href="code-library.html">検索・絞り込みコード →</a></article>
-  <article class="lesson-card"><b>ユーザー体験</b><h3>お気に入り／ブックマーク／最近見た項目</h3><p>よく使う情報を保存して、あとからすぐに開けるようにします。</p><a href="code-library.html">お気に入りコード →</a></article>
-  <article class="lesson-card"><b>画面操作</b><h3>タブ／アコーディオン／モーダル</h3><p>情報を整理し、必要な部分だけを表示するUIです。</p><a href="code-library.html">UI操作コード →</a></article>
-  <article class="lesson-card"><b>入力・送信</b><h3>フォーム検証／文字数／画像プレビュー</h3><p>入力ミスを減らし、送信前に内容を確認できるようにします。</p><a href="code-library.html">フォーム関連コード →</a></article>
-  <article class="lesson-card"><b>フィードバック</b><h3>通知／ローディング／エラー表示</h3><p>処理中・成功・失敗を明確に伝え、二重送信や操作の迷いを防ぎます。</p><a href="code-library.html">通知・ボタンコード →</a></article>
-  <article class="lesson-card"><b>メディア</b><h3>画像スライダー／拡大表示／ギャラリー</h3><p>画像を見やすく並べ、必要なら拡大やスライド切り替えを追加します。</p><a href="code-library.html">画像関連コード →</a></article>
-  <article class="lesson-card"><b>サイト構成</b><h3>パンくず／ページ送り／現在地表示</h3><p>ページ数が多いサイトでも、利用者が位置を把握できるようにします。</p><a href="code-library.html">ページ分割コード →</a></article>
-  <article class="lesson-card"><b>個人設定</b><h3>ダークモード／言語／表示設定</h3><p>利用者が好みの表示に変更できるようにし、必要なら設定を保存します。</p><a href="code-library.html">テーマ切り替えコード →</a></article>
-  <article class="lesson-card"><b>アカウント・データ</b><h3>プロフィール／認証／権限</h3><p>ログイン状態の確認、プロフィール編集、本人だけがデータを扱えるルールを学びます。</p><a href="code-library.html">認証コード →</a></article>
+  <article class="lesson-card"><b>検索・発見</b><h3>検索／カテゴリ絞り込み／並べ替え</h3><p>入力語やカテゴリで一覧を絞り、名前・日付・人気順に並べ替える機能です。</p><a href="#advanced-code-lessons">検索・絞り込みコード →</a></article>
+  <article class="lesson-card"><b>ユーザー体験</b><h3>お気に入り／ブックマーク／最近見た項目</h3><p>よく使う情報を保存して、あとからすぐに開けるようにします。</p><a href="#advanced-code-lessons">お気に入りコード →</a></article>
+  <article class="lesson-card"><b>画面操作</b><h3>タブ／アコーディオン／モーダル</h3><p>情報を整理し、必要な部分だけを表示するUIです。</p><a href="#advanced-code-lessons">UI操作コード →</a></article>
+  <article class="lesson-card"><b>入力・送信</b><h3>フォーム検証／文字数／画像プレビュー</h3><p>入力ミスを減らし、送信前に内容を確認できるようにします。</p><a href="#advanced-code-lessons">フォーム関連コード →</a></article>
+  <article class="lesson-card"><b>フィードバック</b><h3>通知／ローディング／エラー表示</h3><p>処理中・成功・失敗を明確に伝え、二重送信や操作の迷いを防ぎます。</p><a href="#advanced-code-lessons">通知・ボタンコード →</a></article>
+  <article class="lesson-card"><b>メディア</b><h3>画像スライダー／拡大表示／ギャラリー</h3><p>画像を見やすく並べ、必要なら拡大やスライド切り替えを追加します。</p><a href="#advanced-code-lessons">画像関連コード →</a></article>
+  <article class="lesson-card"><b>サイト構成</b><h3>パンくず／ページ送り／現在地表示</h3><p>ページ数が多いサイトでも、利用者が位置を把握できるようにします。</p><a href="#advanced-code-lessons">ページ分割コード →</a></article>
+  <article class="lesson-card"><b>個人設定</b><h3>ダークモード／言語／表示設定</h3><p>利用者が好みの表示に変更できるようにし、必要なら設定を保存します。</p><a href="#advanced-code-lessons">テーマ切り替えコード →</a></article>
+  <article class="lesson-card"><b>アカウント・データ</b><h3>プロフィール／認証／権限</h3><p>ログイン状態の確認、プロフィール編集、本人だけがデータを扱えるルールを学びます。</p><a href="#advanced-code-lessons">認証コード →</a></article>
  </div>
- <div class="panel lesson-next"><b>学習の進め方</b><p>まずHTMLで部品を配置し、CSSで見た目を整え、JavaScriptで動きを追加します。複数ユーザーのデータ保存・決済・メール送信などは、専用サービスやサーバー側の安全な処理が必要です。</p><a href="code-library.html" class="btn btn-primary">応用コード一覧を開く →</a></div>
+ <div class="panel lesson-next"><b>学習の進め方</b><p>まずHTMLで部品を配置し、CSSで見た目を整え、JavaScriptで動きを追加します。複数ユーザーのデータ保存・決済・メール送信などは、専用サービスやサーバー側の安全な処理が必要です。</p><a href="#advanced-code-lessons" class="btn btn-primary">応用コードを学ぶ →</a></div>
 </section></main><footer><a class="brand" href="https://mylifereading6666-oss.github.io/AevStudio/"><span class="brand-mark">A</span><span>AevStudio<small>BUILD YOUR NEXT IDEA</small></span></a><span>© 2026 AevStudio</span><span>まずは小さく作り、少しずつ育てよう。</span></footer>
 <dialog id="auth-dialog"><form method="dialog" class="dialog-card"><button class="close" type="button" aria-label="閉じる" onclick="this.closest('dialog').close()">×</button><span class="eyebrow">ACCOUNT</span><h2 id="auth-title">AevStudioにログイン</h2><p>プロジェクトをアカウントに保存します。</p><input id="auth-email" type="email" placeholder="メールアドレス" required><input id="auth-password" type="password" placeholder="パスワード" required><button class="btn btn-primary" id="auth-submit" type="button">ログイン</button><button class="text-button" id="auth-toggle" type="button">アカウントを新規登録</button><p id="auth-message" class="hint"></p></form></dialog>
 <script src="config.js"></script><script src="auth.js?v=20261121-12"></script><script src="project-menu.js?v=20261121-29"></script><script src="app.js?v=20261121-14"></script>
@@ -120,6 +120,123 @@ body[data-page="learn"] .section{scroll-margin-top:90px}
 })();
 </script>
 <script>
+/* Build all advanced-code lessons from the local built-in catalogue. */
+(function(){
+ const root=document.getElementById('learn-code-groups');
+ if(!root)return;
+ if(typeof builtinSnippets==='undefined'||typeof snippetGuides==='undefined'){root.textContent='教材データを読み込めませんでした。';return;}
+ const names={navigation:'ナビゲーション',design:'デザイン・レイアウト',forms:'フォーム・入力',account:'アカウント',media:'画像・メディア',interaction:'操作・表示',data:'検索・データ'};
+ const useCases={
+ 'modal-dialog':['実行前の確認画面・利用規約の表示','ログイン案内や画像詳細のポップアップ'],
+ 'responsive-grid':['作品・商品・記事のカード一覧','画面幅に応じた1〜複数列のレイアウト'],
+ 'dark-glass':['ヘッダーやサイドメニューの半透明パネル','ダッシュボードの情報カード'],
+ 'copy-clipboard':['共有URLや招待コードのコピー','コード例・設定値のワンクリックコピー'],
+ 'image-lightbox':['作品一覧から画像を拡大','商品写真やスクリーンショットの詳細表示'],
+ 'theme-toggle':['利用者が選ぶダーク・ライト表示','テーマ設定を保存して次回も復元'],
+ 'sticky-header':['共通ナビゲーションの固定','長いページのカテゴリ見出しの追従'],
+ 'form-validation':['お問い合わせ・登録フォームの必須入力確認','メール形式や文字数などの入力チェック'],
+ 'animated-gradient':['トップページの背景演出','ボタンや見出しのアクセント表現'],
+ 'hamburger-accessible':['スマートフォン用サイドメニュー','項目数が多いサイトのナビゲーション'],
+ 'hamburger-html':['ホーム・学習・アカウントへのリンク集','PCとスマホで共通利用するナビの土台'],
+ 'dropdown-menu':['メニュー内のカテゴリ別リンク','FAQや設定項目の折り畳み'],
+ 'account-layout':['プロフィールとアカウント設定の画面','登録情報とログアウト操作をまとめるページ'],
+ 'supabase-auth':['メールアドレスでの新規登録・ログイン','ログイン状態を使う個人向け機能の入口'],
+ 'auth-guard':['ログイン必須ページへの案内','ログイン後だけ表示するマイページ'],
+ 'profile-update':['表示名や自己紹介の編集','プロフィール設定画面での情報更新'],
+ 'responsive-nav':['PCとスマホで異なるナビゲーション配置','幅に応じたリンク間隔の調整'],
+ 'tabs':['設定画面のプロフィール・通知・外観切り替え','商品詳細の説明・仕様・レビュー切り替え'],
+ 'faq-accordion':['よくある質問の回答表示','長い説明を項目ごとに折り畳む'],
+ 'live-search':['記事・作品・商品一覧の即時検索','管理画面のデータ一覧の絞り込み'],
+ 'favorites':['お気に入り作品や記事の保存','あとで確認する項目のブックマーク'],
+ 'toast':['保存成功・コピー完了の通知','入力エラーや通信失敗の案内'],
+ 'password-visibility':['ログイン・新規登録フォーム','パスワード再入力欄の確認'],
+ 'character-counter':['プロフィール紹介文の文字数表示','お問い合わせ本文の入力上限表示'],
+ 'image-preview':['プロフィール画像のアップロード前確認','投稿フォームで添付画像を確認'],
+ 'back-to-top':['長い記事やドキュメントのページ','商品一覧・ギャラリーの先頭へ戻る操作'],
+ 'loading-button':['フォーム送信中の二重送信防止','データ保存やログイン処理の進行表示'],
+ 'carousel':['トップページのおすすめ作品紹介','商品画像やスクリーンショットの切り替え'],
+ 'pagination':['記事・作品・商品一覧のページ分割','管理画面の大量データを一定件数ずつ表示']
+ };
+ const cautions={
+ 'hamburger-html':'JavaScript側のIDと一致させ、リンク先のファイルが存在するか確認してください。',
+ 'hamburger-accessible':'aria-expandedを開閉状態と同期し、フォーカス移動・Escキー・背景クリックを確認してください。',
+ 'supabase-auth':'ブラウザーには公開用キーだけを置き、service_roleキーを公開せず、DBにRLSを設定してください。',
+ 'auth-guard':'画面遷移の制御だけではデータを保護できません。DBやサーバー側でも認可してください。',
+ 'profile-update':'入力値を検証し、ユーザーメタデータを管理者権限の判定に使わないでください。',
+ 'favorites':'localStorageは同じブラウザー内の保存です。端末間同期には認証とDBが必要です。',
+ 'image-preview':'この例は端末内プレビューのみです。形式・サイズを検証し、不要なObject URLを解放してください。',
+ 'carousel':'スライドが0件の場合を処理し、画像の代替テキストと手動操作を用意してください。',
+ 'pagination':'この例はDOM要素の表示切り替えです。大量データのサーバー側分割取得とは異なります。',
+ 'copy-clipboard':'Clipboard APIはHTTPSなどの安全な環境が必要です。失敗時の案内も用意してください。',
+ 'theme-toggle':'保存データを読み込めない場合の初期表示と、文字・背景のコントラストを確認してください。',
+ 'form-validation':'ブラウザー側だけでなく、重要なデータはサーバー側でも検証してください。',
+ 'loading-button':'失敗時にもボタンが戻るようfinallyを使い、エラー表示と再試行方法を用意してください.'
+ };
+ const seen=new Set(),items=[];
+ builtinSnippets.forEach(x=>{if(seen.has(x.id))return;seen.add(x.id);if(x.id==='modal'||x.id==='responsive-cards')return;items.push(x);});
+ const groups={};
+ items.forEach(item=>{const guide=snippetGuides[item.id]||{};const group=guide.group||'interaction';(groups[group]||(groups[group]=[])).push({item,guide});});
+ root.replaceChildren();
+ Object.keys(names).forEach(group=>{
+  const entries=groups[group]||[];if(!entries.length)return;
+  const section=document.createElement('section');section.className='learn-code-category';
+  const h=document.createElement('h3');h.textContent=names[group]+'（'+entries.length+'）';section.appendChild(h);
+  const grid=document.createElement('div');grid.className='feature-learning-grid';section.appendChild(grid);
+  entries.forEach(({item,guide})=>{
+   const card=document.createElement('article');card.className='lesson-card learn-code-card';
+   const tag=document.createElement('b');tag.textContent=item.category+' · '+(item.difficulty||'');card.appendChild(tag);
+   const title=document.createElement('h3');title.textContent=item.title;card.appendChild(title);
+   const desc=document.createElement('p');desc.textContent=item.description||'';card.appendChild(desc);
+   const usage=document.createElement('p');const label=document.createElement('b');label.textContent='使い方：';usage.append(label,document.createTextNode(guide.usage||'対応するHTML要素を用意してコードを追加します。'));card.appendChild(usage);
+   const app=document.createElement('div');app.className='learn-existing-extra';const appLabel=document.createElement('b');appLabel.textContent='応用例';app.appendChild(appLabel);
+   const ul=document.createElement('ul');(useCases[item.id]||['既存ページの機能に組み込む','利用者の操作に合わせて表示や処理を調整する']).forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li)});app.appendChild(ul);card.appendChild(app);
+   const caution=document.createElement('p');caution.className='learn-caution';caution.textContent='注意点：'+(cautions[item.id]||guide.caution||'ページ構成や利用環境に合わせて調整し、公開前に動作を確認してください。');card.appendChild(caution);
+   const details=document.createElement('details');details.className='code-source learn-code-source';const summary=document.createElement('summary');summary.textContent='コードを表示';details.appendChild(summary);
+   const pre=document.createElement('pre');const code=document.createElement('code');code.textContent=item.code||'';pre.appendChild(code);details.appendChild(pre);card.appendChild(details);grid.appendChild(card);
+  });
+  root.appendChild(section);
+ });
+ const count=document.createElement('p');count.className='learn-code-count';count.textContent='重複するコードを統合した '+items.length+' 件の応用コードを掲載しています。';root.prepend(count);
+})();
+</script><script>
+/* Extend existing learning cards with distinct applications and cautions. */
+(function(){
+ const data={
+ "ページ一覧から追加":[["作品紹介・料金案内・お問い合わせを別ページに分ける","記事ごとに個別ページを作り一覧からリンク"],"リンク先のファイル名を一致させ、存在しないページを指定しない。"],
+ "内容ごとに整理":[["トップは概要、下層は詳細情報に分ける","利用者向けページと管理用ページを分ける"],"同じ情報を複数ページに重複掲載せず、更新場所を決める。"],
+ "リンクで移動":[["共通ナビから全ページへ移動","関連記事や次の記事へのリンクを設置"],"相対パスを確認し、移動後も戻れる導線を用意する。"],
+ "ページの骨組み":[["見出し・本文・画像・リストを意味に合うHTML要素で構成","header・main・footerで領域を整理"],"見出し階層や画像の代替テキストなどアクセシビリティに配慮する。"],
+ "見た目をデザイン":[["CSS変数で色・余白・文字サイズを一括管理","GridやFlexboxでカードやヘッダーを整列"],"文字とのコントラストとスマホ幅での表示を確認する。"],
+ "動きをつける":[["タブやメニューを操作に応じて切り替える","入力内容を確認して結果を画面に反映"],"エラー時の表示も用意し、利用者の操作を妨げない。"],
+ "必要な項目を整理する":[["プロフィール・設定・通知を別カードに分ける","本人だけが変更できる項目を明確にする"],"不要な個人情報を集めず、公開情報と非公開情報を分ける。"],
+ "新規登録・ログインを接続する":[["メール認証やパスワード再設定を追加","ログイン状態で画面の案内を切り替える"],"秘密情報をブラウザーに置かず、DB側でも権限を確認する。"],
+ "入力内容を保存する":[["表示名・自己紹介をプロフィールに保存","画像をStorageに保存してプロフィールに表示"],"入力値・画像形式・サイズを検証し、保存先の公開範囲を設定する。"],
+ "ユーザーごとに閲覧権限を分ける":[["本人のプロフィールだけ編集可能にする","管理者用と一般利用者用の権限を分ける"],"画面でボタンを隠すだけでは保護にならない。RLSなどDB側の制御が必要。"],
+ "ボタンとリンクを用意":[["サイト内ページへの移動メニュー","外部サイトやヘルプへのリンク集"],"ボタンは処理、リンクは移動に使い分け、キーボード操作にも対応する。"],
+ "画面端に固定する":[["スクロール中も表示するヘッダー","スマホで画面端から開くドロワー"],"z-indexの重なりと小さい画面での高さ・スクロールを確認する。"],
+ "開閉・閉じる動作を実装":[["背景クリック・Escキー・リンク選択で閉じる","メニューを開いた間だけ背景スクロールを止める"],"aria-expandedを実際の開閉状態と同期し、フォーカスを適切に管理する。"],
+ "項目を整理する":[["カテゴリ別に項目を折り畳む","ログイン状態や権限に応じて項目を切り替える"],"重要なリンクを深い階層に隠しすぎず、開閉状態を分かりやすくする。"],
+ "検索／カテゴリ絞り込み／並べ替え":[["記事・作品・商品一覧をキーワードで絞り込む","カテゴリと日付・名前順を組み合わせる"],"0件の場合の案内を表示し、大量データでは処理負荷を考慮する。"],
+ "お気に入り／ブックマーク／最近見た項目":[["作品や記事をお気に入りに登録","最近開いたページを履歴表示"],"localStorageは端末・ブラウザー単位。同期には認証とDBが必要。"],
+ "タブ／アコーディオン／モーダル":[["設定画面をタブで分割","補足説明や実行前確認をモーダル表示"],"キーボード操作と閉じる手段を用意し、状態を読み上げ可能にする。"],
+ "フォーム検証／文字数／画像プレビュー":[["お問い合わせの必須項目・文字数を確認","プロフィール画像を送信前にプレビュー"],"ブラウザー側だけでなく、送信・保存前にサーバー側でも検証する。"],
+ "通知／ローディング／エラー表示":[["保存成功・通信失敗を画面内通知","送信中はボタンを無効化して二重送信を防止"],"失敗時にも操作を再開できるようにし、処理中表示が残らないようにする。"],
+ "画像スライダー／拡大表示／ギャラリー":[["作品画像をスライダーで切り替え","画像を押して拡大表示"],"代替テキストを付け、自動再生には停止操作を用意する。"],
+ "パンくず／ページ送り／現在地表示":[["記事一覧を複数ページに分割","パンくずで現在位置と上位ページを表示"],"ページ番号の範囲と0件時を処理し、現在地を明確にする。"],
+ "ダークモード／言語／表示設定":[["利用者がテーマや言語を切り替える","文字サイズや表示密度を設定"],"選択を復元できるようにし、テーマ変更後もコントラストを保つ。"],
+ "プロフィール／認証／権限":[["プロフィール編集とログイン状態表示を分ける","一般利用者・管理者で操作範囲を変更"],"画面側だけで権限を判断せず、サーバー・DB側で認可する。"]
+ };
+ document.querySelectorAll('.learn-section article').forEach(card=>{
+  if(card.dataset.enriched==='true')return;
+  const title=card.querySelector('h3')?.textContent.trim(),entry=data[title];if(!entry)return;
+  const box=document.createElement('div');box.className='learn-existing-extra';
+  const label=document.createElement('b');label.textContent='応用例';box.appendChild(label);
+  const ul=document.createElement('ul');entry[0].forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li)});box.appendChild(ul);
+  const caution=document.createElement('p');caution.className='learn-caution';caution.textContent='注意点：'+entry[1];box.appendChild(caution);
+  card.appendChild(box);card.dataset.enriched='true';
+ });
+})();
+</script><script>
 /* Make every learning lesson card independently collapsible. */
 (function(){
  const selectors='.learn-section .learn-grid article, .learn-section .lesson-steps article, .learn-section .feature-learning-grid article';
