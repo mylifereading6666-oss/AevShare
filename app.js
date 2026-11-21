@@ -1,7 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const config=window.AEVSTUDIO_CONFIG||{}, configured=config.supabaseUrl&&config.supabaseAnonKey&&!config.supabaseAnonKey.startsWith('PASTE_');
-let client=null,user=null,projects=[],current=null,mode='visual',signup=false,selectedTemplate='blank';
+let client=null,user=null,projects=[],current=null,mode='visual',signup=false,selectedTemplate='blank',realtimeChannel=null;
 if(configured&&window.supabase)client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey);
 
 const builtinSnippets=[
@@ -28,6 +28,14 @@ function renderCodeSnippets(list=codeSnippets,ignoreQuery=false){
 async function loadCodeSnippets(){
  if(client){const {data,error}=await client.from('studio_code_snippets').select('*').order('title');if(!error&&data&&data.length)codeSnippets=data.map(x=>({...x,tags:x.tags||[]}));}
  $('#code-search-status').textContent='コード一覧を準備しました';renderCodeSnippets();
+}
+function setupRealtime(){
+ if(!client)return;
+ if(realtimeChannel){client.removeChannel(realtimeChannel);realtimeChannel=null;}
+ let channel=client.channel('aevstudio-live'+(user?'-'+user.id:'-public'));
+ if(user)channel=channel.on('postgres_changes',{event:'*',schema:'public',table:'studio_projects',filter:'user_id=eq.'+user.id},()=>loadProjects(true));
+ channel=channel.on('postgres_changes',{event:'*',schema:'public',table:'studio_code_snippets'},()=>loadCodeSnippets());
+ realtimeChannel=channel.subscribe();
 }
 function filterCode(){renderCodeSnippets()}
 const localSynonyms={
@@ -131,7 +139,7 @@ function showTemplatePicker(){ $('#project-hub').classList.add('hidden');$('#wor
 function openWorkspace(){ $('#project-hub').classList.add('hidden');$('#template-picker').classList.add('hidden');$('#workspace').classList.remove('hidden');$('#workspace').scrollIntoView({behavior:'smooth'}); }
 function newProject(template='blank'){let s=starter[template]||starter.blank;let projectId=(window.crypto&&typeof crypto.randomUUID==='function')?crypto.randomUUID():'aev-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);let p={id:projectId,name:template==='blank'?'Untitled Project':({portfolio:'Portfolio',landing:'Landing Page',blog:'Blog'}[template]),...s,html:'',css:'',updated_at:new Date().toISOString()};projects.unshift(p);applyProject(p);$('#starter-template').value=template;renderProjects();openWorkspace();saveLocal()}
 function saveLocal(){localStorage.setItem('aevstudio.projects',JSON.stringify(projects));$('#save-status').textContent='この端末に保存しました'}
-async function loadProjects(){if(client&&user){const {data,error}=await client.from('studio_projects').select('*').order('updated_at',{ascending:false});if(!error&&data)projects=data.map(x=>({...x,id:x.id,name:x.name,title:x.title||'New page',description:x.description||'',color:x.color||'#8b6cff',html:x.html||'',css:x.css||''}));else projects=JSON.parse(localStorage.getItem('aevstudio.projects')||'[]')}else projects=JSON.parse(localStorage.getItem('aevstudio.projects')||'[]');renderProjects();if(projects[0])current=projects[0];showHub()}
+async function loadProjects(quiet=false){const previousId=current?.id;if(client&&user){const {data,error}=await client.from('studio_projects').select('*').order('updated_at',{ascending:false});if(!error&&data)projects=data.map(x=>({...x,id:x.id,name:x.name,title:x.title||'New page',description:x.description||'',color:x.color||'#8b6cff',html:x.html||'',css:x.css||''}));else projects=JSON.parse(localStorage.getItem('aevstudio.projects')||'[]')}else projects=JSON.parse(localStorage.getItem('aevstudio.projects')||'[]');renderProjects();current=projects.find(p=>p.id===previousId)||projects[0]||null;if(!quiet)showHub()}
 async function saveProject(){if(!current)return;let p={...current,name:$('#project-name').value,...(mode==='visual'?fromVisual():{html:$('#html-code').value,css:$('#css-code').value}),updated_at:new Date().toISOString()};Object.assign(current,p);projects=projects.map(x=>x.id===p.id?p:x);saveLocal();renderProjects();if(client&&user){const payload={id:p.id,user_id:user.id,name:p.name,title:p.title,description:p.description,color:p.color,html:p.html,css:p.css,updated_at:p.updated_at};const {error}=await client.from('studio_projects').upsert(payload);if(error)$('#save-status').textContent='端末保存済み（クラウド保存エラー）';else $('#save-status').textContent='クラウドに保存しました'} }
 function setMode(m){mode=m;$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));$('#visual-editor').classList.toggle('hidden',m!=='visual');$('#code-editor').classList.toggle('hidden',m!=='code');refresh()}
 
@@ -186,9 +194,10 @@ $('#start-new-project').onclick=showTemplatePicker;$('#back-to-hub').onclick=sho
 $('#starter-template').onchange=e=>{let s=starter[e.target.value];if(s){$('#visual-title').value=s.title;$('#visual-description').value=s.description;$('#visual-color').value=s.color;refresh()}};
 $$('[data-template]').forEach(b=>b.onclick=()=>{selectedTemplate=b.dataset.template;showTemplatePicker();$$('[data-new-template]').forEach(x=>x.classList.toggle('selected',x.dataset.newTemplate===selectedTemplate))});
 $('#add-section').onclick=()=>{let p=fromVisual();$('#visual-description').value=p.description+'\n\n新しいセクションを追加しました。';refresh()};
-$('#auth-open').onclick=async()=>{if(user&&client){await client.auth.signOut();user=null;$('#account-label').textContent='ゲストモード';$('#auth-open').textContent='ログイン';await loadProjects();return}if(!client){$('#auth-message').textContent='config.jsにSupabaseの公開キーを設定してください。'}$('#auth-dialog').showModal()};
+$('#auth-open').onclick=async()=>{if(user&&client){$('#auth-open').disabled=true;try{await client.auth.signOut()}finally{$('#auth-open').disabled=false}return}if(!user){if(!client){$('#auth-message').textContent='config.jsにSupabaseの公開キーを設定してください。'}$('#auth-dialog').showModal()}};
 $('#auth-toggle').onclick=()=>{signup=!signup;$('#auth-title').textContent=signup?'アカウントを新規登録':'AevStudioにログイン';$('#auth-submit').textContent=signup?'登録する':'ログイン';$('#auth-toggle').textContent=signup?'ログインに戻る':'アカウントを新規登録'};
 $('#auth-submit').onclick=async()=>{if(!client){$('#auth-message').textContent='Supabase公開キーが未設定です。';return}let email=$('#auth-email').value,password=$('#auth-password').value;let r=signup?await client.auth.signUp({email,password}):await client.auth.signInWithPassword({email,password});$('#auth-message').textContent=r.error?r.error.message:(signup?'確認メールを確認してください。':'ログインしました。');if(!r.error&&!signup){$('#auth-dialog').close();user=r.data.user;$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト';await loadProjects()}};
 
-if(client){client.auth.getSession().then(async({data})=>{user=data.session?.user||null;if(user){$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト'}renderAccountPage();await loadProjects()});client.auth.onAuthStateChange(async(_e,s)=>{user=s?.user||null;if(user){$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト'}else{$('#account-label').textContent='ゲストモード';$('#auth-open').textContent='ログイン'}renderAccountPage();await loadProjects()})}else loadProjects();
+function syncAuthControls(){const button=$('#auth-open'),label=$('#account-label');if(button){button.textContent=user?'ログアウト':'ログイン';button.setAttribute('aria-label',user?'ログアウト':'ログイン');}if(label)label.textContent=user?(user.email||'ログイン中'):'ゲストモード';renderAccountPage()}
+if(client){client.auth.onAuthStateChange((_event,session)=>{user=session?.user||null;syncAuthControls();setTimeout(async()=>{await loadProjects();setupRealtime()},0)});client.auth.getSession().then(async({data})=>{user=data.session?.user||null;syncAuthControls();await loadProjects();setupRealtime()})}else loadProjects();
 })();
