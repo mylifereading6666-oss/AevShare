@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090d18"><meta name="description" content="AevStudio 応用コード一覧の公式利用ガイド。検索、分類、コードの使い方、安全上の注意を説明します。">
+<title>応用コード一覧 公式ドキュメント | AevStudio</title>
+<link rel="stylesheet" href="style.css?v=20261121-11">
+<style>
+.docs-shell{width:min(980px,calc(100% - 32px));margin:36px auto 80px}
+.docs-hero,.docs-section{padding:clamp(18px,3vw,28px);margin:18px 0;border:1px solid var(--line);border-radius:16px;background:#101726}
+.docs-hero h1{font-size:clamp(27px,5vw,42px);margin:10px 0}
+.docs-hero p,.docs-section p,.docs-section li{color:#b4bfd4;line-height:1.85}
+.docs-section h2{font-size:21px;margin:0 0 12px}
+.docs-section h3{font-size:16px;margin:20px 0 6px}
+.docs-section code{color:#d2c8ff;background:#080e1b;padding:2px 5px;border-radius:5px}
+.docs-note{padding:13px 15px;border-left:3px solid #9b86ff;background:#191b35;border-radius:8px;color:#d7d3ef}
+.docs-links{display:grid;gap:10px}
+.docs-links a{color:#c5b6ff;overflow-wrap:anywhere}
+.docs-top{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+@media(max-width:600px){.docs-shell{margin-top:20px}.docs-section h2{font-size:19px}}
+</style>
+</head>
+<body>
+<header class="topbar">
+<a class="brand" href="./"><span class="brand-mark">A</span><span>AevStudio<small>WEB CREATION STUDIO</small></span></a>
+<button class="menu-toggle" id="menu-toggle" type="button" aria-label="メニューを開く" aria-expanded="false"><span class="menu-toggle-lines"><span></span><span></span><span></span></span><span class="menu-toggle-label">メニュー</span></button>
+<nav class="site-menu hidden" id="site-menu" aria-label="メインメニュー"><div class="menu-head"><b>MENU</b><button id="menu-close" type="button" aria-label="閉じる">×</button></div><details open><summary>学習・資料</summary><a href="learn.html">Web制作を学ぶ</a><a href="code-library.html">応用コード一覧</a><a href="code-library-guide.html">応用コード一覧 公式ドキュメント</a></details><details><summary>制作</summary><a href="projects.html">プロジェクト</a></details><details><summary>アカウント</summary><a href="account.html">アカウント管理</a></details></nav>
+<div class="menu-backdrop hidden" id="menu-backdrop"></div>
+<div class="account"><span id="account-label">ゲストモード</span><button class="btn btn-primary auth-open-button" id="auth-open" type="button">ログイン / 登録</button><span class="auth-status-badge hidden" id="auth-status"><i></i><span>ONLINE</span></span></div>
+</header>
+<main class="docs-shell">
+<section class="docs-hero"><span class="eyebrow">OFFICIAL DOCUMENTATION</span><h1>AevStudio 応用コード一覧<br>公式ドキュメント</h1><p>このページは、応用コード一覧の検索方法、分類、コードの組み込み方、安全に利用するための注意点を説明する公式ガイドです。</p><div class="docs-top"><a class="btn btn-primary" href="code-library.html">応用コード一覧を開く →</a><span class="code-tag">最終更新：2026-11-21</span></div></section>
+<section class="docs-section"><h2>1. 応用コード一覧について</h2><p>応用コード一覧は、Webサイト制作で再利用できるHTML・CSS・JavaScriptのサンプルをまとめた機能です。掲載コードは完成済みのWebサイト一式ではなく、特定の機能を実装するための部品・例です。プロジェクトの構造に合わせて調整して利用してください。</p><div class="docs-note">この機能の検索はブラウザー内で行います。検索のためにAIへ入力内容を送信する仕組みは使用しません。</div></section>
+<section class="docs-section"><h2>2. 検索の使い方</h2><ol><li>検索欄に機能名、用途、関連する単語を入力します。</li><li>名前の一部だけでも検索できます。例：「メニュー」「画像」「ログイン」「コピー」。</li><li>意味が近い別の言葉やタグも検索対象です。例：「写真」で画像関連、「スマホ」でレスポンシブ関連を探せます。</li><li>分類ボタンを使うと、関連する機能だけに絞り込めます。</li><li>検索結果の「使い方・説明・注意点」を開き、コードを使う前に必要なHTML要素や設定を確認します。</li></ol></section>
+<section class="docs-section"><h2>3. 分類一覧</h2><ul><li><b>ナビゲーション：</b>メニュー、ヘッダー、ページ移動、上部へ戻る機能。</li><li><b>デザイン・レイアウト：</b>カード配置、配色、背景、レスポンシブ表示。</li><li><b>フォーム・入力：</b>入力検証、文字数表示、パスワード表示切り替え。</li><li><b>アカウント：</b>ログイン、セッション、プロフィールのサンプル。</li><li><b>画像・メディア：</b>画像プレビュー、拡大表示、スライダー。</li><li><b>操作・表示：</b>モーダル、タブ、通知、読み込み中表示。</li><li><b>検索・データ：</b>一覧検索、お気に入り、ページ分割。</li></ul></section>
+<section class="docs-section"><h2>4. コードをプロジェクトに組み込む手順</h2><ol><li>先にプロジェクトを保存し、元に戻せる状態にします。</li><li>コードの説明を読み、必要なHTML要素・ID・クラスを確認します。</li><li>HTMLコードはページ構造、CSSコードはスタイル、JavaScriptコードは動作を担当する場所へ追加します。</li><li>同じIDが複数存在しないか、コード内のID・クラス名がHTML側と一致しているか確認します。</li><li>プレビューでPC・スマートフォンの両方を確認し、コンソールのエラーも確認します。</li><li>問題がなければ保存し、公開前にもう一度動作確認します。</li></ol><div class="docs-note">コードをそのまま貼り付けても、既存コードとの競合や不足しているHTML要素によって動作しない場合があります。</div></section>
+<section class="docs-section"><h2>5. セキュリティ・プライバシー上の注意</h2><ul><li>APIキー、パスワード、秘密鍵、Supabaseのservice_roleキーなどをHTML・CSS・JavaScriptへ直接記載しないでください。</li><li>ログイン状態を画面上で確認するだけでは、データへのアクセス制限になりません。データベース側のアクセス制御も必要です。</li><li>フォームの入力値はブラウザーだけでなく、サーバー側でも検証してください。</li><li>利用者が入力した文字列をHTMLとして無検証で挿入しないでください。表示時は適切にエスケープしてください。</li><li>画像やファイルのアップロードを追加する場合は、形式・容量・アクセス権限を別途検証してください。</li></ul></section>
+<section class="docs-section"><h2>6. 互換性・アクセシビリティ・性能</h2><ul><li>利用するブラウザーで対応しているAPIやCSS機能か確認してください。</li><li>ボタンには用途が分かる名前を付け、キーボード操作とフォーカス表示を確保してください。</li><li>画像には内容を説明する代替テキストを設定してください。</li><li>アニメーションは動きを減らす設定への配慮を行い、過剰な演出を避けてください。</li><li>スマートフォンやタブレットでも表示崩れ、横スクロール、押しにくいボタンがないか確認してください。</li></ul></section>
+<section class="docs-section"><h2>7. 掲載コードの利用範囲と免責</h2><p>掲載コードは学習・制作の参考例です。利用する人は、自分のプロジェクトに合わせて内容を確認・調整してください。コードの導入によって発生したデータ消失、表示不具合、外部サービスの停止などを防ぐため、導入前のバックアップとテストを推奨します。外部サービスを利用する場合は、そのサービスの利用規約・公式仕様も確認してください。</p></section>
+<section class="docs-section"><h2>8. 公式リファレンス</h2><p>HTML・CSS・JavaScript・Web APIの仕様やブラウザー対応状況を確認する際は、以下の公式リファレンスを参照してください。</p><div class="docs-links"><a href="https://developer.mozilla.org/ja/docs/Web" target="_blank" rel="noopener noreferrer">MDN：ウェブ技術のリファレンス</a><a href="https://developer.mozilla.org/ja/docs/Web/HTML" target="_blank" rel="noopener noreferrer">MDN：HTML</a><a href="https://developer.mozilla.org/ja/docs/Web/CSS" target="_blank" rel="noopener noreferrer">MDN：CSS</a><a href="https://developer.mozilla.org/ja/docs/Web/JavaScript" target="_blank" rel="noopener noreferrer">MDN：JavaScript</a><a href="https://developer.mozilla.org/ja/docs/Web/API" target="_blank" rel="noopener noreferrer">MDN：Web API</a></div></section>
+</main>
+<footer><a class="brand" href="./"><span class="brand-mark">A</span><span>AevStudio<small>BUILD YOUR NEXT IDEA</small></span></a><span>© 2026 AevStudio</span><span>応用コード一覧 公式ドキュメント</span></footer>
+<script src="config.js"></script><script src="auth.js?v=20261121-15"></script>
+<script>
+(()=>{const menu=document.getElementById('site-menu'),toggle=document.getElementById('menu-toggle'),close=document.getElementById('menu-close'),backdrop=document.getElementById('menu-backdrop');if(!menu||!toggle||!backdrop)return;document.body.append(menu,backdrop);const set=open=>{menu.classList.toggle('hidden',!open);backdrop.classList.toggle('hidden',!open);toggle.setAttribute('aria-expanded',String(open));};toggle.addEventListener('click',()=>set(menu.classList.contains('hidden')));close?.addEventListener('click',()=>set(false));backdrop.addEventListener('click',()=>set(false));menu.querySelectorAll('a[href]').forEach(a=>a.addEventListener('click',()=>set(false)));document.addEventListener('keydown',e=>{if(e.key==='Escape')set(false)});set(false);})();
+</script>
+</body></html>
