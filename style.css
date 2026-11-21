@@ -118,3 +118,49 @@ body.menu-is-open{overflow:hidden!important;overscroll-behavior:none}
  .menu-backdrop{inset:65px 0 0}
  .auth-open-button{padding:9px 11px;font-size:12px}
 }
+
+
+/* Mobile header repair: keep every control on one line. */
+@media (max-width: 850px) {
+  .topbar {
+    height: 76px !important;
+    min-height: 76px;
+    padding: 0 14px !important;
+    gap: 10px;
+    justify-content: space-between;
+  }
+  .brand { flex: 1 1 auto; min-width: 0; gap: 9px; font-size: 15px; }
+  .brand > span:last-child { min-width: 0; white-space: nowrap; }
+  .brand-mark { flex: 0 0 38px; width: 38px; height: 38px; }
+  .menu-toggle {
+    flex: 0 0 44px !important;
+    width: 44px !important;
+    min-width: 44px !important;
+    height: 44px;
+    padding: 0 !important;
+    justify-content: center;
+  }
+  .menu-toggle-label { display: none !important; }
+  .account { flex: 0 0 auto; gap: 0; }
+  .account #account-label { display: none !important; }
+  .auth-open-button {
+    display: inline-flex;
+    flex: 0 0 auto;
+    width: auto !important;
+    min-width: 0;
+    max-width: none;
+    padding: 10px 13px !important;
+    font-size: 13px !important;
+    line-height: 1.2;
+    white-space: nowrap !important;
+    word-break: keep-all;
+  }
+}
+@media (max-width: 380px) {
+  .topbar { padding: 0 9px !important; gap: 7px; }
+  .brand { font-size: 13px; gap: 7px; }
+  .brand small { font-size: 7px; letter-spacing: 1.4px; }
+  .brand-mark { flex-basis: 34px; width: 34px; height: 34px; }
+  .menu-toggle { flex-basis: 40px !important; width: 40px !important; min-width: 40px !important; }
+  .auth-open-button { padding: 9px 10px !important; font-size: 12px !important; }
+}
