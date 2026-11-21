@@ -161,6 +161,25 @@ if(previewPane&&previewHead&&!$('#preview-toggle')){
  });
 }
 
+
+function renderAccountPage(){
+ const state=$('#account-state'),email=$('#account-email'),uid=$('#account-user-id'),created=$('#account-created'),action=$('#account-login-action'),passwordBtn=$('#account-password-update');
+ if(!state)return;
+ if(user){state.textContent='ログイン中';email.textContent=user.email||'未設定';uid.textContent=user.id||'—';created.textContent=user.created_at?new Date(user.created_at).toLocaleString():'—';if(action){action.textContent='ログアウト';action.onclick=async()=>{if(client)await client.auth.signOut();user=null;renderAccountPage();$('#account-label').textContent='ゲストモード';$('#auth-open').textContent='ログイン';};}if(passwordBtn)passwordBtn.disabled=false;}
+ else{state.textContent='ログインしていません';email.textContent='—';uid.textContent='—';created.textContent='—';if(action){action.textContent='ログイン';action.onclick=()=>$('#auth-dialog').showModal();}if(passwordBtn)passwordBtn.disabled=true;}
+}
+$('#account-password-update')?.addEventListener('click',async()=>{
+ const feedback=$('#account-feedback'),next=$('#account-new-password').value,confirm=$('#account-confirm-password').value;
+ if(!user||!client){feedback.textContent='パスワードを変更するにはログインしてください。';return}
+ if(next.length<6){feedback.textContent='パスワードは6文字以上で入力してください。';return}
+ if(next!==confirm){feedback.textContent='確認用パスワードが一致しません。';return}
+ const btn=$('#account-password-update');btn.disabled=true;feedback.textContent='変更しています...';
+ try{const {error}=await client.auth.updateUser({password:next});if(error)throw error;feedback.textContent='パスワードを変更しました。';$('#account-new-password').value='';$('#account-confirm-password').value='';}
+ catch(error){feedback.textContent='変更できませんでした：'+(error.message||'時間をおいて再度お試しください。');}
+ finally{btn.disabled=false;}
+});
+renderAccountPage();
+
 initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$('#ai-code-search-button').onclick=runAICodeSearch;$('#ai-response-language')?.addEventListener('change',()=>{const b=$('#ai-code-search-button');b.textContent=$('#ai-response-language').value==='en'?'✦ Local AI search':'✦ ローカルAI検索'});$$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
 $('#start-new-project').onclick=showTemplatePicker;$('#back-to-hub').onclick=showHub;$('#back-project-hub').onclick=showHub;$('#continue-project').onclick=()=>$('#hub-project-list').scrollIntoView({behavior:'smooth'});$('#create-selected-project').onclick=()=>newProject(selectedTemplate);$$('[data-new-template]').forEach(b=>b.onclick=()=>{selectedTemplate=b.dataset.newTemplate;$$('[data-new-template]').forEach(x=>x.classList.toggle('selected',x===b))});$('#save-project').onclick=saveProject;$('#preview-project').onclick=()=>{refresh();$('#preview-frame').scrollIntoView({behavior:'smooth',block:'center'})};$('#refresh-preview').onclick=refresh;$$('.tab').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 ['visual-title','visual-description','visual-color','html-code','css-code'].forEach(id=>$('#'+id).addEventListener('input',()=>$('#save-status').textContent='未保存の変更'));
@@ -171,5 +190,5 @@ $('#auth-open').onclick=async()=>{if(user&&client){await client.auth.signOut();u
 $('#auth-toggle').onclick=()=>{signup=!signup;$('#auth-title').textContent=signup?'アカウントを新規登録':'AevStudioにログイン';$('#auth-submit').textContent=signup?'登録する':'ログイン';$('#auth-toggle').textContent=signup?'ログインに戻る':'アカウントを新規登録'};
 $('#auth-submit').onclick=async()=>{if(!client){$('#auth-message').textContent='Supabase公開キーが未設定です。';return}let email=$('#auth-email').value,password=$('#auth-password').value;let r=signup?await client.auth.signUp({email,password}):await client.auth.signInWithPassword({email,password});$('#auth-message').textContent=r.error?r.error.message:(signup?'確認メールを確認してください。':'ログインしました。');if(!r.error&&!signup){$('#auth-dialog').close();user=r.data.user;$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト';await loadProjects()}};
 
-if(client){client.auth.getSession().then(async({data})=>{user=data.session?.user||null;if(user){$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト'}await loadProjects()});client.auth.onAuthStateChange(async(_e,s)=>{user=s?.user||null;if(user){$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト'}else{$('#account-label').textContent='ゲストモード';$('#auth-open').textContent='ログイン'}await loadProjects()})}else loadProjects();
+if(client){client.auth.getSession().then(async({data})=>{user=data.session?.user||null;if(user){$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト'}renderAccountPage();await loadProjects()});client.auth.onAuthStateChange(async(_e,s)=>{user=s?.user||null;if(user){$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト'}else{$('#account-label').textContent='ゲストモード';$('#auth-open').textContent='ログイン'}renderAccountPage();await loadProjects()})}else loadProjects();
 })();
