@@ -90,7 +90,7 @@ const snippetGuides={
 'responsive-cards':{group:'design',usage:'カード一覧の親要素にcard-grid、各カードにcardを付けます。画面幅に合わせて列数が変化します。',caution:'カード内の画像や長いテキストがはみ出さないようにしてください。実機の幅で余白と読みやすさを確認してください。'}
 };
 const groupNames={navigation:'ナビゲーション',design:'デザイン・レイアウト',forms:'フォーム・入力',account:'アカウント',media:'画像・メディア',interaction:'操作・表示',data:'検索・データ'};
-let codeSnippets=builtinSnippets.map(x=>({...x,...(snippetGuides[x.id]||{}),aliases:x.tags||[]})),activeCodeCategory='all';
+let codeSnippets=[...new Map(builtinSnippets.map(x=>[x.id,{...x,...(snippetGuides[x.id]||{}),aliases:x.tags||[]}])).values()],activeCodeCategory='all';
 function renderCodeSnippets(list=codeSnippets){
  const root=$('#code-snippet-list'); if(!root)return;
  const q=$('#code-search-input')?.value.trim()||'';
