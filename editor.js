@@ -182,67 +182,82 @@ function schedule(){if(tab==='visual'&&current)current.visualDirty=true;checkpoi
 function download(name,content,type){const url=URL.createObjectURL(new Blob([content],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1200)}
 async function zip(){await save();const p=read();if(!window.JSZip){download('index.html',compose(p),'text/html;charset=utf-8');say('ZIP機能を読込中のためHTMLを保存しました');return}const z=new JSZip(),pages=p.pages&&p.pages.length?p.pages:[p];pages.forEach((pg,i)=>{const stem=i===0?'index':'page-'+(i+1);z.file(stem+'.html','<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(pg.title||pg.name)+'</title><link rel="stylesheet" href="'+stem+'.css"></head><body>'+pg.html+'<script src="'+stem+'.js">'+'</'+'script></body></html>');z.file(stem+'.css',pg.css||p.css||'');z.file(stem+'.js',pg.js||'')});const blob=await z.generateAsync({type:'blob'});const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='AevStudio-project.zip';a.click();setTimeout(()=>URL.revokeObjectURL(url),1500);say('ZIPを書き出しました')}
 async function load(){
+ // Render from this device first. Network/auth must never block the editor.
  let local=[];
- try{local=JSON.parse(localStorage.getItem(KEY)||'[]')}catch(e){}
+ try{
+  const stored=JSON.parse(localStorage.getItem(KEY)||'[]');
+  local=Array.isArray(stored)?stored:[];
+ }catch(error){console.warn('AevStudio local project data could not be parsed:',error)}
  projects=local.map(p=>{
   const q=split(p.html||'');
-  return Object.assign({},p,{html:q.html,js:p.js||q.js||'',pages:p.pages||q.pages||[{name:'トップページ',title:p.title||'My Website',description:p.description||'',html:q.html,css:p.css||'',js:p.js||q.js||''}]})
+  return Object.assign({},p,{html:q.html,js:p.js||q.js||'',pages:Array.isArray(p.pages)&&p.pages.length?p.pages:(q.pages||[{name:'トップページ',title:p.title||'My Website',description:p.description||'',html:q.html,css:p.css||'',js:p.js||q.js||''}])});
  });
  const params=new URLSearchParams(location.search);
  const pid=params.get('project');
  const hasTemplate=params.has('template');
  const t=params.get('template')||'blank';
- // Create and render the selected template immediately, before any network/auth work.
- // create() saves locally and replaces the URL with the new project ID.
  let requestedProject=null;
  if(hasTemplate){
   const requestedCount=Math.max(1,Math.min(20,parseInt(params.get('pages')||'1',10)||1));
   create(templates[t]?t:'blank',requestedCount);
   requestedProject=current;
- }
- // Cloud synchronization is secondary: it must never block or replace the new template.
- try{
-  if(client){
-   const authResult=await client.auth.getSession();
-   if(authResult.error)throw authResult.error;
-   const session=authResult.data.session;
-   user=session&&session.user;
-  }
-  if(client&&user){
-   const r=await client.from('studio_projects').select('*').order('updated_at',{ascending:false});
-   if(!r.error&&r.data){
-    const cloud=r.data.map(x=>{
-     const q=split(x.html||'');
-     return {id:x.id,name:x.name,title:x.title||'My Website',description:x.description||'',color:x.color||'#8b6cff',html:q.html,js:q.js,css:x.css||'',pages:q.pages||[{name:'トップページ',title:x.title||'My Website',description:x.description||'',html:q.html,css:x.css||'',js:q.js||''}],updated_at:x.updated_at||new Date().toISOString()}
-    });
-    // Merge from the current in-memory list, which already contains the new template.
-    const merged=new Map();
-    projects.concat(cloud).forEach(p=>{
-     const old=merged.get(p.id);
-     if(!old||new Date(p.updated_at||0)>=new Date(old.updated_at||0))merged.set(p.id,p)
-    });
-    projects=Array.from(merged.values()).sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));
-    localSave();
-   }else say('クラウド読込失敗: '+(r.error?.message||'原因不明')+'。テンプレートは端末に保存されています',true);
-  }
- }catch(syncError){
-  console.warn('AevStudio cloud sync deferred:',syncError);
-  say('クラウド同期を完了できませんでした。テンプレートは端末に保存されています。',true);
- }
- // Re-select the template after cloud merge so it remains the active project.
- if(requestedProject){
-  const latest=projects.find(p=>p.id===requestedProject.id)||requestedProject;
-  if(!projects.some(p=>p.id===latest.id))projects.unshift(latest);
-  fill(latest);
-  history.replaceState({},'', 'editor.html?project='+encodeURIComponent(latest.id));
-  localSave();
-  if(client&&user)await save();
  }else if(pid){
-  const p=projects.find(x=>x.id===pid);
-  if(p)fill(p);else if(projects.length)fill(projects[0]);else create('blank')
- }else if(projects.length){fill(projects[0])}
- else create('blank');
- list()
+  const found=projects.find(p=>String(p.id)===String(pid));
+  if(found)fill(found);
+  else if(projects.length)fill(projects[0]);
+  else create('blank',1);
+ }else if(projects.length){
+  fill(projects[0]);
+ }else{
+  create('blank',1);
+ }
+ list();
+ say('端末のプロジェクトを読み込みました');
+
+ // Cloud sync runs in the background with a timeout. It cannot hold the editor
+ // in its initial "準備中" state or prevent local projects from opening.
+ const withTimeout=(promise,label)=>Promise.race([
+  promise,
+  new Promise((_,reject)=>setTimeout(()=>reject(new Error(label+'がタイムアウトしました')),8000))
+ ]);
+ (async()=>{
+  try{
+   if(!client)return;
+   const authResult=await withTimeout(client.auth.getSession(),'Supabase認証');
+   if(authResult.error)throw authResult.error;
+   user=authResult.data.session?.user||null;
+   if(!user)return;
+   const result=await withTimeout(client.from('studio_projects').select('*').order('updated_at',{ascending:false}),'クラウド読み込み');
+   if(result.error)throw result.error;
+   const cloud=(result.data||[]).map(x=>{
+    const q=split(x.html||'');
+    return {id:x.id,name:x.name,title:x.title||'My Website',description:x.description||'',color:x.color||'#8b6cff',html:q.html,js:q.js,css:x.css||'',pages:q.pages||[{name:'トップページ',title:x.title||'My Website',description:x.description||'',html:q.html,css:x.css||'',js:q.js||''}],updated_at:x.updated_at||new Date().toISOString()};
+   });
+   const activeId=requestedProject?.id||pid||current?.id;
+   const merged=new Map();
+   projects.concat(cloud).forEach(p=>{
+    const old=merged.get(String(p.id));
+    if(!old||new Date(p.updated_at||0)>=new Date(old.updated_at||0))merged.set(String(p.id),p);
+   });
+   projects=Array.from(merged.values()).sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0));
+   localSave();
+   const active=projects.find(p=>String(p.id)===String(activeId));
+   if(active)fill(active);
+   list();
+   if(requestedProject){
+    const saved=projects.find(p=>String(p.id)===String(requestedProject.id))||requestedProject;
+    const payload={id:saved.id,user_id:user.id,name:saved.name,title:saved.title,description:saved.description,color:saved.color,html:packed(saved),css:saved.css,updated_at:saved.updated_at||new Date().toISOString()};
+    const upsert=await withTimeout(client.from('studio_projects').upsert(payload),'クラウド保存');
+    if(upsert.error)throw upsert.error;
+    say('プロジェクトを端末とクラウドに保存しました');
+   }else{
+    say('プロジェクトを読み込みました（クラウド同期済み）');
+   }
+  }catch(error){
+   console.warn('AevStudio background cloud sync failed:',error);
+   say('端末のプロジェクトは利用できます。クラウド同期は未完了です: '+(error?.message||String(error)),true);
+  }
+ })();
 }
 $('#new-project').onclick=()=>{create('blank',1);say('新しいプロジェクトを作成しました')};const addPageButton=$('#add-page-button');if(addPageButton)addPageButton.onclick=addPage;
 $$('.editor-tab').forEach(b=>b.onclick=()=>switchTab(b.dataset.tab));
