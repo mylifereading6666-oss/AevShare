@@ -60,7 +60,7 @@ const templates={
  ]),
  event:siteTemplate('event','CREATIVE MEETUP','アイデアが出会う、一日。','イベント・展示会・勉強会の日時、会場、内容、参加案内をまとめるテンプレートです。','#3e72bd',img('photo-1505373877841-8d25f7d46678'),'SAVE THE DATE','',[
   {nav:'Program',eyebrow:'EVENT PROGRAM',heading:'イベントプログラム',text:'開催内容やタイムテーブルを紹介します。',cards:[
-   {image:img('photo-1517457373958-b7 manor?'.replace(' manor?',''),700),alt:'イベント会場',kicker:'10:00 · OPENING',title:'オープニング',text:'イベントの概要と当日の流れを紹介。'},
+   {image:img('photo-1511578314322-379afb476865',700),alt:'イベント会場',kicker:'10:00 · OPENING',title:'オープニング',text:'イベントの概要と当日の流れを紹介。'},
    {image:img('photo-1515187029135-18ee286d815b',700),alt:'セッションの様子',kicker:'13:00 · SESSION',title:'トークセッション',text:'登壇者とテーマを掲載します。'},
    {image:img('photo-1511632765486-a01980e01a18',700),alt:'交流する参加者',kicker:'16:00 · NETWORKING',title:'交流タイム',text:'参加者同士で交流する時間。'}
   ]},
