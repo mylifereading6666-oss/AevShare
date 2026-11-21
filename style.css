@@ -201,3 +201,14 @@ body.menu-is-open{overflow:hidden!important;overscroll-behavior:none}
 @media(max-width:850px){
  .auth-status-badge{min-height:40px;padding:9px 12px;font-size:11px;gap:7px}
 }
+
+/* Shared project shortcuts inside the global navigation */
+.menu-project-section{margin-top:14px;padding:13px 0 4px;border-top:1px solid var(--line);min-width:0}
+.menu-project-heading{margin-bottom:9px;color:var(--cyan);font-size:10px;font-weight:800;letter-spacing:1.5px}
+.menu-new-project{display:block!important;margin:0 0 9px!important;padding:10px 12px!important;border:1px solid #8b76ee!important;border-radius:9px!important;background:#8b76ee18!important;color:#d5c9ff!important;font-weight:750!important;text-align:center;text-decoration:none!important}
+.menu-project-items{display:grid;gap:6px;max-height:240px;overflow-y:auto;overscroll-behavior:contain}
+.site-menu .menu-project-item{display:block!important;margin:0!important;padding:9px 11px!important;border:1px solid var(--line);border-radius:8px;background:#ffffff08;color:var(--text)!important;text-decoration:none}
+.menu-project-item b,.menu-project-item small{display:block;overflow-wrap:anywhere}
+.menu-project-item b{font-size:12px;font-weight:700}
+.menu-project-item small{margin-top:3px;color:var(--muted);font-size:10px}
+.menu-project-empty{padding:9px 4px;color:var(--muted);font-size:11px;line-height:1.6}
