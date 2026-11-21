@@ -66,9 +66,37 @@ function renderCodeSnippets(list=codeSnippets,ignoreQuery=false){
  $$('[data-copy-code]').forEach(b=>b.onclick=async()=>{const x=codeSnippets.find(s=>s.id===b.dataset.copyCode);if(x){try{await navigator.clipboard.writeText(x.code);b.textContent='コピーしました'}catch(e){b.textContent='コピーできませんでした'}}});
  $$('[data-show-code]').forEach(b=>b.onclick=()=>{const x=codeSnippets.find(s=>s.id===b.dataset.showCode);if(x)$('#ai-code-answer').innerHTML='<h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description)+'<br>難易度：'+escapeHtml(x.difficulty||'')+'<br>用途：'+escapeHtml((x.tags||[]).join('、'))+'</p><pre>'+escapeHtml(x.code)+'</pre>'});
 }
+let codeSnippetLoadPromise=null;
 async function loadCodeSnippets(){
- if(client){const {data,error}=await client.from('studio_code_snippets').select('*').order('title');if(!error&&data&&data.length){const remote=data.map(x=>({...x,tags:x.tags||[]}));const byId=new Map([...builtinSnippets,...remote].map(x=>[x.id,x]));codeSnippets=[...byId.values()]};}
- $('#code-search-status').textContent='コード一覧を準備しました';renderCodeSnippets();
+ // Show the built-in library immediately. Cloud additions are optional and must
+ // never block the page if the table, network, or permissions are unavailable.
+ codeSnippets=[...builtinSnippets];
+ renderCodeSnippets();
+ $('#code-search-status').textContent='コード一覧を準備しました（端末内のコード）';
+ if(!client||codeSnippetLoadPromise)return;
+ codeSnippetLoadPromise=(async()=>{
+  let timeoutId;
+  try{
+   const timeout=new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('cloud-timeout')),4500)});
+   const request=client.from('studio_code_snippets').select('*').order('title');
+   const result=await Promise.race([request,timeout]);
+   if(result.error)throw result.error;
+   if(Array.isArray(result.data)&&result.data.length){
+    const remote=result.data.map(x=>({...x,tags:Array.isArray(x.tags)?x.tags:[]}));
+    const byId=new Map([...builtinSnippets,...remote].map(x=>[x.id,x]));
+    codeSnippets=[...byId.values()];
+    renderCodeSnippets();
+    $('#code-search-status').textContent=codeSnippets.length+' 件のコードを利用できます';
+   }
+  }catch(error){
+   console.warn('Optional cloud code snippets unavailable; using built-in snippets.',error);
+   $('#code-search-status').textContent='端末内のコードを表示中（クラウド追加分は読み込めませんでした）';
+  }finally{
+   clearTimeout(timeoutId);
+   codeSnippetLoadPromise=null;
+  }
+ })();
+ return codeSnippetLoadPromise;
 }
 function setupRealtime(){
  if(!client)return;
