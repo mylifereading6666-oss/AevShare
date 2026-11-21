@@ -105,7 +105,16 @@ function initMenu(){
  const close=()=>{menu.classList.add('hidden');backdrop.classList.add('hidden');toggle.setAttribute('aria-expanded','false')};
  toggle.onclick=()=>{const open=menu.classList.contains('hidden');menu.classList.toggle('hidden',!open);backdrop.classList.toggle('hidden',!open);toggle.setAttribute('aria-expanded',String(open))};
  $('#menu-close').onclick=close;backdrop.onclick=close;
- $$('[data-menu-link]').forEach(a=>a.addEventListener('click',close));
+ $('[data-menu-link]').forEach(a=>a.addEventListener('click',event=>{
+  const href=a.getAttribute('href');
+  if(!href||!href.startsWith('#'))return;
+  const target=$(href);
+  if(!target)return;
+  event.preventDefault();
+  close();
+  history.replaceState(null,'',href);
+  requestAnimationFrame(()=>target.scrollIntoView({behavior:'smooth',block:'start'}));
+ }));
 }
 
 const starter={blank:{title:'Hello, AevStudio!',description:'ここからあなたのWebサイトを作りましょう。',color:'#8b6cff'},portfolio:{title:'My Portfolio',description:'こんにちは。私の作品とプロフィールを紹介します。',color:'#8b6cff'},landing:{title:'アイデアを、カタチに。',description:'私たちのサービスをご紹介します。',color:'#38b9c8'},blog:{title:'My Journal',description:'日々の気づきや好きなことを綴るブログです。',color:'#d69a70'}};
