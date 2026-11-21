@@ -12,7 +12,6 @@ if(!panel){
  production.appendChild(panel);
 }
 function localProjects(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
-function localProjects(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
 function render(items){
  itemsCache=items;
  const root=document.getElementById('menu-project-items');if(!root)return;
