@@ -1,6 +1,7 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],api=window.AEVSTUDIO_AUTH,client=api&&api.client,KEY='aevstudio.projects',START='<!--AEVSTUDIO_JS_START-->',END='<!--AEVSTUDIO_JS_END-->';
 let projects=[],current=null,tab='visual',timer=null,user=null,cloudSaveQueue=Promise.resolve(),activePageIndex=0,previewMode='browse';const PAGE_META='<!--AEVSTUDIO_PAGES:';
+try{
 function templateAccountSection(){
  return '<section class="content-section account-section" id="account"><div class="section-copy"><span class="eyebrow">MEMBER AREA</span><h2>アカウント</h2><p>ログイン・新規登録・プロフィール管理を配置するエリアです。実際の会員認証にはSupabaseなどの認証サービスとの接続が必要です。</p></div><div class="account-panel"><form class="template-account-form"><label>メールアドレス<input type="email" name="email" autocomplete="email" required placeholder="name@example.com"></label><label>パスワード<input type="password" name="password" autocomplete="current-password" required minlength="8" placeholder="8文字以上"></label><div class="account-actions"><button type="submit" data-auth-mode="login">ログイン</button><button type="button" data-auth-mode="signup" class="account-secondary">新規登録</button></div><p class="account-message" aria-live="polite">このフォームはテンプレート用のサンプルUIです。認証処理は未接続です。</p></form><div class="account-profile"><label>表示名<input type="text" placeholder="あなたの名前"></label><label>自己紹介<textarea rows="3" placeholder="プロフィールを入力"></textarea></label><button type="button" class="account-secondary" data-profile-save>プロフィール編集（サンプル）</button></div></div></section>';
 }
@@ -270,5 +271,14 @@ $('#site-type').addEventListener('change',e=>{const key=e.target.value;if(!templ
 window.addEventListener('pagehide',()=>{clearTimeout(timer);checkpoint()});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){clearTimeout(timer);checkpoint();if(client&&user)save().catch(()=>{})}});$('#save-now').onclick=save;$('#refresh-preview').onclick=()=>{preview();say('プレビューを更新しました')};$('#preview-size').onchange=e=>{const w=e.target.value;$('#site-preview').style.width=w;$('#preview-label').textContent=(w==='100%'?'自動':w==='1200px'?'PC':w==='768px'?'タブレット':'スマホ')+' · '+w};$('#download-html').onclick=()=>download('index.html',compose(read()),'text/html;charset=utf-8');$('#export-zip').onclick=zip;
 if(client)client.auth.onAuthStateChange(async(_e,s)=>{user=s&&s.user;if(user){const r=await client.from('studio_projects').select('*').order('updated_at',{ascending:false});if(!r.error&&r.data){r.data.forEach(x=>{const q=split(x.html||'');if(!projects.some(p=>p.id===x.id))projects.push({id:x.id,name:x.name,title:x.title||'My Website',description:x.description||'',color:x.color||'#8b6cff',html:q.html,js:q.js,css:x.css||'',pages:q.pages||[{name:'トップページ',title:x.title||'My Website',description:x.description||'',html:q.html,css:x.css||'',js:q.js||''}],updated_at:x.updated_at})});list()}}});
 const jszip=document.createElement('script');jszip.src='https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';jszip.async=true;document.head.appendChild(jszip);
-setupPreviewInspector();load().catch(e=>{console.error('AevStudio cloud load error:',e);say('読み込みエラー: '+(e?.message||String(e)),true);if(!current)create('blank')});
+setupPreviewInspector();load().catch(e=>{console.error('AevStudio editor startup failed:',e);const status=$('#save-status');if(status){status.textContent='エディター起動エラー: '+(e?.message||String(e));status.style.color='#ff9baf'}if(!current){try{create('blank')}catch(fallbackError){console.error('AevStudio fallback editor failed:',fallbackError)}}});
+}catch(error){
+ console.error('AevStudio editor initialization failed:',error);
+ const message=error&&error.message?error.message:String(error);
+ const status=document.getElementById('save-status');
+ if(status){status.textContent='エディター初期化エラー: '+message;status.style.color='#ff9baf'}
+ let panel=document.getElementById('editor-fatal-error');
+ if(!panel){panel=document.createElement('div');panel.id='editor-fatal-error';panel.style.cssText='position:fixed;z-index:99999;left:12px;right:12px;top:12px;padding:14px 16px;border:1px solid #ff718f;border-radius:12px;background:#241522;color:#fff;font:14px/1.6 system-ui;box-shadow:0 12px 40px #0008';document.body.appendChild(panel)}
+ panel.textContent='AevStudioエディターの初期化に失敗しました: '+message+'。この情報をもとに修正できます。';
+}
 })();
