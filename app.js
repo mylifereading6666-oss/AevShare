@@ -16,10 +16,10 @@ const builtinSnippets=[
 {id:'animated-gradient',category:'CSS',title:'アニメーションするグラデーション',description:'背景色がゆっくり変化する演出。',tags:['アニメーション','背景','グラデーション','動き'],code:'.gradient { background:linear-gradient(120deg,#5947a8,#147d91,#5947a8); background-size:200% 200%; animation:flow 8s ease infinite; }\\n@keyframes flow { 50% { background-position:100% 50%; } }',difficulty:'中級'}
 ];
 let codeSnippets=[...builtinSnippets],activeCodeCategory='all';
-function renderCodeSnippets(list=codeSnippets){
+function renderCodeSnippets(list=codeSnippets,ignoreQuery=false){
  const root=$('#code-snippet-list'); if(!root)return;
  const q=$('#code-search-input').value.trim().toLowerCase();
- const shown=list.filter(x=>(activeCodeCategory==='all'||x.category===activeCodeCategory)&&(!q||[x.title,x.description,x.category,...(x.tags||[])].join(' ').toLowerCase().includes(q)));
+ const shown=list.filter(x=>(activeCodeCategory==='all'||x.category===activeCodeCategory)&&(ignoreQuery||!q||[x.title,x.description,x.category,...(x.tags||[])].join(' ').toLowerCase().includes(q)));
  root.innerHTML=shown.length?shown.map(x=>'<article class="code-snippet"><div class="code-snippet-top"><span class="code-tag">'+escapeHtml(x.category)+' · '+escapeHtml(x.difficulty||'')+'</span><span class="code-tag">'+escapeHtml(x.id)+'</span></div><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description)+'</p><pre>'+escapeHtml(x.code)+'</pre><div class="code-snippet-actions"><button data-copy-code="'+escapeHtml(x.id)+'">コードをコピー</button><button data-show-code="'+escapeHtml(x.id)+'">詳細</button></div></article>').join(''):'<div class="empty">該当するコードがありません。検索語を変えてください。</div>';
  $('#code-search-status').textContent=shown.length+' 件のコードを表示中';
  $('[data-copy-code]').forEach(b=>b.onclick=async()=>{const x=codeSnippets.find(s=>s.id===b.dataset.copyCode);if(x){try{await navigator.clipboard.writeText(x.code);b.textContent='コピーしました'}catch(e){b.textContent='コピーできませんでした'}}});
@@ -40,7 +40,7 @@ async function runAICodeSearch(){
   if(error)throw error;
   const ids=data.matches||[],matches=ids.map(id=>codeSnippets.find(x=>x.id===id)).filter(Boolean);
   box.innerHTML='<h3>✦ AI検索結果</h3><p>'+escapeHtml(data.explanation||'目的に合うコードを選びました。')+'</p>';
-  if(matches.length){box.innerHTML+='<p>おすすめコード：'+matches.map(x=>escapeHtml(x.title)).join('、')+'</p>';activeCodeCategory='all';$('[data-code-category]').forEach(x=>x.classList.toggle('active',x.dataset.codeCategory==='all'));renderCodeSnippets(matches)}else{box.innerHTML+='<p>一致するコードが見つかりませんでした。別の表現で検索してください。</p>';renderCodeSnippets()}
+  if(matches.length){box.innerHTML+='<p>おすすめコード：'+matches.map(x=>escapeHtml(x.title)).join('、')+'</p>';activeCodeCategory='all';$('[data-code-category]').forEach(x=>x.classList.toggle('active',x.dataset.codeCategory==='all'));renderCodeSnippets(matches,true)}else{box.innerHTML+='<p>一致するコードが見つかりませんでした。別の表現で検索してください。</p>';renderCodeSnippets()}
  }catch(e){box.textContent='AI検索を利用できません。Supabase Edge FunctionのデプロイとAI APIキーの設定を確認してください。';}
  finally{btn.disabled=false;btn.textContent='✦ AIで探す'}
 }
@@ -82,9 +82,9 @@ $('#start-new-project').onclick=showTemplatePicker;$('#back-to-hub').onclick=sho
 $('#starter-template').onchange=e=>{let s=starter[e.target.value];if(s){$('#visual-title').value=s.title;$('#visual-description').value=s.description;$('#visual-color').value=s.color;refresh()}};
 $('[data-template]').forEach(b=>b.onclick=()=>{selectedTemplate=b.dataset.template;showTemplatePicker();$('[data-new-template]').forEach(x=>x.classList.toggle('selected',x.dataset.newTemplate===selectedTemplate))});
 $('#add-section').onclick=()=>{let p=fromVisual();$('#visual-description').value=p.description+'\n\n新しいセクションを追加しました。';refresh()};
-$('#auth-open').onclick=()=>{if(!client){$('#auth-message').textContent='config.jsにSupabaseの公開キーを設定してください。';}$('#auth-dialog').showModal()};
+$('#auth-open').onclick=async()=>{if(user&&client){await client.auth.signOut();user=null;$('#account-label').textContent='ゲストモード';$('#auth-open').textContent='ログイン';await loadProjects();return}if(!client){$('#auth-message').textContent='config.jsにSupabaseの公開キーを設定してください。'}$('#auth-dialog').showModal()};
 $('#auth-toggle').onclick=()=>{signup=!signup;$('#auth-title').textContent=signup?'アカウントを新規登録':'AevStudioにログイン';$('#auth-submit').textContent=signup?'登録する':'ログイン';$('#auth-toggle').textContent=signup?'ログインに戻る':'アカウントを新規登録'};
 $('#auth-submit').onclick=async()=>{if(!client){$('#auth-message').textContent='Supabase公開キーが未設定です。';return}let email=$('#auth-email').value,password=$('#auth-password').value;let r=signup?await client.auth.signUp({email,password}):await client.auth.signInWithPassword({email,password});$('#auth-message').textContent=r.error?r.error.message:(signup?'確認メールを確認してください。':'ログインしました。');if(!r.error&&!signup){$('#auth-dialog').close();user=r.data.user;$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト';await loadProjects()}};
-$('#auth-open').addEventListener('click',async()=>{if(user&&client){await client.auth.signOut();user=null;$('#account-label').textContent='ゲストモード';$('#auth-open').textContent='ログイン';await loadProjects()}});
+
 if(client){client.auth.getSession().then(async({data})=>{user=data.session?.user||null;if(user){$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト'}await loadProjects()});client.auth.onAuthStateChange(async(_e,s)=>{user=s?.user||null;if(user){$('#account-label').textContent=user.email;$('#auth-open').textContent='ログアウト'}else{$('#account-label').textContent='ゲストモード';$('#auth-open').textContent='ログイン'}await loadProjects()})}else loadProjects();
 })();
