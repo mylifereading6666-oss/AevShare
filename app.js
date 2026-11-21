@@ -67,7 +67,7 @@ function renderCodeSnippets(list=codeSnippets,ignoreQuery=false){
  $$('[data-show-code]').forEach(b=>b.onclick=()=>{const x=codeSnippets.find(s=>s.id===b.dataset.showCode);if(x)$('#ai-code-answer').innerHTML='<h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description)+'<br>難易度：'+escapeHtml(x.difficulty||'')+'<br>用途：'+escapeHtml((x.tags||[]).join('、'))+'</p><pre>'+escapeHtml(x.code)+'</pre>'});
 }
 async function loadCodeSnippets(){
- if(client){const {data,error}=await client.from('studio_code_snippets').select('*').order('title');if(!error&&data&&data.length)codeSnippets=data.map(x=>({...x,tags:x.tags||[]}));}
+ if(client){const {data,error}=await client.from('studio_code_snippets').select('*').order('title');if(!error&&data&&data.length){const remote=data.map(x=>({...x,tags:x.tags||[]}));const byId=new Map([...builtinSnippets,...remote].map(x=>[x.id,x]));codeSnippets=[...byId.values()]};}
  $('#code-search-status').textContent='コード一覧を準備しました';renderCodeSnippets();
 }
 function setupRealtime(){
