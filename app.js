@@ -98,41 +98,16 @@ function renderCodeSnippets(list=codeSnippets){
   .map(item=>({item,score:q?scoreLocalSnippet(item,q):1}))
   .filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
  const shown=ranked.map(x=>x.item);
- root.innerHTML=shown.length?shown.map(x=>'<article class="code-snippet"><div class="code-snippet-top"><span class="code-tag">'+escapeHtml(x.category)+' · '+escapeHtml(x.difficulty||'')+'</span><span class="code-tag">'+escapeHtml(groupNames[x.group]||'その他')+'</span></div><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description||'')+'</p><pre>'+escapeHtml(x.code||'')+'</pre><div class="code-snippet-actions"><button data-copy-code="'+escapeHtml(x.id)+'">コードをコピー</button></div><details class="code-guide"><summary>使い方・説明・注意点</summary><div><p><b>使い方</b><br>'+escapeHtml(x.usage||'コードをページ内の対応する場所へ追加し、必要なIDやクラスをHTML側に用意してください。')+'</p><p><b>注意点</b><br>'+escapeHtml(x.caution||'実際のページ構成や利用環境に合わせて調整し、公開前に動作確認してください。')+'</p></div></details></article>').join(''):'<div class="empty">該当するコードがありません。名前の一部、別名、用途の言葉でも検索できます。</div>';
+ root.innerHTML=shown.length?shown.map(x=>'<article class="code-snippet"><div class="code-snippet-top"><span class="code-tag">'+escapeHtml(x.category)+' · '+escapeHtml(x.difficulty||'')+'</span><span class="code-tag">'+escapeHtml(groupNames[x.group]||'その他')+'</span></div><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description||'')+'</p><details class="code-source"><summary>コードを表示</summary><pre>'+escapeHtml(x.code||'')+'</pre><div class="code-snippet-actions"><button data-copy-code="'+escapeHtml(x.id)+'">コードをコピー</button></div></details><details class="code-guide"><summary>使い方・説明・注意点</summary><div><p><b>使い方</b><br>'+escapeHtml(x.usage||'コードをページ内の対応する場所へ追加し、必要なIDやクラスをHTML側に用意してください。')+'</p><p><b>注意点</b><br>'+escapeHtml(x.caution||'実際のページ構成や利用環境に合わせて調整し、公開前に動作確認してください。')+'</p></div></details></article>').join(''):'<div class="empty">該当するコードがありません。名前の一部、別名、用途の言葉でも検索できます。</div>';
  $('#code-search-status').textContent=shown.length+' 件のコードを表示中'+(q?'（関連語・一部一致）':'');
  $$('[data-copy-code]').forEach(b=>b.onclick=async()=>{const x=codeSnippets.find(s=>s.id===b.dataset.copyCode);if(x){try{await navigator.clipboard.writeText(x.code);b.textContent='コピーしました'}catch(e){b.textContent='コピーできませんでした。コードを選択してコピーしてください。'}}});
 }
-let codeSnippetLoadPromise=null;
-async function loadCodeSnippets(){
- // Show the built-in library immediately. Cloud additions are optional and must
- // never block the page if the table, network, or permissions are unavailable.
+function loadCodeSnippets(){
+ // The code library is fully local: render synchronously without waiting for Supabase.
  codeSnippets=[...new Map(builtinSnippets.map(x=>[x.id,{...x,...(snippetGuides[x.id]||{}),aliases:x.tags||[]}])).values()];
  renderCodeSnippets();
- $('#code-search-status').textContent='コード一覧を準備しました（端末内のコード）';
- if(!client||codeSnippetLoadPromise)return;
- codeSnippetLoadPromise=(async()=>{
-  let timeoutId;
-  try{
-   const timeout=new Promise((_,reject)=>{timeoutId=setTimeout(()=>reject(new Error('cloud-timeout')),4500)});
-   const request=client.from('studio_code_snippets').select('*').order('title');
-   const result=await Promise.race([request,timeout]);
-   if(result.error)throw result.error;
-   if(Array.isArray(result.data)&&result.data.length){
-    const remote=result.data.map(x=>({...x,tags:Array.isArray(x.tags)?x.tags:[],...(snippetGuides[x.id]||{})}));
-    const byId=new Map([...codeSnippets,...remote].map(x=>[x.id,x]));
-    codeSnippets=[...byId.values()];
-    renderCodeSnippets();
-    $('#code-search-status').textContent=codeSnippets.length+' 件のコードを利用できます';
-   }
-  }catch(error){
-   console.warn('Optional cloud code snippets unavailable; using built-in snippets.',error);
-   $('#code-search-status').textContent='端末内のコードを表示中（クラウド追加分は読み込めませんでした）';
-  }finally{
-   clearTimeout(timeoutId);
-   codeSnippetLoadPromise=null;
-  }
- })();
- return codeSnippetLoadPromise;
+ const status=$('#code-search-status');
+ if(status)status.textContent=codeSnippets.length+' 件のコードを表示中（端末内）';
 }
 function setupRealtime(){
  if(!client)return;
