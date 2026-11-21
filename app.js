@@ -56,15 +56,51 @@ const builtinSnippets=[
 {"id":"responsive-cards","category":"CSS","title":"スマホ対応カードUI","description":"画面幅に合わせてカード列数を自動調整します。","tags":["カード","スマホ","レスポンシブ","グリッド"],"difficulty":"初級","code":".card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px}\n.card{min-width:0;padding:18px;border:1px solid #29344b;border-radius:14px}"},
 {"id":"theme-toggle","category":"JavaScript","title":"ダーク・ライトテーマ切り替え","description":"テーマを切り替え、次回アクセス時にも選択を復元します。","tags":["ダークモード","ライトモード","テーマ","外観"],"difficulty":"初級","code":"const button=document.querySelector(\"#theme-toggle\");\ndocument.documentElement.dataset.theme=localStorage.getItem(\"theme\")||\"dark\";\nbutton.addEventListener(\"click\",()=>{const next=document.documentElement.dataset.theme===\"dark\"?\"light\":\"dark\";document.documentElement.dataset.theme=next;localStorage.setItem(\"theme\",next)});"}
 ];
-let codeSnippets=[...builtinSnippets],activeCodeCategory='all';
-function renderCodeSnippets(list=codeSnippets,ignoreQuery=false){
+const snippetGuides={
+'modal-dialog':{group:'interaction',usage:'dialog要素で確認画面や補足情報を表示します。開くボタンからshowModal()を呼び、閉じる操作でclose()を呼びます。',caution:'dialogのidはページ内で重複させないでください。開く対象の要素が存在することを確認し、Escキーなど利用者が閉じられる手段も用意してください。'},
+'responsive-grid':{group:'design',usage:'カードを並べる親要素にgridクラスを付けます。画面幅に応じて列数が自動調整されます。',caution:'カード内に長いURLや大きな画像がある場合は、子要素にmin-width:0や画像のmax-width:100%も指定してください。'},
+'dark-glass':{group:'design',usage:'半透明のパネルにglassクラスを付けます。背景の上に重ねるカードやメニューに使えます。',caution:'backdrop-filterに対応しない環境ではぼかしが表示されません。文字と背景のコントラストを確保し、装飾だけに頼らないでください。'},
+'copy-clipboard':{group:'interaction',usage:'copyText("コピーしたい文章")のように呼び出します。コピー操作は利用者が押すボタンなどの操作に結び付けてください。',caution:'Clipboard APIはHTTPSなどの安全なコンテキストとブラウザーの許可が必要です。失敗時の案内も追加してください。'},
+'image-lightbox':{group:'media',usage:'拡大対象の画像にdata-lightbox属性を付け、ページ内にid="lightbox"のdialogとimgを用意します。画像を押すとdialog内に表示します。',caution:'dialogと内部imgが存在することを確認してください。閉じるボタン、代替テキスト、画像の読み込み失敗への対応も用意してください。'},
+'theme-toggle':{group:'design',usage:'id="themeToggle"のボタンを用意し、押されたときにhtml要素のlightクラスを切り替えます。CSS側でlight時の配色を定義します。',caution:'localStorageが使えない環境も考慮してください。初回表示時に保存済みテーマを復元する処理と、文字色・背景色の両方の定義が必要です。'},
+'sticky-header':{group:'navigation',usage:'ページ上部のヘッダーにheaderクラスを付けると、スクロール中も上端に追従します。',caution:'祖先要素にoverflow設定があるとstickyの動作に影響します。重なり順(z-index)と、固定ヘッダーで本文が隠れないかを確認してください。'},
+'form-validation':{group:'forms',usage:'id="myForm"のform要素にsubmitイベントを設定します。required、type、minlengthなどのHTML属性と組み合わせて入力を確認します。',caution:'ブラウザー側の検証だけでは不十分です。重要なデータはサーバー側でも必ず検証し、エラー理由を利用者に分かる形で示してください。'},
+'animated-gradient':{group:'design',usage:'背景を動かしたい要素にgradientクラスを付けます。@keyframes flowで背景位置を変化させます。',caution:'動きが苦手な利用者向けにprefers-reduced-motionへの対応を追加してください。大きな領域で多用すると描画負荷が上がる場合があります。'},
+'hamburger-accessible':{group:'navigation',usage:'menu-toggle、site-menu、menu-backdropの3要素をHTMLに用意し、ボタンから開閉します。Escキーや背景クリックでも閉じます。',caution:'コード内のidとHTMLのidを一致させてください。メニューを開いたときのフォーカス移動、フォーカス戻し、画面読み上げ向けの状態通知も確認してください。'},
+'hamburger-html':{group:'navigation',usage:'メニューを開くbutton、リンクを含むnav、背景ボタンをページに配置します。JavaScript側のid指定と一致させてください。',caution:'idはページ内で一意にしてください。JavaScriptが無効でも主要なページへ移動できる代替ナビゲーションを検討してください。'},
+'dropdown-menu':{group:'navigation',usage:'detailsの中にsummaryとリンクを置きます。summaryを押すと、JavaScriptなしで項目を開閉できます。',caution:'summaryには内容が分かる短い見出しを付けてください。入れ子を深くしすぎず、キーボードでも操作できるか確認してください。'},
+'account-layout':{group:'account',usage:'プロフィールと設定をsectionごとに分けるアカウント画面のHTML土台として使います。表示内容は実際のユーザー情報に置き換えます。',caution:'このHTMLだけではログインや本人確認はできません。メールアドレスなどの個人情報を表示する前に、認証とアクセス制御を実装してください。'},
+'supabase-auth':{group:'account',usage:'Supabaseクライアントを初期化した後、register()で新規登録、login()でメールアドレスとパスワードによるログインを行います。',caution:'ブラウザーに置けるのは公開用キーのみです。service_roleキーや秘密情報を公開しないでください。データベースには適切なRLSポリシーを設定してください。'},
+'auth-guard':{group:'account',usage:'getSession()でセッションを確認し、未ログインならログインページへ案内します。ログイン中は画面にユーザー情報を表示できます。',caution:'クライアント側の画面遷移だけではデータを保護できません。データベース側のRLSやサーバー側の認可チェックを必ず併用してください。'},
+'profile-update':{group:'account',usage:'ログイン中のユーザーがupdateDisplayName("表示名")を呼び、ユーザーメタデータのdisplay_nameを更新します。',caution:'入力文字数や使用可能文字を検証してください。ユーザーメタデータを権限判定の根拠にせず、重要な権限は信頼できるサーバー側で管理してください。'},
+'responsive-nav':{group:'navigation',usage:'site-navクラスをナビゲーションに付けます。幅700px以下ではリンクを縦並びに切り替えます。',caution:'実際のヘッダー幅に合わせてブレークポイントを調整してください。横スクロールやリンクの押しにくさがないかスマートフォンでも確認してください。'},
+'tabs':{group:'interaction',usage:'各タブにdata-tab、表示領域に対応するdata-panelを付けます。クリックしたタブに対応するパネルだけが表示されます。',caution:'タブ名とパネルの値を一致させてください。aria-selectedだけでなく、必要に応じてroleやキーボード操作も実装してください。'},
+'faq-accordion':{group:'interaction',usage:'質問ごとにdetailsとsummaryを配置し、回答をその中に記述します。利用者が質問を押すと回答が開きます。',caution:'summaryの文言だけで質問内容が伝わるようにしてください。長い回答や複雑な操作をdetails内に詰め込みすぎないでください。'},
+'live-search':{group:'data',usage:'id="search"の入力欄とdata-search-card属性を付けたカードを用意します。入力するたびにカードのテキストを照合して絞り込みます。',caution:'この例は読み込まれている要素だけを検索します。大量データでは検索対象を絞り、検索結果0件の案内や入力のクリア操作も追加してください。'},
+'favorites':{group:'data',usage:'各項目のIDをtoggleFavorite()へ渡します。お気に入りIDはlocalStorageに保存され、同じブラウザーで次回も復元できます。',caution:'localStorageは端末・ブラウザー単位です。別端末との同期やユーザー間の共有には認証とデータベースが必要です。保存データを安全な認証情報として扱わないでください。'},
+'toast':{group:'interaction',usage:'HTMLにid="toast"の通知領域を用意し、showToast("保存しました")のように呼び出します。',caution:'通知を短時間で消す場合も、重要なエラーを見逃さないようにしてください。role="status"を付け、必要に応じて閉じる手段も用意してください。'},
+'password-visibility':{group:'forms',usage:'id="password"の入力欄とid="toggle-password"のボタンを用意します。ボタンで入力欄をpassword/textに切り替えます。',caution:'パスワードを画面に表示する機能です。初期状態は必ず非表示にし、共有端末では周囲から見られないよう注意を促してください。'},
+'character-counter':{group:'forms',usage:'id="message"の入力欄とid="counter"の表示領域を用意します。入力のたびに文字数と上限を更新します。',caution:'HTMLのmaxlengthとサーバー側の文字数制限を揃えてください。絵文字などは文字数の数え方が利用者の感覚と異なる場合があります。'},
+'image-preview':{group:'media',usage:'type="file"の入力欄とid="image-preview"のimgを用意します。選択した画像をアップロード前にプレビューします。',caution:'このコードは端末内のプレビューのみで、サーバー保存は行いません。ファイル形式・サイズを検証し、不要になったObject URLは解放してください。'},
+'modal':{group:'interaction',usage:'確認ボタンとdialogを配置し、ボタン操作でshowModal()を呼び出します。キャンセル時はclose()で閉じます。',caution:'この例は表示だけで、削除処理そのものは行いません。実行前に対象を確認し、Escキーやキャンセルボタンで閉じられるようにしてください。'},
+'back-to-top':{group:'navigation',usage:'id="back-to-top"のボタンを用意します。一定量スクロールすると表示され、押すとページ先頭へ戻ります。',caution:'対象ボタンが存在することを確認してください。スクロールアニメーションはprefers-reduced-motionに配慮してください。'},
+'loading-button':{group:'interaction',usage:'非同期処理の開始時にボタンを無効化して処理中と表示し、終了後に元の状態へ戻します。',caution:'例のdoYourRequest()は実際の処理に置き換えてください。失敗時のエラー表示を追加し、finallyで必ずボタンを元に戻してください。'},
+'carousel':{group:'media',usage:'各スライドにdata-slide、前後ボタンにpreviousとnextのidを付けます。ボタン操作で表示するスライドを切り替えます。',caution:'スライド数が0の場合の処理や、画像の代替テキストを用意してください。自動再生を追加する場合は停止操作も必要です。'},
+'pagination':{group:'data',usage:'一覧の各要素にdata-itemを付け、renderPage(ページ番号)で表示する範囲を切り替えます。',caution:'この例は画面上の要素を隠すだけで、データを分割取得するものではありません。ページ番号の範囲や0件の場合を処理してください。'},
+'responsive-cards':{group:'design',usage:'カード一覧の親要素にcard-grid、各カードにcardを付けます。画面幅に合わせて列数が変化します。',caution:'カード内の画像や長いテキストがはみ出さないようにしてください。実機の幅で余白と読みやすさを確認してください。'}
+};
+const groupNames={navigation:'ナビゲーション',design:'デザイン・レイアウト',forms:'フォーム・入力',account:'アカウント',media:'画像・メディア',interaction:'操作・表示',data:'検索・データ'};
+let codeSnippets=builtinSnippets.map(x=>({...x,...(snippetGuides[x.id]||{}),aliases:x.tags||[]})),activeCodeCategory='all';
+function renderCodeSnippets(list=codeSnippets){
  const root=$('#code-snippet-list'); if(!root)return;
- const q=$('#code-search-input').value.trim().toLowerCase();
- const shown=list.filter(x=>(activeCodeCategory==='all'||x.category===activeCodeCategory)&&(ignoreQuery||!q||[x.title,x.description,x.category,...(x.tags||[])].join(' ').toLowerCase().includes(q)));
- root.innerHTML=shown.length?shown.map(x=>'<article class="code-snippet"><div class="code-snippet-top"><span class="code-tag">'+escapeHtml(x.category)+' · '+escapeHtml(x.difficulty||'')+'</span><span class="code-tag">'+escapeHtml(x.id)+'</span></div><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description)+'</p><pre>'+escapeHtml(x.code)+'</pre><div class="code-snippet-actions"><button data-copy-code="'+escapeHtml(x.id)+'">コードをコピー</button><button data-show-code="'+escapeHtml(x.id)+'">詳細</button></div></article>').join(''):'<div class="empty">該当するコードがありません。検索語を変えてください。</div>';
- $('#code-search-status').textContent=shown.length+' 件のコードを表示中';
- $$('[data-copy-code]').forEach(b=>b.onclick=async()=>{const x=codeSnippets.find(s=>s.id===b.dataset.copyCode);if(x){try{await navigator.clipboard.writeText(x.code);b.textContent='コピーしました'}catch(e){b.textContent='コピーできませんでした'}}});
- $$('[data-show-code]').forEach(b=>b.onclick=()=>{const x=codeSnippets.find(s=>s.id===b.dataset.showCode);if(x)$('#ai-code-answer').innerHTML='<h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description)+'<br>難易度：'+escapeHtml(x.difficulty||'')+'<br>用途：'+escapeHtml((x.tags||[]).join('、'))+'</p><pre>'+escapeHtml(x.code)+'</pre>'});
+ const q=$('#code-search-input')?.value.trim()||'';
+ const ranked=list.filter(x=>activeCodeCategory==='all'||x.group===activeCodeCategory)
+  .map(item=>({item,score:q?scoreLocalSnippet(item,q):1}))
+  .filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+ const shown=ranked.map(x=>x.item);
+ root.innerHTML=shown.length?shown.map(x=>'<article class="code-snippet"><div class="code-snippet-top"><span class="code-tag">'+escapeHtml(x.category)+' · '+escapeHtml(x.difficulty||'')+'</span><span class="code-tag">'+escapeHtml(groupNames[x.group]||'その他')+'</span></div><h3>'+escapeHtml(x.title)+'</h3><p>'+escapeHtml(x.description||'')+'</p><pre>'+escapeHtml(x.code||'')+'</pre><div class="code-snippet-actions"><button data-copy-code="'+escapeHtml(x.id)+'">コードをコピー</button></div><details class="code-guide"><summary>使い方・説明・注意点</summary><div><p><b>使い方</b><br>'+escapeHtml(x.usage||'コードをページ内の対応する場所へ追加し、必要なIDやクラスをHTML側に用意してください。')+'</p><p><b>注意点</b><br>'+escapeHtml(x.caution||'実際のページ構成や利用環境に合わせて調整し、公開前に動作確認してください。')+'</p></div></details></article>').join(''):'<div class="empty">該当するコードがありません。名前の一部、別名、用途の言葉でも検索できます。</div>';
+ $('#code-search-status').textContent=shown.length+' 件のコードを表示中'+(q?'（関連語・一部一致）':'');
+ $('[data-copy-code]').forEach(b=>b.onclick=async()=>{const x=codeSnippets.find(s=>s.id===b.dataset.copyCode);if(x){try{await navigator.clipboard.writeText(x.code);b.textContent='コピーしました'}catch(e){b.textContent='コピーできませんでした。コードを選択してコピーしてください。'}}});
 }
 let codeSnippetLoadPromise=null;
 async function loadCodeSnippets(){
@@ -82,7 +118,7 @@ async function loadCodeSnippets(){
    const result=await Promise.race([request,timeout]);
    if(result.error)throw result.error;
    if(Array.isArray(result.data)&&result.data.length){
-    const remote=result.data.map(x=>({...x,tags:Array.isArray(x.tags)?x.tags:[]}));
+    const remote=result.data.map(x=>({...x,tags:Array.isArray(x.tags)?x.tags:[],...(snippetGuides[x.id]||{})}));
     const byId=new Map([...builtinSnippets,...remote].map(x=>[x.id,x]));
     codeSnippets=[...byId.values()];
     renderCodeSnippets();
@@ -135,47 +171,27 @@ function localSearchTokens(value){
  return [...new Set(tokens)];
 }
 function scoreLocalSnippet(item,query){
- const fields=[item.title||'',item.description||'',item.category||'',...(item.tags||[])].join(' ').toLowerCase();
+ const q=String(query||'').trim().toLowerCase();
+ if(!q)return 1;
+ const fields=[item.title||'',item.description||'',item.category||'',groupNames[item.group]||'',...(item.tags||[]),...(item.aliases||[]),item.usage||'',item.caution||''].join(' ').toLowerCase();
  const code=String(item.code||'').toLowerCase();
- const q=query.toLowerCase();
  let score=0;
- if(fields.includes(q))score+=14;
- if(String(item.title||'').toLowerCase().includes(q))score+=12;
+ if(fields.includes(q))score+=30;
+ if(String(item.title||'').toLowerCase().includes(q))score+=25;
+ if(q.length===1&&fields.includes(q))score+=8;
  const expanded=new Set(localSearchTokens(q));
  for(const [key,values] of Object.entries(localSynonyms)){
-  if(q.includes(key)||values.some(v=>q.includes(v.toLowerCase()))){expanded.add(key);values.forEach(v=>localSearchTokens(v).forEach(t=>expanded.add(t)));}
+  if(q.includes(key)||values.some(v=>q.includes(v.toLowerCase()))){
+   localSearchTokens(key).forEach(t=>expanded.add(t));
+   values.forEach(v=>localSearchTokens(v).forEach(t=>expanded.add(t)));
+  }
  }
- const fieldTokens=localSearchTokens(fields),codeTokens=localSearchTokens(code);
- for(const token of expanded){
-  if(token.length<2)continue;
-  if(fields.includes(token))score+=token.length>3?4:2;
+ const tokens=[...expanded].filter(t=>t.length>1);
+ for(const token of tokens){
+  if(fields.includes(token))score+=String(item.title||'').toLowerCase().includes(token)?9:5;
   if(code.includes(token))score+=1;
-  if(fieldTokens.includes(token))score+=2;
-  if(codeTokens.includes(token))score+=0.5;
  }
  return score;
-}
-function aiText(key,language,count){
- const ja={empty:'目的に近いコードは見つかりませんでした。別の言葉でも検索してみてください。',found:'入力内容と関連語を照合し、関連度の高いコードを選びました。',none:'検索語を入力してください。',ready:'ローカル検索を準備しました。',failed:'検索を実行できませんでした。'};
- const en={empty:'No closely related snippets were found. Try different wording.',found:'Relevant snippets were selected by matching your request and related terms.',none:'Enter what you want to build.',ready:'Local search is ready.',failed:'The search could not be completed.'};
- return (language==='en'?en:ja)[key];
-}
-async function runAICodeSearch(){
- const query=$('#code-search-input').value.trim(),box=$('#ai-code-answer'),btn=$('#ai-code-search-button'),language=$('#ai-response-language')?.value||'ja';
- box.classList.remove('hidden');
- if(!query){box.textContent=aiText('none',language);return}
- btn.disabled=true;btn.textContent=language==='en'?'Searching...':'検索中...';
- box.textContent=language==='en'?'Searching locally on this device...':'この端末内で検索しています...';
- try{
-  const ranked=codeSnippets.map(item=>({item,score:scoreLocalSnippet(item,query)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
-  const matches=ranked.map(x=>x.item);
-  box.innerHTML='<h3>✦ '+(language==='en'?'Local AI search results':'ローカルAI検索結果')+'</h3><p>'+aiText(matches.length?'found':'empty',language)+'</p>';
-  if(matches.length){
-   box.innerHTML+='<p>'+(language==='en'?'Recommended snippets: ':'おすすめコード：')+matches.map(x=>escapeHtml(x.title)).join(', ')+'</p>';
-   activeCodeCategory='all';$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x.dataset.codeCategory==='all'));renderCodeSnippets(matches,true);
-  }else renderCodeSnippets([]);
- }catch(e){box.textContent=aiText('failed',language)}
- finally{btn.disabled=false;btn.textContent=language==='en'?'✦ Local AI search':'✦ ローカルAI検索'}
 }
 function initMenu(){
  const toggle=$('#menu-toggle'),menu=$('#site-menu'),backdrop=$('#menu-backdrop');
@@ -257,7 +273,7 @@ $('#account-password-update')?.addEventListener('click',async()=>{
 });
 renderAccountPage();
 
-initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$('#ai-code-search-button').onclick=runAICodeSearch;$('#ai-response-language')?.addEventListener('change',()=>{const b=$('#ai-code-search-button');b.textContent=$('#ai-response-language').value==='en'?'✦ Local AI search':'✦ ローカルAI検索'});$$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
+initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
 $('#start-new-project').onclick=showTemplatePicker;$('#back-to-hub').onclick=showHub;$('#back-project-hub').onclick=showHub;$('#continue-project').onclick=()=>$('#hub-project-list').scrollIntoView({behavior:'smooth'});$('#create-selected-project').onclick=()=>newProject(selectedTemplate);$$('[data-new-template]').forEach(b=>b.onclick=()=>{selectedTemplate=b.dataset.newTemplate;$$('[data-new-template]').forEach(x=>x.classList.toggle('selected',x===b))});$('#save-project').onclick=saveProject;$('#preview-project').onclick=()=>{refresh();$('#preview-frame').scrollIntoView({behavior:'smooth',block:'center'})};$('#refresh-preview').onclick=refresh;$$('.tab').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 ['project-name','visual-title','visual-description','visual-color','html-code','css-code'].forEach(id=>$('#'+id)?.addEventListener('input',()=>{ $('#save-status').textContent='変更を自動保存します...';clearTimeout(autosaveTimer);autosaveTimer=setTimeout(()=>saveProject(),700)}));
 $('#starter-template').onchange=e=>{let s=starter[e.target.value];if(s){$('#visual-title').value=s.title;$('#visual-description').value=s.description;$('#visual-color').value=s.color;refresh()}};
