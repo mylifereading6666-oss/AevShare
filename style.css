@@ -59,3 +59,22 @@
 .ai-language-label{display:inline-flex;align-items:center;gap:7px;color:var(--muted);font-size:11px;white-space:nowrap}
 .ai-language-label select{padding:10px;border:1px solid var(--line);border-radius:8px;background:#101726;color:var(--text);font:inherit}
 @media(max-width:700px){.ai-language-label{flex:1;justify-content:flex-end}.ai-language-label select{max-width:130px}}
+
+
+/* AevStudio live preview placement */
+@media(min-width:851px){
+ .preview-pane{position:sticky;top:88px;align-self:start;max-height:calc(100vh - 110px);min-height:390px}
+ .preview-pane iframe{min-height:340px}
+}
+@media(max-width:850px) and (min-width:561px){
+ .preview-pane{position:sticky;bottom:12px;z-index:4;box-shadow:0 8px 30px #0005}
+}
+@media(max-width:560px){
+ .preview-pane{position:fixed;right:12px;bottom:12px;z-index:30;width:min(78vw,330px);height:48px;min-height:0;border:1px solid #7568c9;border-radius:13px;overflow:hidden;box-shadow:0 12px 38px #000b;transition:height .2s ease,width .2s ease}
+ .preview-pane .preview-head{height:46px;min-height:46px;padding:0 10px;background:#171d32;color:#e9e5ff;font-size:10px}
+ .preview-pane .preview-head #preview-toggle{border:1px solid #8b76ee;border-radius:8px;padding:6px 9px;background:#5746a8;color:white;font-size:11px;cursor:pointer}
+ .preview-pane .preview-head #refresh-preview{display:none}
+ .preview-pane iframe{display:none;width:100%;height:calc(100% - 46px);min-height:0;flex:none;background:white}
+ .preview-pane.preview-open{width:min(94vw,430px);height:min(68vh,560px)}
+ .preview-pane.preview-open iframe{display:block}
+}
