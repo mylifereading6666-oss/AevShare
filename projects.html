@@ -47,12 +47,12 @@ body[data-page="projects"] .section{scroll-margin-top:90px}
  let signup=false,authClient=null;
  try{const c=window.AEVSTUDIO_CONFIG;if(c?.supabaseUrl&&c?.supabaseAnonKey&&window.supabase)authClient=window.supabase.createClient(c.supabaseUrl,c.supabaseAnonKey)}catch(e){}
  async function syncAuth(){if(!authClient)return;const {data}=await authClient.auth.getSession();const u=data.session?.user;$('#account-label').textContent=u?u.email:'ゲストモード';authOpen.textContent=u?'ログアウト':'ログイン'}
- authOpen?.addEventListener('click',async()=>{
+ if(authOpen)authOpen.onclick=async()=>{
   if(authClient){const {data}=await authClient.auth.getSession();if(data.session){await authClient.auth.signOut();await syncAuth();return}}
   if(dialog&&!dialog.open)dialog.showModal();
- });
- switcher?.addEventListener('click',()=>{signup=!signup;$('#auth-title').textContent=signup?'アカウントを新規登録':'AevStudioにログイン';submit.textContent=signup?'登録する':'ログイン';switcher.textContent=signup?'ログインに戻る':'アカウントを新規登録';if(msg)msg.textContent=''});
- submit?.addEventListener('click',async()=>{
+ };
+ if(switcher)switcher.onclick=()=>{signup=!signup;$('#auth-title').textContent=signup?'アカウントを新規登録':'AevStudioにログイン';submit.textContent=signup?'登録する':'ログイン';switcher.textContent=signup?'ログインに戻る':'アカウントを新規登録';if(msg)msg.textContent=''};
+ if(submit)submit.onclick=async()=>{
   if(!authClient){if(msg)msg.textContent='Supabase設定を読み込めません。ページを再読み込みしてください。';return}
   submit.disabled=true;
   try{const email=$('#auth-email').value.trim(),password=$('#auth-password').value;
@@ -61,7 +61,7 @@ body[data-page="projects"] .section{scroll-margin-top:90px}
    if(!result.error&&!signup){dialog?.close();await syncAuth()}
   }catch(e){if(msg)msg.textContent='認証に失敗しました。入力内容と通信を確認してください。'}
   finally{submit.disabled=false}
- });
+ };
  authClient?.auth.onAuthStateChange(()=>syncAuth());syncAuth();
 })();
 </script></body></html>
