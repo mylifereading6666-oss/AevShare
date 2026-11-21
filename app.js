@@ -30,19 +30,75 @@ async function loadCodeSnippets(){
  $('#code-search-status').textContent='コード一覧を準備しました';renderCodeSnippets();
 }
 function filterCode(){renderCodeSnippets()}
+const localSynonyms={
+ '画像':['写真','picture','photo','image','gallery','ギャラリー','拡大','lightbox'],
+ '拡大':['大きく','ズーム','zoom','enlarge','lightbox'],
+ 'スマホ':['モバイル','mobile','phone','responsive','レスポンシブ'],
+ 'レイアウト':['配置','grid','layout','カード','card','columns'],
+ 'コピー':['複製','clipboard','copy','クリップボード'],
+ 'テーマ':['色','外観','dark','light','theme','ダーク','ライト'],
+ 'フォーム':['入力','form','validation','バリデーション','チェック'],
+ 'アニメーション':['動き','animation','animated','gradient','グラデーション'],
+ '固定':['追従','sticky','fixed','header','ヘッダー'],
+ 'ポップアップ':['モーダル','dialog','modal','popup','ダイアログ'],
+ 'ボタン':['クリック','click','button','操作'],
+ '背景':['background','gradient','グラデーション'],
+ 'ページ':['web page','website','サイト','ウェブサイト']
+};
+function localSearchTokens(value){
+ const s=String(value||'').toLowerCase().replace(/[Ａ-Ｚａ-ｚ０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xfee0));
+ const words=s.match(/[a-z0-9_+#.-]+|[ぁ-んァ-ヶ一-龠々ー]+/g)||[];
+ const tokens=[];
+ for(const word of words){
+  if(word.length>1)tokens.push(word);
+  if(/[ぁ-んァ-ヶ一-龠]/.test(word)&&word.length>2){
+   for(let i=0;i<word.length-1;i++)tokens.push(word.slice(i,i+2));
+  }
+ }
+ return [...new Set(tokens)];
+}
+function scoreLocalSnippet(item,query){
+ const fields=[item.title||'',item.description||'',item.category||'',...(item.tags||[])].join(' ').toLowerCase();
+ const code=String(item.code||'').toLowerCase();
+ const q=query.toLowerCase();
+ let score=0;
+ if(fields.includes(q))score+=14;
+ if(String(item.title||'').toLowerCase().includes(q))score+=12;
+ const expanded=new Set(localSearchTokens(q));
+ for(const [key,values] of Object.entries(localSynonyms)){
+  if(q.includes(key)||values.some(v=>q.includes(v.toLowerCase()))){expanded.add(key);values.forEach(v=>localSearchTokens(v).forEach(t=>expanded.add(t)));}
+ }
+ const fieldTokens=localSearchTokens(fields),codeTokens=localSearchTokens(code);
+ for(const token of expanded){
+  if(token.length<2)continue;
+  if(fields.includes(token))score+=token.length>3?4:2;
+  if(code.includes(token))score+=1;
+  if(fieldTokens.includes(token))score+=2;
+  if(codeTokens.includes(token))score+=0.5;
+ }
+ return score;
+}
+function aiText(key,language,count){
+ const ja={empty:'目的に近いコードは見つかりませんでした。別の言葉でも検索してみてください。',found:'入力内容と関連語を照合し、関連度の高いコードを選びました。',none:'検索語を入力してください。',ready:'ローカル検索を準備しました。',failed:'検索を実行できませんでした。'};
+ const en={empty:'No closely related snippets were found. Try different wording.',found:'Relevant snippets were selected by matching your request and related terms.',none:'Enter what you want to build.',ready:'Local search is ready.',failed:'The search could not be completed.'};
+ return (language==='en'?en:ja)[key];
+}
 async function runAICodeSearch(){
- const query=$('#code-search-input').value.trim(),box=$('#ai-code-answer'),btn=$('#ai-code-search-button');
- if(!query){box.textContent='作りたい機能や目的を入力してください。';box.classList.remove('hidden');return}
- if(!client){box.textContent='Supabaseの設定が必要です。';box.classList.remove('hidden');return}
- btn.disabled=true;btn.textContent='AI検索中...';box.classList.remove('hidden');box.textContent='AIが目的に合うコードを探しています...';
+ const query=$('#code-search-input').value.trim(),box=$('#ai-code-answer'),btn=$('#ai-code-search-button'),language=$('#ai-response-language')?.value||'ja';
+ box.classList.remove('hidden');
+ if(!query){box.textContent=aiText('none',language);return}
+ btn.disabled=true;btn.textContent=language==='en'?'Searching...':'検索中...';
+ box.textContent=language==='en'?'Searching locally on this device...':'この端末内で検索しています...';
  try{
-  const {data,error}=await client.functions.invoke('ai-code-search',{body:{query}});
-  if(error)throw error;
-  const ids=data.matches||[],matches=ids.map(id=>codeSnippets.find(x=>x.id===id)).filter(Boolean);
-  box.innerHTML='<h3>✦ AI検索結果</h3><p>'+escapeHtml(data.explanation||'目的に合うコードを選びました。')+'</p>';
-  if(matches.length){box.innerHTML+='<p>おすすめコード：'+matches.map(x=>escapeHtml(x.title)).join('、')+'</p>';activeCodeCategory='all';$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x.dataset.codeCategory==='all'));renderCodeSnippets(matches,true)}else{box.innerHTML+='<p>一致するコードが見つかりませんでした。別の表現で検索してください。</p>';renderCodeSnippets()}
- }catch(e){box.textContent='AI検索を利用できません。Supabase Edge FunctionのデプロイとAI APIキーの設定を確認してください。';}
- finally{btn.disabled=false;btn.textContent='✦ AIで探す'}
+  const ranked=codeSnippets.map(item=>({item,score:scoreLocalSnippet(item,query)})).filter(x=>x.score>0).sort((a,b)=>b.score-a.score).slice(0,3);
+  const matches=ranked.map(x=>x.item);
+  box.innerHTML='<h3>✦ '+(language==='en'?'Local AI search results':'ローカルAI検索結果')+'</h3><p>'+aiText(matches.length?'found':'empty',language)+'</p>';
+  if(matches.length){
+   box.innerHTML+='<p>'+(language==='en'?'Recommended snippets: ':'おすすめコード：')+matches.map(x=>escapeHtml(x.title)).join(', ')+'</p>';
+   activeCodeCategory='all';$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x.dataset.codeCategory==='all'));renderCodeSnippets(matches,true);
+  }else renderCodeSnippets([]);
+ }catch(e){box.textContent=aiText('failed',language)}
+ finally{btn.disabled=false;btn.textContent=language==='en'?'✦ Local AI search':'✦ ローカルAI検索'}
 }
 function initMenu(){
  const toggle=$('#menu-toggle'),menu=$('#site-menu'),backdrop=$('#menu-backdrop');
@@ -76,7 +132,7 @@ function saveLocal(){localStorage.setItem('aevstudio.projects',JSON.stringify(pr
 async function loadProjects(){if(client&&user){const {data,error}=await client.from('studio_projects').select('*').order('updated_at',{ascending:false});if(!error&&data)projects=data.map(x=>({...x,id:x.id,name:x.name,title:x.title||'New page',description:x.description||'',color:x.color||'#8b6cff',html:x.html||'',css:x.css||''}));else projects=JSON.parse(localStorage.getItem('aevstudio.projects')||'[]')}else projects=JSON.parse(localStorage.getItem('aevstudio.projects')||'[]');renderProjects();if(projects[0])current=projects[0];showHub()}
 async function saveProject(){if(!current)return;let p={...current,name:$('#project-name').value,...(mode==='visual'?fromVisual():{html:$('#html-code').value,css:$('#css-code').value}),updated_at:new Date().toISOString()};Object.assign(current,p);projects=projects.map(x=>x.id===p.id?p:x);saveLocal();renderProjects();if(client&&user){const payload={id:p.id,user_id:user.id,name:p.name,title:p.title,description:p.description,color:p.color,html:p.html,css:p.css,updated_at:p.updated_at};const {error}=await client.from('studio_projects').upsert(payload);if(error)$('#save-status').textContent='端末保存済み（クラウド保存エラー）';else $('#save-status').textContent='クラウドに保存しました'} }
 function setMode(m){mode=m;$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));$('#visual-editor').classList.toggle('hidden',m!=='visual');$('#code-editor').classList.toggle('hidden',m!=='code');refresh()}
-initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$('#ai-code-search-button').onclick=runAICodeSearch;$$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
+initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$('#ai-code-search-button').onclick=runAICodeSearch;$('#ai-response-language')?.addEventListener('change',()=>{const b=$('#ai-code-search-button');b.textContent=$('#ai-response-language').value==='en'?'✦ Local AI search':'✦ ローカルAI検索'});$$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
 $('#start-new-project').onclick=showTemplatePicker;$('#back-to-hub').onclick=showHub;$('#back-project-hub').onclick=showHub;$('#continue-project').onclick=()=>$('#hub-project-list').scrollIntoView({behavior:'smooth'});$('#create-selected-project').onclick=()=>newProject(selectedTemplate);$$('[data-new-template]').forEach(b=>b.onclick=()=>{selectedTemplate=b.dataset.newTemplate;$$('[data-new-template]').forEach(x=>x.classList.toggle('selected',x===b))});$('#save-project').onclick=saveProject;$('#preview-project').onclick=()=>{refresh();$('#preview-frame').scrollIntoView({behavior:'smooth',block:'center'})};$('#refresh-preview').onclick=refresh;$$('.tab').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 ['visual-title','visual-description','visual-color','html-code','css-code'].forEach(id=>$('#'+id).addEventListener('input',()=>$('#save-status').textContent='未保存の変更'));
 $('#starter-template').onchange=e=>{let s=starter[e.target.value];if(s){$('#visual-title').value=s.title;$('#visual-description').value=s.description;$('#visual-color').value=s.color;refresh()}};
