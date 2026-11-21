@@ -1,11 +1,99 @@
 (()=>{'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],api=window.AEVSTUDIO_AUTH,client=api&&api.client,KEY='aevstudio.projects',START='<!--AEVSTUDIO_JS_START-->',END='<!--AEVSTUDIO_JS_END-->';
 let projects=[],current=null,tab='visual',timer=null,user=null;
+function siteTemplate(key,name,title,description,color,heroImage,heroTag,mainHtml,sections){
+ const nav=sections.map((s,i)=>'<a href="#section-'+i+'">'+s.nav+'</a>').join('');
+ const body=sections.map((s,i)=>'<section class="content-section" id="section-'+i+'"><div class="section-copy"><span class="eyebrow">'+s.eyebrow+'</span><h2>'+s.heading+'</h2><p>'+s.text+'</p></div>'+(s.image?'<img class="section-image" src="'+s.image+'" alt="'+s.alt+'" loading="lazy">':'')+(s.cards?'<div class="template-cards">'+s.cards.map((v,j)=>'<article class="template-card"><img src="'+v.image+'" alt="'+v.alt+'" loading="lazy"><div><small>'+v.kicker+'</small><h3>'+v.title+'</h3><p>'+v.text+'</p></div></article>').join('')+'</div>':'')+'</section>').join('');
+ const html='<header class="site-header"><a class="site-brand" href="#">'+name+'</a><nav>'+nav+'</nav><a class="header-cta" href="#section-'+Math.max(0,sections.length-1)+'">お問い合わせ</a></header><main><section class="template-hero"><div class="hero-copy"><span class="eyebrow">'+heroTag+'</span><h1>'+title+'</h1><p>'+description+'</p><a class="hero-button" href="#section-0">詳しく見る <b>→</b></a></div><img class="hero-image" src="'+heroImage+'" alt="'+name+'のメイン画像"></section>'+body+'</main><footer class="site-footer"><b>'+name+'</b><span>'+description+'</span><small>© '+name+' · All rights reserved.</small></footer>';
+ const css=':root{--accent:'+color+';--ink:#172033;--muted:#68738a;--paper:#f6f7fb}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Inter,system-ui,-apple-system,"Noto Sans JP",sans-serif;color:var(--ink);background:var(--paper)}a{color:inherit}.site-header{min-height:76px;padding:16px clamp(18px,6vw,90px);display:flex;align-items:center;gap:28px;background:#fff;position:relative;z-index:2}.site-brand{font-size:20px;font-weight:850;text-decoration:none;letter-spacing:-.04em;margin-right:auto}.site-header nav{display:flex;gap:22px;flex-wrap:wrap}.site-header nav a{text-decoration:none;font-size:13px;color:#586174}.header-cta,.hero-button{display:inline-flex;align-items:center;gap:18px;padding:12px 18px;border-radius:999px;background:var(--accent);color:white;text-decoration:none;font-weight:700;font-size:13px}.template-hero{display:grid;grid-template-columns:1fr 1fr;align-items:center;gap:clamp(24px,5vw,70px);padding:clamp(42px,8vw,112px) clamp(18px,8vw,120px);background:linear-gradient(135deg,#fff 0%,color-mix(in srgb,var(--accent) 9%,white) 100%)}.hero-copy{max-width:620px}.eyebrow{font-size:11px;letter-spacing:.2em;font-weight:800;color:var(--accent)}h1{font-size:clamp(36px,5.5vw,68px);line-height:1.12;letter-spacing:-.05em;margin:16px 0}h2{font-size:clamp(26px,3vw,40px);line-height:1.2;margin:12px 0}h3{margin:8px 0;font-size:20px}.hero-copy>p,.section-copy>p{line-height:1.9;color:var(--muted);max-width:560px}.hero-button{margin-top:16px}.hero-image{width:100%;height:clamp(250px,34vw,440px);object-fit:cover;border-radius:24px;box-shadow:0 24px 70px #18223a20}.content-section{padding:clamp(42px,7vw,90px) clamp(18px,8vw,120px);max-width:1500px;margin:auto}.section-copy{max-width:760px;margin-bottom:24px}.section-image{width:100%;max-height:420px;object-fit:cover;border-radius:20px}.template-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:18px;margin-top:24px}.template-card{overflow:hidden;border-radius:18px;background:white;box-shadow:0 12px 34px #18223a0c}.template-card img{width:100%;height:190px;object-fit:cover;display:block}.template-card>div{padding:18px}.template-card small{color:var(--accent);font-weight:800;letter-spacing:.12em}.template-card p{color:var(--muted);line-height:1.7;font-size:14px}.site-footer{display:grid;gap:10px;padding:38px clamp(18px,8vw,120px);background:#151d2d;color:#fff}.site-footer span,.site-footer small{color:#aeb8ca;font-size:13px}.media-gallery{padding:30px clamp(18px,8vw,120px);display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px}.media-gallery figure{margin:0}.media-gallery img{width:100%;height:auto;max-height:420px;object-fit:cover;border-radius:16px}.media-gallery figcaption{font-size:12px;color:var(--muted);padding:6px}@media(max-width:760px){.site-header{gap:12px;flex-wrap:wrap}.site-header nav{order:3;width:100%;gap:14px}.header-cta{padding:10px 13px}.template-hero{grid-template-columns:1fr;padding:38px 20px}.hero-image{height:240px}.content-section{padding:44px 20px}.template-card img{height:170px}}';
+ return {name:name,title:title,description:description,color:color,type:key,html:html,css:css,js:''};
+}
+const img=(id,w=1200)=>'https://images.unsplash.com/'+id+'?auto=format&fit=crop&w='+w+'&q=85';
 const templates={
-blank:{title:'My Website',description:'ここにサイトの説明を入力します。',color:'#8b6cff',type:'website',html:'<header><b>MY WEBSITE</b><nav><a href="#about">About</a><a href="#contact">Contact</a></nav></header><main><p class="eyebrow">WELCOME</p><h1>アイデアを、形に。</h1><p>ここからWebサイトを作りましょう。</p><a class="button" href="#about">詳しく見る</a></main><section id="about"><h2>About</h2><p>紹介文を入力してください。</p></section><footer id="contact">お問い合わせ · © My Website</footer>',css:'*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;color:#20243a;background:#f7f8fc}header{display:flex;justify-content:space-between;padding:22px 7%;background:white}nav a{margin-left:16px;color:inherit;text-decoration:none}main{padding:90px 8%;background:linear-gradient(130deg,#f0edff,#fff);min-height:390px}.eyebrow{color:#765bdf;letter-spacing:3px}h1{font-size:clamp(38px,7vw,70px)}.button{display:inline-block;padding:12px 20px;background:#765bdf;color:white;border-radius:8px;text-decoration:none}section{padding:60px 8%}footer{padding:24px 8%;background:#17172d;color:white}',js:''},
-portfolio:{title:'My Portfolio',description:'作品とプロフィールを紹介するポートフォリオです。',color:'#8b6cff',type:'portfolio',html:'<header><b>MY PORTFOLIO</b><nav><a href="#works">Works</a><a href="#profile">Profile</a></nav></header><main><p class="eyebrow">CREATIVE PORTFOLIO</p><h1>こんにちは。<br>私の作品をご覧ください。</h1><p>デザイン・開発・アイデアを形にしています。</p></main><section id="works"><h2>Selected Works</h2><div class="cards"><article>PROJECT 01</article><article>PROJECT 02</article><article>PROJECT 03</article></div></section><section id="profile"><h2>Profile</h2><p>プロフィールを入力してください。</p></section><footer>CONTACT · © PORTFOLIO</footer>',css:'*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;color:#20223a;background:#f8f8fc}header{padding:22px 7%;display:flex;justify-content:space-between;background:white}nav a{margin-left:18px;color:inherit;text-decoration:none}main{padding:100px 8%;background:#17172b;color:white;min-height:420px}.eyebrow{color:#a99aff;letter-spacing:3px}h1{font-size:clamp(38px,7vw,70px)}section{padding:60px 8%}.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:15px}.cards article{padding:50px 20px;background:#e9e7fb;border-radius:14px}footer{padding:24px;background:#17172b;color:white;text-align:center}',js:''},
-landing:{title:'サービス紹介',description:'サービスの特徴や魅力を伝えるページです。',color:'#6b5cff',type:'landing',html:'<header><b>YOUR SERVICE</b><a href="#start">お問い合わせ</a></header><main><span>NEW EXPERIENCE</span><h1>あなたの毎日を、<br>もっと便利に。</h1><p>サービスの魅力を入力してください。</p><a class="cta" href="#start">無料で始める</a></main><section class="features"><h2>選ばれる理由</h2><div><article><b>01</b><h3>簡単</h3><p>使いやすい設計。</p></article><article><b>02</b><h3>便利</h3><p>必要な機能をひとつに。</p></article><article><b>03</b><h3>安心</h3><p>わかりやすいサポート。</p></article></div></section><footer id="start">お問い合わせ · © YOUR SERVICE</footer>',css:'*{box-sizing:border-box}body{margin:0;font-family:system-ui,sans-serif;color:#20233a}header{padding:20px 7%;display:flex;justify-content:space-between}header a{color:#6250d5}main{padding:100px 8%;background:linear-gradient(120deg,#17172d,#34305d);color:white}main span{color:#aaa0ff;letter-spacing:3px}h1{font-size:clamp(40px,7vw,76px)}.cta{display:inline-block;background:#8b79ff;color:white;padding:14px 25px;border-radius:9px;text-decoration:none}.features{padding:70px 8%}.features>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:15px}.features article{padding:24px;background:#f0efff;border-radius:14px}footer{padding:28px;background:#17172d;color:white;text-align:center}',js:''},
-blog:{title:'My Journal',description:'日々の記事やお知らせを発信するブログです。',color:'#2d7f88',type:'blog',html:'<header><b>MY JOURNAL</b><nav><a href="#articles">記事一覧</a><a href="#about">このブログについて</a></nav></header><main><p>JOURNAL / NOTES</p><h1>日々の記録と、<br>小さな発見。</h1></main><section id="articles"><h2>最新の記事</h2><article><small>2026.11.21</small><h3>最初の記事のタイトル</h3><p>記事の概要を入力してください。</p></article><article><small>2026.11.20</small><h3>2つ目の記事</h3><p>記事の概要を入力してください。</p></article></section><footer id="about">ABOUT THIS BLOG</footer>',css:'*{box-sizing:border-box}body{margin:0;font-family:Georgia,serif;color:#27333b;background:#f4f7f6}header{display:flex;justify-content:space-between;padding:22px 7%;background:white}nav a{margin-left:16px;color:inherit;text-decoration:none}main{padding:90px 8%;background:#183b43;color:white}main p{letter-spacing:3px;color:#9ed5d2}h1{font-size:clamp(38px,7vw,68px)}section{max-width:850px;margin:auto;padding:55px 8%}article{padding:20px 0;border-bottom:1px solid #ccd7d4}article small{color:#38818a}footer{padding:30px;background:#183b43;color:white;text-align:center}',js:''}
+ blank:siteTemplate('blank','MY WEBSITE','アイデアを、形に。','あなたのWebサイト制作をここから始めましょう。','#8065ed',img('photo-1498050108023-c5249f4df085'),'START YOUR WEBSITE','',[
+  {nav:'About',eyebrow:'ABOUT',heading:'このサイトについて',text:'ここにサイトの目的や紹介文を入力してください。',image:img('photo-1516321318423-f06f85e504b3'),alt:'ノートパソコンで作業する様子'},
+  {nav:'Contact',eyebrow:'GET IN TOUCH',heading:'お問い合わせ',text:'連絡先やSNSへのリンクを掲載できます。',image:img('photo-1497366754035-f200968a6e72'),alt:'明るいワークスペース'}
+ ]),
+ portfolio:siteTemplate('portfolio','YOUR NAME','つくることが、好きです。','デザイン・開発・写真。これまでの作品とプロフィールを紹介します。','#8b6cff',img('photo-1498050108023-c5249f4df085'),'SELECTED WORKS','',[
+  {nav:'Works',eyebrow:'01 / SELECTED WORKS',heading:'制作した作品',text:'作品ごとに画像・担当内容・使用技術を紹介できます。',cards:[
+   {image:img('photo-1460925895917-afdab827c52f',700),alt:'Webサイトの分析画面',kicker:'WEB DESIGN',title:'Webサイトデザイン',text:'情報を整理した見やすいWebサイトを制作。'},
+   {image:img('photo-1558655146-d09347e92766',700),alt:'グラフィックデザイン',kicker:'GRAPHIC',title:'ビジュアル制作',text:'色とレイアウトを工夫したデザイン作品。'},
+   {image:img('photo-1516321318423-f06f85e504b3',700),alt:'ノートパソコン',kicker:'DEVELOPMENT',title:'Webアプリ開発',text:'使いやすさを重視したWebアプリ。'}
+  ]},
+  {nav:'Profile',eyebrow:'02 / PROFILE',heading:'プロフィール',text:'自己紹介・得意分野・使用できるツールなどを掲載しましょう。',image:img('photo-1521737711867-e3b97375f902'),alt:'チームで制作について話し合う様子'},
+  {nav:'Contact',eyebrow:'03 / CONTACT',heading:'一緒につくりませんか？',text:'お問い合わせ方法やSNSのリンクを掲載できます。',image:img('photo-1522071820081-009f0129c71c'),alt:'共同作業するメンバー'}
+ ]),
+ landing:siteTemplate('landing','NOVA / SERVICE','毎日の「できた」を、もっと。','サービスの特徴をわかりやすく伝え、次のアクションにつなげる紹介ページです。','#6558df',img('photo-1460925895917-afdab827c52f'),'A BETTER WAY TO WORK','',[
+  {nav:'Features',eyebrow:'WHY NOVA',heading:'選ばれる3つの理由',text:'サービスの価値を、具体的なメリットとともに紹介します。',cards:[
+   {image:img('photo-1553877522-43269d4ea984',700),alt:'チームで計画する様子',kicker:'SIMPLE',title:'シンプルで使いやすい',text:'初めての人でも迷わず使える設計。'},
+   {image:img('photo-1551434678-e076c223a692',700),alt:'パソコンで作業する様子',kicker:'SMART',title:'作業を効率化',text:'必要な機能をひとつにまとめます。'},
+   {image:img('photo-1521737711867-e3b97375f902',700),alt:'サポートチーム',kicker:'SUPPORT',title:'安心のサポート',text:'困ったときも相談できる体制。'}
+  ]},
+  {nav:'About',eyebrow:'ABOUT THE SERVICE',heading:'サービスについて',text:'サービスの背景、対象ユーザー、利用するメリットを詳しく説明します。',image:img('photo-1497366754035-f200968a6e72'),alt:'明るいオフィス'},
+  {nav:'Start',eyebrow:'GET STARTED',heading:'今日から始めよう',text:'申込み・資料請求・お問い合わせなどのボタンをここに設置します。',image:img('photo-1516321318423-f06f85e504b3'),alt:'作業スペース'}
+ ]),
+ blog:siteTemplate('blog','THE DAILY NOTE','日々の発見を、言葉に。','日記・レビュー・お知らせなどを読みやすく届けるブログテンプレートです。','#27858a',img('photo-1455390582262-044c0a7d8a75'),'STORIES & JOURNAL','',[
+  {nav:'Articles',eyebrow:'LATEST STORIES',heading:'新着記事',text:'記事のタイトル・概要・サムネイルを並べて掲載できます。',cards:[
+   {image:img('photo-1499750310107-5fef28a66643',700),alt:'ノートとペン',kicker:'2026.11.21 · DIARY',title:'新しいことを始める日',text:'日々の気づきや体験を記事にしてみましょう。'},
+   {image:img('photo-1516321318423-f06f85e504b3',700),alt:'ノートパソコン',kicker:'2026.11.18 · TECH',title:'制作メモと学び',text:'学んだことや便利なテクニックを記録。'},
+   {image:img('photo-1497366754035-f200968a6e72',700),alt:'作業デスク',kicker:'2026.11.12 · LIFE',title:'お気に入りの作業環境',text:'日常の出来事やおすすめを紹介。'}
+  ]},
+  {nav:'About',eyebrow:'ABOUT THIS BLOG',heading:'このブログについて',text:'ブログのテーマ、運営者、更新頻度などを紹介します。',image:img('photo-1455390582262-044c0a7d8a75'),alt:'文章を書くためのノート'}
+ ]),
+ shop:siteTemplate('shop','ATELIER STORE','お気に入りに出会う場所。','商品写真・特徴・価格・購入案内を掲載する小さなオンラインストアのデザインです。','#b36a43',img('photo-1491553895911-0055ec6402d0'),'CURATED FOR YOU','',[
+  {nav:'Products',eyebrow:'SHOP COLLECTION',heading:'おすすめの商品',text:'商品画像・商品名・特徴・価格を紹介します。実際の決済機能は別途連携が必要です。',cards:[
+   {image:img('photo-1523275335684-37898b6baf30',700),alt:'腕時計',kicker:'NEW ARRIVAL',title:'ミニマルウォッチ',text:'シンプルなデザイン · ¥8,800'},
+   {image:img('photo-1548036328-c9fa89d128fa',700),alt:'バッグ',kicker:'POPULAR',title:'デイリーバッグ',text:'毎日に使いやすいサイズ · ¥6,500'},
+   {image:img('photo-1503602642458-232111445657',700),alt:'椅子',kicker:'LIFESTYLE',title:'デザインチェア',text:'空間になじむフォルム · ¥12,000'}
+  ]},
+  {nav:'About',eyebrow:'OUR CONCEPT',heading:'ものづくりへのこだわり',text:'ショップのコンセプトや商品選びの基準を説明します。',image:img('photo-1494438639946-1ebd1d20bf85'),alt:'雑貨の並ぶ棚'},
+  {nav:'Guide',eyebrow:'SHOP GUIDE',heading:'ご利用ガイド',text:'配送・返品・問い合わせ方法などを掲載します。',image:img('photo-1556742049-0cfed4f6a45d'),alt:'商品購入のイメージ'}
+ ]),
+ restaurant:siteTemplate('restaurant','BISTRO LUMIÈRE','季節を味わう、特別なひととき。','料理・店内・メニュー・営業時間など、お店の魅力を伝えるレストランサイトです。','#9b633d',img('photo-1517248135467-4c7edcad34c4'),'WELCOME TO OUR TABLE','',[
+  {nav:'Menu',eyebrow:'SEASONAL MENU',heading:'季節のおすすめ',text:'料理の写真とメニュー説明を掲載できます。',cards:[
+   {image:img('photo-1504674900247-0877df9cc836',700),alt:'彩り豊かな料理',kicker:'MAIN',title:'季節のプレート',text:'旬の食材を使ったおすすめ料理。'},
+   {image:img('photo-1476224203421-9ac39bcb3327',700),alt:'パスタ料理',kicker:'PASTA',title:'自家製パスタ',text:'素材の味を大切にした一皿。'},
+   {image:img('photo-1488477181946-6428a0291777',700),alt:'デザート',kicker:'DESSERT',title:'本日のデザート',text:'食後に楽しむ季節の甘い一品。'}
+  ]},
+  {nav:'Space',eyebrow:'OUR SPACE',heading:'落ち着いた店内',text:'座席・内装・お店の雰囲気を写真で紹介しましょう。',image:img('photo-1414235077428-338989a2e8c0'),alt:'レストランのテーブル'},
+  {nav:'Info',eyebrow:'INFORMATION',heading:'店舗情報・ご予約',text:'住所・営業時間・定休日・予約方法を記載してください。',image:img('photo-1559339352-11d035aa65de'),alt:'カフェの店内'}
+ ]),
+ event:siteTemplate('event','CREATIVE MEETUP','アイデアが出会う、一日。','イベント・展示会・勉強会の日時、会場、内容、参加案内をまとめるテンプレートです。','#3e72bd',img('photo-1505373877841-8d25f7d46678'),'SAVE THE DATE','',[
+  {nav:'Program',eyebrow:'EVENT PROGRAM',heading:'イベントプログラム',text:'開催内容やタイムテーブルを紹介します。',cards:[
+   {image:img('photo-1517457373958-b7 manor?'.replace(' manor?',''),700),alt:'イベント会場',kicker:'10:00 · OPENING',title:'オープニング',text:'イベントの概要と当日の流れを紹介。'},
+   {image:img('photo-1515187029135-18ee286d815b',700),alt:'セッションの様子',kicker:'13:00 · SESSION',title:'トークセッション',text:'登壇者とテーマを掲載します。'},
+   {image:img('photo-1511632765486-a01980e01a18',700),alt:'交流する参加者',kicker:'16:00 · NETWORKING',title:'交流タイム',text:'参加者同士で交流する時間。'}
+  ]},
+  {nav:'Venue',eyebrow:'VENUE & ACCESS',heading:'会場・アクセス',text:'会場名、住所、アクセス方法、地図へのリンクを掲載します。',image:img('photo-1497366811353-6870744d04b2'),alt:'イベントスペース'},
+  {nav:'Join',eyebrow:'REGISTRATION',heading:'参加する',text:'申込方法・参加費・注意事項を掲載します。',image:img('photo-1511578314322-379afb476865'),alt:'イベントの参加者'}
+ ]),
+ photography:siteTemplate('photography','FRAME & LIGHT','光と景色を、記録する。','写真家・フォトグラファー向け。大きな写真を主役にしたギャラリーサイトです。','#596f78',img('photo-1470252649378-9c29740c9fa8'),'PHOTOGRAPHY PORTFOLIO','',[
+  {nav:'Gallery',eyebrow:'SELECTED PHOTOGRAPHS',heading:'フォトギャラリー',text:'写真を大きく見せて、作品の世界観を伝えます。',cards:[
+   {image:img('photo-1470252649378-9c29740c9fa8',900),alt:'朝日の風景',kicker:'LANDSCAPE',title:'Morning Light',text:'朝の光と風景。'},
+   {image:img('photo-1470770841072-f978cf4d019e',900),alt:'湖と山の風景',kicker:'NATURE',title:'Quiet Lake',text:'静かな湖畔の風景。'},
+   {image:img('photo-1500530855697-b586d89ba3ee',900),alt:'山と自然',kicker:'TRAVEL',title:'Beyond the Road',text:'旅先で出会った景色。'}
+  ]},
+  {nav:'About',eyebrow:'ABOUT THE PHOTOGRAPHER',heading:'撮影について',text:'撮影スタイル、使用機材、依頼可能な内容などを紹介します。',image:img('photo-1452587925148-ce544e77e70d'),alt:'カメラを持つフォトグラファー'},
+  {nav:'Contact',eyebrow:'BOOKING',heading:'撮影のご相談',text:'撮影依頼・利用条件・連絡先を掲載してください。',image:img('photo-1516035069371-29a1b244cc32'),alt:'カメラ機材'}
+ ]),
+ gaming:siteTemplate('gaming','PLAYER ONE','PLAY. CREATE. CONNECT.','ゲームチーム・コミュニティ・配信者の活動やイベントを紹介するサイトです。','#6a5ae0',img('photo-1542751371-adc38448a05e'),'GAMING COMMUNITY','',[
+  {nav:'About',eyebrow:'WHO WE ARE',heading:'コミュニティ紹介',text:'チームの方針、活動内容、メンバーを紹介します。',image:img('photo-1511512578047-dfb367046420'),alt:'ゲームをプレイする様子'},
+  {nav:'News',eyebrow:'LATEST UPDATES',heading:'最新ニュース',text:'大会・配信・アップデートなどのお知らせを掲載します。',cards:[
+   {image:img('photo-1542751371-adc38448a05e',700),alt:'eスポーツ会場',kicker:'TOURNAMENT',title:'大会開催のお知らせ',text:'開催日時や参加方法を案内。'},
+   {image:img('photo-1593305841991-05c297ba4575',700),alt:'ゲーム機器',kicker:'STREAM',title:'配信スケジュール',text:'配信予定やチャンネルを紹介。'},
+   {image:img('photo-1511512578047-dfb367046420',700),alt:'ゲームプレイ',kicker:'COMMUNITY',title:'メンバー募集',text:'参加条件やルールを掲載。'}
+  ]},
+  {nav:'Join',eyebrow:'JOIN US',heading:'一緒にプレイしよう',text:'参加方法・ルール・SNSや配信チャンネルへのリンクを掲載します。',image:img('photo-1593305841991-05c297ba4575'),alt:'ゲーム環境'}
+ ]),
+ agency:siteTemplate('agency','NORTH / CREATIVE','ブランドの可能性を、デザインする。','制作会社・個人事業・クリエイティブチーム向けのサービスサイトです。','#315e83',img('photo-1497366811353-6870744d04b2'),'DESIGN & DIGITAL STUDIO','',[
+  {nav:'Services',eyebrow:'WHAT WE DO',heading:'サービス',text:'提供するサービスと対応範囲を整理して紹介します。',cards:[
+   {image:img('photo-1460925895917-afdab827c52f',700),alt:'Web分析画面',kicker:'01 / WEB',title:'Webサイト制作',text:'目的に合わせたWebサイトを設計・制作。'},
+   {image:img('photo-1558655146-d09347e92766',700),alt:'デザイン制作',kicker:'02 / BRAND',title:'ブランドデザイン',text:'ロゴやビジュアルの方向性を設計。'},
+   {image:img('photo-1553877522-43269d4ea984',700),alt:'打ち合わせ',kicker:'03 / SUPPORT',title:'運用サポート',text:'公開後の改善や更新を支援。'}
+  ]},
+  {nav:'Works',eyebrow:'OUR WORK',heading:'制作実績',text:'実績画像・担当内容・成果を掲載します。',image:img('photo-1497366754035-f200968a6e72'),alt:'制作スタジオ'},
+  {nav:'Contact',eyebrow:'START A PROJECT',heading:'プロジェクトの相談',text:'相談フォームやメールアドレス、対応時間を掲載してください。',image:img('photo-1521737711867-e3b97375f902'),alt:'チームミーティング'}
+ ])
 };
 function makeId(){return (window.crypto&&window.crypto.randomUUID)?window.crypto.randomUUID():'p-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2)}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
