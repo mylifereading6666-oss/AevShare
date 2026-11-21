@@ -24,8 +24,12 @@ $('#create-project-button').addEventListener('click',()=>{
  const pages=Math.max(1,Math.min(10,Number($('#new-project-pages').value)||1));
  const status=$('#new-status'),button=$('#create-project-button');
  button.disabled=true;button.textContent='端末に保存しています...';setStatus(status,'プロジェクトを作成しています。端末への保存後にクラウド同期を行います。');
- const url='editor.html?template='+encodeURIComponent(template)+'&pages='+pages+'&name='+encodeURIComponent(name);
- location.href=url;
+ const target=new URL('./editor.html',window.location.href);
+ target.searchParams.set('template',template);
+ target.searchParams.set('pages',String(pages));
+ target.searchParams.set('name',name);
+ target.searchParams.set('v','20261121-49');
+ window.location.assign(target.href);
 });
 async function loadProjects(){
  const status=$('#continue-status'),root=$('#continue-project-list'),button=$('#open-project-button');
