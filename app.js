@@ -129,11 +129,38 @@ function refresh(){let html=mode==='code'?$('#html-code').value:buildHTML();if(m
 function showHub(){ $('#template-picker').classList.add('hidden');$('#workspace').classList.add('hidden');$('#project-hub').classList.remove('hidden');$('#project-hub').scrollIntoView({behavior:'smooth'}); }
 function showTemplatePicker(){ $('#project-hub').classList.add('hidden');$('#workspace').classList.add('hidden');$('#template-picker').classList.remove('hidden');$('#template-picker').scrollIntoView({behavior:'smooth'}); }
 function openWorkspace(){ $('#project-hub').classList.add('hidden');$('#template-picker').classList.add('hidden');$('#workspace').classList.remove('hidden');$('#workspace').scrollIntoView({behavior:'smooth'}); }
-function newProject(template='blank'){let s=starter[template]||starter.blank;let p={id:crypto.randomUUID(),name:template==='blank'?'Untitled Project':({portfolio:'Portfolio',landing:'Landing Page',blog:'Blog'}[template]),...s,html:'',css:'',updated_at:new Date().toISOString()};projects.unshift(p);applyProject(p);$('#starter-template').value=template;renderProjects();openWorkspace();saveLocal()}
+function newProject(template='blank'){let s=starter[template]||starter.blank;let projectId=(window.crypto&&typeof crypto.randomUUID==='function')?crypto.randomUUID():'aev-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);let p={id:projectId,name:template==='blank'?'Untitled Project':({portfolio:'Portfolio',landing:'Landing Page',blog:'Blog'}[template]),...s,html:'',css:'',updated_at:new Date().toISOString()};projects.unshift(p);applyProject(p);$('#starter-template').value=template;renderProjects();openWorkspace();saveLocal()}
 function saveLocal(){localStorage.setItem('aevstudio.projects',JSON.stringify(projects));$('#save-status').textContent='この端末に保存しました'}
 async function loadProjects(){if(client&&user){const {data,error}=await client.from('studio_projects').select('*').order('updated_at',{ascending:false});if(!error&&data)projects=data.map(x=>({...x,id:x.id,name:x.name,title:x.title||'New page',description:x.description||'',color:x.color||'#8b6cff',html:x.html||'',css:x.css||''}));else projects=JSON.parse(localStorage.getItem('aevstudio.projects')||'[]')}else projects=JSON.parse(localStorage.getItem('aevstudio.projects')||'[]');renderProjects();if(projects[0])current=projects[0];showHub()}
 async function saveProject(){if(!current)return;let p={...current,name:$('#project-name').value,...(mode==='visual'?fromVisual():{html:$('#html-code').value,css:$('#css-code').value}),updated_at:new Date().toISOString()};Object.assign(current,p);projects=projects.map(x=>x.id===p.id?p:x);saveLocal();renderProjects();if(client&&user){const payload={id:p.id,user_id:user.id,name:p.name,title:p.title,description:p.description,color:p.color,html:p.html,css:p.css,updated_at:p.updated_at};const {error}=await client.from('studio_projects').upsert(payload);if(error)$('#save-status').textContent='端末保存済み（クラウド保存エラー）';else $('#save-status').textContent='クラウドに保存しました'} }
 function setMode(m){mode=m;$$('.tab').forEach(b=>b.classList.toggle('active',b.dataset.mode===m));$('#visual-editor').classList.toggle('hidden',m!=='visual');$('#code-editor').classList.toggle('hidden',m!=='code');refresh()}
+
+// Independent project-start handler: works even if another initializer fails.
+document.addEventListener('click',function(event){
+ const target=event.target.closest('#start-new-project,#create-selected-project,#back-to-hub');
+ if(!target)return;
+ event.preventDefault();event.stopImmediatePropagation();
+ try{
+  if(target.id==='start-new-project')showTemplatePicker();
+  else if(target.id==='create-selected-project')newProject(selectedTemplate);
+  else showHub();
+ }catch(error){console.error('AevStudio project start error:',error);const status=$('#save-status');if(status)status.textContent='制作を開始できませんでした。ページを再読み込みしてください。';}
+},true);
+// Responsive live preview control.
+const previewPane=$('.preview-pane'),previewHead=$('.preview-head');
+if(previewPane&&previewHead&&!$('#preview-toggle')){
+ const previewToggle=document.createElement('button');
+ previewToggle.type='button';previewToggle.id='preview-toggle';previewToggle.textContent='実際の表示を確認';
+ previewToggle.setAttribute('aria-expanded','false');
+ previewHead.appendChild(previewToggle);
+ previewToggle.addEventListener('click',()=>{
+  const opened=previewPane.classList.toggle('preview-open');
+  previewToggle.setAttribute('aria-expanded',String(opened));
+  previewToggle.textContent=opened?'プレビューを閉じる':'実際の表示を確認';
+  if(opened)refresh();
+ });
+}
+
 initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$('#ai-code-search-button').onclick=runAICodeSearch;$('#ai-response-language')?.addEventListener('change',()=>{const b=$('#ai-code-search-button');b.textContent=$('#ai-response-language').value==='en'?'✦ Local AI search':'✦ ローカルAI検索'});$$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
 $('#start-new-project').onclick=showTemplatePicker;$('#back-to-hub').onclick=showHub;$('#back-project-hub').onclick=showHub;$('#continue-project').onclick=()=>$('#hub-project-list').scrollIntoView({behavior:'smooth'});$('#create-selected-project').onclick=()=>newProject(selectedTemplate);$$('[data-new-template]').forEach(b=>b.onclick=()=>{selectedTemplate=b.dataset.newTemplate;$$('[data-new-template]').forEach(x=>x.classList.toggle('selected',x===b))});$('#save-project').onclick=saveProject;$('#preview-project').onclick=()=>{refresh();$('#preview-frame').scrollIntoView({behavior:'smooth',block:'center'})};$('#refresh-preview').onclick=refresh;$$('.tab').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 ['visual-title','visual-description','visual-color','html-code','css-code'].forEach(id=>$('#'+id).addEventListener('input',()=>$('#save-status').textContent='未保存の変更'));
