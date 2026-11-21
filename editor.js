@@ -204,8 +204,8 @@ async function load(){
  }else if(pid){
   const found=projects.find(p=>String(p.id)===String(pid));
   if(found)fill(found);
-  else if(projects.length)fill(projects[0]);
-  else create('blank',1);
+  // A cloud-only project must not be replaced by an unrelated project or a blank one.
+
  }else if(projects.length){
   fill(projects[0]);
  }else{
@@ -222,11 +222,11 @@ async function load(){
  ]);
  (async()=>{
   try{
-   if(!client)return;
+   if(!client){if(pid&&!current)say('このプロジェクトは端末にありません。クラウドから開くにはログインと接続が必要です。',true);return;}
    const authResult=await withTimeout(client.auth.getSession(),'Supabase認証');
    if(authResult.error)throw authResult.error;
    user=authResult.data.session?.user||null;
-   if(!user)return;
+   if(!user){if(pid&&!current)say('このプロジェクトは端末にありません。クラウドから開くにはログインしてください。',true);return;}
    const result=await withTimeout(client.from('studio_projects').select('*').order('updated_at',{ascending:false}),'クラウド読み込み');
    if(result.error)throw result.error;
    const cloud=(result.data||[]).map(x=>{
@@ -243,6 +243,7 @@ async function load(){
    localSave();
    const active=projects.find(p=>String(p.id)===String(activeId));
    if(active)fill(active);
+   else if(pid&&!current)say('指定されたプロジェクトがクラウドにも見つかりませんでした。プロジェクト一覧から選び直してください。',true);
    list();
    if(requestedProject){
     const saved=projects.find(p=>String(p.id)===String(requestedProject.id))||requestedProject;
@@ -255,7 +256,8 @@ async function load(){
    }
   }catch(error){
    console.warn('AevStudio background cloud sync failed:',error);
-   say('端末のプロジェクトは利用できます。クラウド同期は未完了です: '+(error?.message||String(error)),true);
+   if(pid&&!current)say('クラウドからプロジェクトを読み込めませんでした: '+(error?.message||String(error)),true);
+   else say('端末のプロジェクトは利用できます。クラウド同期は未完了です: '+(error?.message||String(error)),true);
   }
  })();
 }
