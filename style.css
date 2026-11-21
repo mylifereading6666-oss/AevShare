@@ -337,3 +337,8 @@ body[data-page="create-project"] .template-card .template-thumb {
 
 /* Keep the login button hidden on every viewport when a session is active. */
 .auth-open-button.hidden{display:none!important}
+
+/* Code library: collapsible source code blocks */
+.code-source{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}
+.code-source summary{color:#c9bcff;cursor:pointer;font-size:12px;font-weight:700;padding:5px 0}
+.code-source pre{max-height:260px;margin:8px 0;overflow:auto}
