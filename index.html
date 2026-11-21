@@ -27,6 +27,70 @@ body[data-page="home"] #project-hub,body[data-page="home"] #template-picker,body
 <dialog id="auth-dialog"><form method="dialog" class="dialog-card"><button class="close" type="button" aria-label="閉じる" onclick="this.closest('dialog').close()">×</button><span class="eyebrow">ACCOUNT</span><h2 id="auth-title">AevStudioにログイン</h2><p>プロジェクトをアカウントに保存します。</p><input id="auth-email" type="email" placeholder="メールアドレス" required><input id="auth-password" type="password" placeholder="パスワード" required><button class="btn btn-primary" id="auth-submit" type="button">ログイン</button><button class="text-button" id="auth-toggle" type="button">アカウントを新規登録</button><p id="auth-message" class="hint"></p></form></dialog>
 <script src="config.js"></script><script src="app.js?v=20261121-2"></script>
 <script>
+/* Independent authentication controller: runs even if page-specific app.js code stops. */
+(function(){
+ const cfg=window.AEVSTUDIO_CONFIG||{};
+ const submit=document.getElementById('auth-submit');
+ const toggle=document.getElementById('auth-toggle');
+ const dialog=document.getElementById('auth-dialog');
+ const email=document.getElementById('auth-email');
+ const password=document.getElementById('auth-password');
+ const message=document.getElementById('auth-message');
+ const button=document.getElementById('auth-open');
+ if(!submit||!dialog||!email||!password)return;
+ let client=null,signup=false;
+ try{
+  if(window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey){
+   client=window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey);
+  }
+ }catch(error){if(message)message.textContent='認証サービスを初期化できませんでした。';}
+ const showMessage=(value,isError=false)=>{
+  if(message){message.textContent=value;message.style.color=isError?'#ff9baf':'#9eadd0';}
+ };
+ const sync=async()=>{
+  if(!client)return;
+  const {data}=await client.auth.getSession();
+  const loggedIn=!!data.session?.user;
+  if(button){button.textContent=loggedIn?'ログアウト':'ログイン / 登録';}
+  const label=document.getElementById('account-label');
+  if(label)label.textContent=loggedIn?(data.session.user.email||'ログイン中'):'ゲストモード';
+ };
+ if(client)client.auth.onAuthStateChange(()=>{sync();});
+ if(toggle)toggle.onclick=()=>{
+  signup=!signup;
+  document.getElementById('auth-title').textContent=signup?'アカウントを新規登録':'AevStudioにログイン';
+  submit.textContent=signup?'登録する':'ログイン';
+  toggle.textContent=signup?'ログインに戻る':'アカウントを新規登録';
+  showMessage('');
+ };
+ submit.onclick=async()=>{
+  if(!client){showMessage('Supabaseとの接続設定を確認してください。',true);return;}
+  const mail=email.value.trim(),pass=password.value;
+  if(!mail||!pass){showMessage('メールアドレスとパスワードを入力してください。',true);return;}
+  submit.disabled=true;submit.textContent=signup?'登録中...':'ログイン中...';showMessage('');
+  try{
+   const result=signup
+    ?await client.auth.signUp({email:mail,password:pass})
+    :await client.auth.signInWithPassword({email:mail,password:pass});
+   if(result.error)throw result.error;
+   if(signup){
+    showMessage(result.data.session?'登録しました。':'確認メールを送信しました。メールを確認してください。');
+   }else{
+    showMessage('ログインしました。画面を更新します。');
+    await sync();
+    dialog.close();
+    setTimeout(()=>location.reload(),250);
+   }
+  }catch(error){
+   showMessage(error?.message||'ログインに失敗しました。入力内容と接続を確認してください。',true);
+  }finally{
+   submit.disabled=false;submit.textContent=signup?'登録する':'ログイン';
+  }
+ };
+ sync();
+})();
+</script>
+<script>
 (function(){
  const menu=document.getElementById('site-menu');
  const toggle=document.getElementById('menu-toggle');
