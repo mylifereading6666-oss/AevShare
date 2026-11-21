@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090d18"><meta name="description" content="AevStudio - 学び、作り、公開するWeb制作スタジオ">
-<title>Web制作を学ぶ | AevStudio</title><link rel="stylesheet" href="style.css?v=20261121-7">
+<title>Web制作を学ぶ | AevStudio</title><link rel="stylesheet" href="style.css?v=20261121-8">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 body[data-page="learn"] .hero,body[data-page="learn"] .section{min-height:0}
@@ -118,4 +118,29 @@ body[data-page="learn"] .section{scroll-margin-top:90px}
   };
  }
 })();
-</script></body></html>
+</script>
+<script>
+/* Make every learning lesson card independently collapsible. */
+(function(){
+ const selectors='.learn-section .learn-grid article, .learn-section .lesson-steps article, .learn-section .feature-learning-grid article';
+ document.querySelectorAll(selectors).forEach((card,index)=>{
+  if(card.dataset.collapsibleReady==='true')return;
+  const children=[...card.childNodes];
+  const lead=children.filter(node=>node.nodeType===Node.ELEMENT_NODE && (node.matches('b,h3')));
+  const rest=children.filter(node=>!lead.includes(node));
+  if(!lead.length)return;
+  const details=document.createElement('details');
+  details.className=(card.className?card.className+' ':'')+'lesson-collapsible';
+  details.dataset.collapsibleReady='true';
+  const summary=document.createElement('summary');
+  summary.className='lesson-card-summary';
+  lead.forEach(node=>summary.appendChild(node.cloneNode(true)));
+  const body=document.createElement('div');
+  body.className='lesson-card-content';
+  rest.forEach(node=>body.appendChild(node));
+  details.append(summary,body);
+  card.replaceWith(details);
+ });
+})();
+</script>
+</body></html>
