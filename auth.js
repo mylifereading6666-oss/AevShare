@@ -84,7 +84,7 @@
    const email=document.getElementById('auth-email')?.value.trim()||'';
    const password=document.getElementById('auth-password')?.value||'';
    if(!email||!password){say('メールアドレスとパスワードを入力してください。',true);return;}
-   if(!/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(email)){say('メールアドレスの形式を確認してください。',true);return;}
+   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){say('メールアドレスの形式を確認してください。',true);return;}
    submit.disabled=true;submit.textContent=signupMode?'登録中...':'ログイン中...';say('');
    try{
     const result=signupMode
