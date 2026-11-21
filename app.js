@@ -89,6 +89,8 @@ const snippetGuides={
 'pagination':{group:'data',usage:'一覧の各要素にdata-itemを付け、renderPage(ページ番号)で表示する範囲を切り替えます。',caution:'この例は画面上の要素を隠すだけで、データを分割取得するものではありません。ページ番号の範囲や0件の場合を処理してください。'},
 'responsive-cards':{group:'design',usage:'カード一覧の親要素にcard-grid、各カードにcardを付けます。画面幅に合わせて列数が変化します。',caution:'カード内の画像や長いテキストがはみ出さないようにしてください。実機の幅で余白と読みやすさを確認してください。'}
 };
+window.AEVSTUDIO_BUILTIN_SNIPPETS=builtinSnippets;
+window.AEVSTUDIO_SNIPPET_GUIDES=snippetGuides;
 const groupNames={navigation:'ナビゲーション',design:'デザイン・レイアウト',forms:'フォーム・入力',account:'アカウント',media:'画像・メディア',interaction:'操作・表示',data:'検索・データ'};
 let codeSnippets=[...new Map(builtinSnippets.map(x=>[x.id,{...x,...(snippetGuides[x.id]||{}),aliases:x.tags||[]}])).values()],activeCodeCategory='all';
 function renderCodeSnippets(list=codeSnippets){
@@ -123,6 +125,8 @@ function filterCode(){renderCodeSnippets()}
   initMenu();
   loadCodeSnippets();
   const searchButton=$('#code-search-button'),searchInput=$('#code-search-input');
+  const initialQuery=new URLSearchParams(window.location.search).get('q');
+  if(initialQuery&&searchInput){searchInput.value=initialQuery;filterCode();setTimeout(()=>searchInput.scrollIntoView({behavior:'smooth',block:'center'}),80);}
   if(searchButton)searchButton.onclick=filterCode;
   if(searchInput)searchInput.addEventListener('input',filterCode);
   $('[data-code-category]').forEach(b=>b.onclick=()=>{
@@ -166,7 +170,7 @@ function localSearchTokens(value){
 function scoreLocalSnippet(item,query){
  const q=String(query||'').trim().toLowerCase();
  if(!q)return 1;
- const fields=[item.title||'',item.description||'',item.category||'',groupNames[item.group]||'',...(item.tags||[]),...(item.aliases||[]),item.usage||'',item.caution||''].join(' ').toLowerCase();
+ const fields=[item.id||'',item.title||'',item.description||'',item.category||'',groupNames[item.group]||'',...(item.tags||[]),...(item.aliases||[]),item.usage||'',item.caution||''].join(' ').toLowerCase();
  const code=String(item.code||'').toLowerCase();
  let score=0;
  if(fields.includes(q))score+=30;
