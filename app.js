@@ -4,6 +4,23 @@ const config=window.AEVSTUDIO_CONFIG||{}, configured=config.supabaseUrl&&config.
 let client=null,user=null,projects=[],current=null,mode='visual',signup=false,selectedTemplate='blank',realtimeChannel=null,autosaveTimer=null;
 if(configured&&window.supabase)client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey);
 window.AEVSTUDIO_AUTH={isLoggedIn:()=>!!user,getSession:async()=>client?client.auth.getSession():({data:{session:null},error:new Error('Supabase client unavailable')}),onAuthStateChange:callback=>client?client.auth.onAuthStateChange(callback):null,signInWithPassword:args=>client?client.auth.signInWithPassword(args):Promise.resolve({error:new Error('Supabase client unavailable')}),signUp:args=>client?client.auth.signUp(args):Promise.resolve({error:new Error('Supabase client unavailable')}),signOut:async()=>client?client.auth.signOut():({error:new Error('Supabase client unavailable')})};
+/* Initialize the shared header session indicator before page-specific UI code. */
+function updateSharedAuthHeader(session){
+ user=session?.user||null;
+ const button=document.getElementById('auth-open');
+ const badge=document.getElementById('auth-status');
+ const label=document.getElementById('account-label');
+ if(button){button.classList.toggle('hidden',!!user);button.textContent='ログイン / 登録';}
+ if(badge)badge.classList.toggle('hidden',!user);
+ if(label)label.textContent=user?(user.email||'ログイン中'):'ゲストモード';
+}
+if(client){
+ client.auth.onAuthStateChange((_event,session)=>updateSharedAuthHeader(session));
+ client.auth.getSession().then(({data,error})=>{
+  if(!error)updateSharedAuthHeader(data.session);
+ }).catch(error=>console.warn('Shared auth header session check failed',error));
+}
+
 
 const builtinSnippets=[
 {id:'modal-dialog',category:'HTML',title:'モーダルダイアログ',description:'ボタンから説明や確認画面を表示する基本構成。',tags:['ポップアップ','ダイアログ','画面','表示'],code:'<dialog id="myDialog">\\n  <p>メッセージ</p>\\n  <button onclick="this.closest(\\'dialog\\').close()">閉じる</button>\\n</dialog>\\n<button onclick="document.querySelector(\\'#myDialog\\').showModal()">開く</button>',difficulty:'初級'},
