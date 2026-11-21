@@ -106,7 +106,7 @@ let codeSnippetLoadPromise=null;
 async function loadCodeSnippets(){
  // Show the built-in library immediately. Cloud additions are optional and must
  // never block the page if the table, network, or permissions are unavailable.
- codeSnippets=[...builtinSnippets];
+ codeSnippets=[...new Map(builtinSnippets.map(x=>[x.id,{...x,...(snippetGuides[x.id]||{}),aliases:x.tags||[]}])).values()];
  renderCodeSnippets();
  $('#code-search-status').textContent='コード一覧を準備しました（端末内のコード）';
  if(!client||codeSnippetLoadPromise)return;
@@ -119,7 +119,7 @@ async function loadCodeSnippets(){
    if(result.error)throw result.error;
    if(Array.isArray(result.data)&&result.data.length){
     const remote=result.data.map(x=>({...x,tags:Array.isArray(x.tags)?x.tags:[],...(snippetGuides[x.id]||{})}));
-    const byId=new Map([...builtinSnippets,...remote].map(x=>[x.id,x]));
+    const byId=new Map([...codeSnippets,...remote].map(x=>[x.id,x]));
     codeSnippets=[...byId.values()];
     renderCodeSnippets();
     $('#code-search-status').textContent=codeSnippets.length+' 件のコードを利用できます';
@@ -143,6 +143,24 @@ function setupRealtime(){
  realtimeChannel=channel.subscribe();
 }
 function filterCode(){renderCodeSnippets()}
+(function initCodeLibraryEarly(){
+ try{
+  initMenu();
+  loadCodeSnippets();
+  const searchButton=$('#code-search-button'),searchInput=$('#code-search-input');
+  if(searchButton)searchButton.onclick=filterCode;
+  if(searchInput)searchInput.addEventListener('input',filterCode);
+  $('[data-code-category]').forEach(b=>b.onclick=()=>{
+   activeCodeCategory=b.dataset.codeCategory;
+   $('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));
+   renderCodeSnippets();
+  });
+ }catch(error){
+  console.error('AevStudio code library initialization failed:',error);
+  const status=$('#code-search-status');
+  if(status)status.textContent='コード一覧の初期化エラー：'+(error?.message||'不明なエラー');
+ }
+})();
 const localSynonyms={
  '画像':['写真','picture','photo','image','gallery','ギャラリー','拡大','lightbox'],
  '拡大':['大きく','ズーム','zoom','enlarge','lightbox'],
@@ -273,7 +291,7 @@ $('#account-password-update')?.addEventListener('click',async()=>{
 });
 renderAccountPage();
 
-initMenu();loadCodeSnippets();$('#code-search-button').onclick=filterCode;$('#code-search-input').addEventListener('input',filterCode);$$('[data-code-category]').forEach(b=>b.onclick=()=>{activeCodeCategory=b.dataset.codeCategory;$$('[data-code-category]').forEach(x=>x.classList.toggle('active',x===b));renderCodeSnippets()});
+// Code library initialized independently above.
 $('#start-new-project').onclick=showTemplatePicker;$('#back-to-hub').onclick=showHub;$('#back-project-hub').onclick=showHub;$('#continue-project').onclick=()=>$('#hub-project-list').scrollIntoView({behavior:'smooth'});$('#create-selected-project').onclick=()=>newProject(selectedTemplate);$$('[data-new-template]').forEach(b=>b.onclick=()=>{selectedTemplate=b.dataset.newTemplate;$$('[data-new-template]').forEach(x=>x.classList.toggle('selected',x===b))});$('#save-project').onclick=saveProject;$('#preview-project').onclick=()=>{refresh();$('#preview-frame').scrollIntoView({behavior:'smooth',block:'center'})};$('#refresh-preview').onclick=refresh;$$('.tab').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 ['project-name','visual-title','visual-description','visual-color','html-code','css-code'].forEach(id=>$('#'+id)?.addEventListener('input',()=>{ $('#save-status').textContent='変更を自動保存します...';clearTimeout(autosaveTimer);autosaveTimer=setTimeout(()=>saveProject(),700)}));
 $('#starter-template').onchange=e=>{let s=starter[e.target.value];if(s){$('#visual-title').value=s.title;$('#visual-description').value=s.description;$('#visual-color').value=s.color;refresh()}};
