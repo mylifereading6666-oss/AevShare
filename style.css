@@ -95,3 +95,26 @@ body.menu-is-open{overflow:hidden!important;overscroll-behavior:none;touch-actio
 .account-password-card input{display:block;width:100%;margin-top:7px;padding:12px;border:1px solid var(--line);border-radius:8px;background:#0a1020;color:var(--text);font:inherit}
 .account-feedback{min-height:22px;color:var(--cyan);font-size:12px}
 @media(max-width:700px){.account-settings-grid{grid-template-columns:1fr}.account-info-card,.account-password-card{padding:18px}}
+
+
+/* Clearer, reliable global navigation */
+.menu-toggle{width:auto;min-width:104px;min-height:44px;flex-direction:row;gap:10px;padding:0 12px;white-space:nowrap}
+.menu-toggle-lines{display:flex;flex-direction:column;gap:5px}
+.menu-toggle-label{font-size:12px;font-weight:750;letter-spacing:.04em}
+.site-menu{display:block;position:fixed;z-index:1001;top:76px;left:0;width:min(360px,90vw);height:calc(100dvh - 76px);padding:22px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;-webkit-overflow-scrolling:touch;border-right:1px solid #35415d;box-shadow:22px 18px 65px #000b}
+.site-menu.hidden{display:none!important}
+.menu-backdrop{position:fixed;z-index:1000;inset:76px 0 0;background:#02040bd9;backdrop-filter:blur(3px)}
+.menu-head{font-size:13px;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.site-menu details{padding:16px 0}
+.site-menu summary{display:flex;align-items:center;min-height:34px;font-size:14px}
+.site-menu details a{display:flex;align-items:center;min-height:46px;margin-top:7px;padding:10px 13px;background:#ffffff08;border:1px solid #ffffff0d;font-size:13px}
+.site-menu details a:before{content:"›";font-size:20px;color:var(--cyan);margin-right:10px}
+.site-menu details a:active{background:#8068ed33;border-color:#8b76ee}
+.auth-open-button{min-height:42px;white-space:nowrap}
+body.menu-is-open{overflow:hidden!important;overscroll-behavior:none}
+@media(max-width:700px){
+ .menu-toggle{min-width:94px;padding:0 9px}
+ .site-menu{top:65px;height:calc(100dvh - 65px)}
+ .menu-backdrop{inset:65px 0 0}
+ .auth-open-button{padding:9px 11px;font-size:12px}
+}
