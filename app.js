@@ -3,7 +3,7 @@ const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const config=window.AEVSTUDIO_CONFIG||{}, configured=config.supabaseUrl&&config.supabaseAnonKey&&!config.supabaseAnonKey.startsWith('PASTE_');
 let client=null,user=null,projects=[],current=null,mode='visual',signup=false,selectedTemplate='blank',realtimeChannel=null,autosaveTimer=null;
 if(configured&&window.supabase)client=window.supabase.createClient(config.supabaseUrl,config.supabaseAnonKey);
-window.AEVSTUDIO_AUTH={isLoggedIn:()=>!!user,signOut:async()=>{if(client)await client.auth.signOut()}};
+window.AEVSTUDIO_AUTH={isLoggedIn:()=>!!user,getSession:async()=>client?client.auth.getSession():({data:{session:null},error:new Error('Supabase client unavailable')}),onAuthStateChange:callback=>client?client.auth.onAuthStateChange(callback):null,signInWithPassword:args=>client?client.auth.signInWithPassword(args):Promise.resolve({error:new Error('Supabase client unavailable')}),signUp:args=>client?client.auth.signUp(args):Promise.resolve({error:new Error('Supabase client unavailable')}),signOut:async()=>client?client.auth.signOut():({error:new Error('Supabase client unavailable')})};
 
 const builtinSnippets=[
 {id:'modal-dialog',category:'HTML',title:'モーダルダイアログ',description:'ボタンから説明や確認画面を表示する基本構成。',tags:['ポップアップ','ダイアログ','画面','表示'],code:'<dialog id="myDialog">\\n  <p>メッセージ</p>\\n  <button onclick="this.closest(\\'dialog\\').close()">閉じる</button>\\n</dialog>\\n<button onclick="document.querySelector(\\'#myDialog\\').showModal()">開く</button>',difficulty:'初級'},
