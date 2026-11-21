@@ -221,3 +221,36 @@ body.menu-is-open{overflow:hidden!important;overscroll-behavior:none}
 .page-learning-note{margin-top:18px;padding:18px}.page-learning-note p{margin-bottom:0;color:var(--muted);font-size:13px;line-height:1.8}
 
 .advanced-lessons{scroll-margin-top:90px}.lesson-steps,.feature-learning-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:14px}.lesson-card{padding:20px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,#141d30,#101725)}.lesson-card>b{font-size:10px;letter-spacing:1.3px;color:var(--cyan)}.lesson-card h3{margin:9px 0;font-size:17px}.lesson-card p{color:var(--muted);font-size:13px;line-height:1.8}.lesson-card a,.lesson-next a:not(.btn){color:#b8a8ff;text-decoration:none;font-weight:700;font-size:13px}.lesson-card pre{max-width:100%;overflow:auto;padding:13px;border-radius:10px;background:#080d18;color:#d8e1f5;font-size:11px;line-height:1.7}.lesson-card code{overflow-wrap:anywhere}.lesson-warning{padding:10px 12px;border-left:3px solid #e1a44b;background:#e1a44b12;border-radius:5px}.lesson-next{margin-top:18px;padding:20px}.lesson-next p{color:var(--muted);line-height:1.8}.lesson-next .btn{margin-top:8px}
+
+
+/* Unified, high-contrast template selection states */
+.template-choice,.template-card,.choice-card,.project-option{
+ position:relative;
+ transition:border-color .16s ease,background .16s ease,box-shadow .16s ease,transform .16s ease;
+}
+.template-choice.selected,.template-card.selected,.choice-card.selected,.project-option.selected{
+ border:2px solid #b8a5ff!important;
+ background:linear-gradient(145deg,#44358a66,#17213a)!important;
+ box-shadow:0 0 0 3px #a78bfa35,0 10px 28px #0006,inset 0 0 0 1px #d5c8ff33!important;
+ color:#fff!important;
+ transform:translateY(-2px);
+}
+.template-choice.selected:after,.template-card.selected:after{
+ content:"✓ 選択中";
+ position:absolute;top:10px;right:10px;z-index:2;
+ padding:5px 9px;border-radius:999px;
+ background:#a78bfa;color:#100d20;
+ font-size:11px;font-weight:900;letter-spacing:.03em;
+ box-shadow:0 3px 12px #0008;
+}
+.template-choice:focus-visible,.template-card:focus-visible,.choice-card:focus-visible,.project-option:focus-visible{
+ outline:3px solid #d6caff!important;outline-offset:3px;
+}
+.template-choice-grid-rich .template-choice.selected img{filter:saturate(1.12) brightness(.82)}
+.template-thumb{display:block;width:100%;height:132px;object-fit:cover;border-radius:9px;margin:0 0 12px}
+body[data-page="create-project"] .template-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}
+body[data-page="create-project"] .template-card{padding:0 0 14px;overflow:hidden;min-width:0}
+body[data-page="create-project"] .template-card .template-thumb{height:125px;border-radius:0;margin:0 0 12px}
+body[data-page="create-project"] .template-card strong,body[data-page="create-project"] .template-card small{margin-left:13px;margin-right:13px}
+body[data-page="create-project"] .template-card small{display:block;margin-top:5px}
+@media(max-width:560px){body[data-page="create-project"] .template-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}body[data-page="create-project"] .template-card .template-thumb{height:88px}body[data-page="create-project"] .template-card strong{font-size:12px}body[data-page="create-project"] .template-card small{font-size:10px}}
