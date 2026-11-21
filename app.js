@@ -199,7 +199,7 @@ function renderProjects(){
  $('#hub-project-list').innerHTML=projects.length?projects.map(p=>'<button class="hub-project-card" data-hub-id="'+p.id+'"><strong>'+escapeHtml(p.name||'Untitled Project')+'</strong><span>最終更新：'+new Date(p.updated_at||Date.now()).toLocaleString('ja-JP')+'</span><b>続きから開く →</b></button>').join(''):'<div class="empty">プロジェクトはまだありません。</div>';
  $$('.project-item').forEach(b=>b.onclick=()=>{applyProject(projects.find(p=>p.id===b.dataset.id));openWorkspace()});
  $$('[data-hub-id]').forEach(b=>b.onclick=()=>{const p=projects.find(x=>x.id===b.dataset.hubId);if(p){applyProject(p);openWorkspace()}});
- $('#continue-project').disabled=!projects.length;
+ $('#continue-project').disabled=false;
 }
 function buildHTML(){let p=fromVisual();let title=escapeHtml(p.title),desc=escapeHtml(p.description);return '<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>*{box-sizing:border-box}body{margin:0;padding:8vw;font:16px/1.7 system-ui;color:#202238;background:#f6f7fb}main{max-width:800px;margin:8vh auto;padding:50px;border-radius:24px;background:white;box-shadow:0 20px 70px #20204018}h1{font-size:clamp(32px,7vw,60px);line-height:1.15;color:'+p.color+'}p{color:#687087}button{border:0;border-radius:9px;padding:12px 20px;background:'+p.color+';color:white;font-weight:bold}'+(p.css||'')+'</style><main>'+(p.html||'<h1>'+title+'</h1><p>'+desc+'</p><button>はじめる</button>')+'</main><script>'+'</scr'+'ipt></html>'}
 function refresh(){let html=mode==='code'?$('#html-code').value:buildHTML();if(mode==='code'){let css=$('#css-code').value;html=html.replace('</head>','<style>'+css+'</style></head>')}$('#preview-frame').srcdoc=html;$('#save-status').textContent='プレビューを更新しました'}
