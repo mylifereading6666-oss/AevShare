@@ -8,7 +8,7 @@ if(!production)return;
 let panel=document.getElementById('menu-project-section');
 if(!panel){
  panel=document.createElement('div');panel.id='menu-project-section';panel.className='menu-project-section';
- panel.innerHTML='<div class="menu-project-heading">マイプロジェクト</div><a class="menu-new-project" href="create-project.html">＋ 新しく作る</a><div class="menu-project-items" id="menu-project-items"><span class="menu-project-empty">読み込み中...</span></div>';
+ panel.innerHTML='<div class="menu-project-heading">マイプロジェクト</div><a class="menu-new-project" href="project-start.html">＋ 新しく作る</a><div class="menu-project-items" id="menu-project-items"><span class="menu-project-empty">読み込み中...</span></div>';
  production.appendChild(panel);
 }
 function localProjects(){try{const v=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(v)?v:[]}catch(e){return []}}
