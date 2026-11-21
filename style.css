@@ -360,6 +360,30 @@ body[data-page="create-project"] .template-card .template-thumb {
 @media(prefers-reduced-motion:reduce){.learn-section .lesson-card-content{animation:none}}
 
 
+
+
+
+/* Integrated advanced-code lessons on the learning page. */
+.learn-code-groups{display:grid;gap:22px;min-width:0}
+.learn-code-count{color:var(--muted);font-size:13px;margin:0}
+.learn-code-category{min-width:0}
+.learn-code-category>h3{margin:0 0 13px;padding-bottom:9px;border-bottom:1px solid var(--line);font-size:17px}
+.learn-code-card{min-width:0;align-self:start;overflow:hidden}
+.learn-code-card>pre,.learn-code-source pre{max-width:100%;overflow:auto;white-space:pre}
+.learn-code-card .learn-existing-extra{margin:12px 0;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#ffffff06}
+.learn-existing-extra>ul{margin:7px 0 0;padding-left:20px}
+.learn-existing-extra li{margin:4px 0}
+.learn-caution{margin:12px 0 0;padding:10px 12px;border-left:3px solid #d6a34b;background:#d6a34b12;border-radius:0 9px 9px 0;color:var(--text);font-size:13px;line-height:1.65}
+.learn-code-source{margin-top:12px}
+.learn-code-source pre{max-height:320px;padding:12px;border-radius:9px;background:#080d18;border:1px solid var(--line);font-size:12px;line-height:1.6}
+.learn-code-source code{white-space:pre}
+.learn-code-card .lesson-card-content{min-width:0}
+@media(max-width:560px){
+ .learn-code-category>h3{font-size:15px}
+ .learn-code-source pre{font-size:11px;max-height:260px}
+ .learn-existing-extra{padding:9px}
+}
+
 /* Major learning-section accordion: keeps the original section spacing and collapses all inner content. */
 .learn-section-fold{min-width:0}
 .learn-section-summary{display:block;list-style:none;cursor:pointer;position:relative;padding-right:42px}
