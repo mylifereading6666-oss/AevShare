@@ -102,3 +102,11 @@
 .diagnostic-errors ul{margin:7px 0 0;padding-left:20px}
 .diagnostic-errors li{margin:4px 0;color:#ff858c;overflow-wrap:anywhere}
 .diagnostic-errors strong,.diagnostic-errors span{color:#ff525e}
+
+
+/* Separate live preview browsing and element inspection modes */
+.preview-mode-controls{display:flex;align-items:center;justify-content:flex-end;gap:6px;flex-wrap:wrap}
+.preview-mode-btn{border:1px solid #39445c;border-radius:7px;padding:7px 10px;background:#111a2b;color:#b8c4dc;font-size:11px;cursor:pointer}
+.preview-mode-btn.active{border-color:#9278ff;background:#6c50d933;color:#fff}
+.preview-mode-hint{padding:7px 12px;background:#111a2b;color:#aab5d0;font-size:10px;line-height:1.5}
+@media(max-width:600px){.preview-title{display:grid;gap:8px}.preview-mode-controls{justify-content:flex-start}.preview-mode-btn{flex:1;min-height:38px}.preview-mode-controls #preview-label{width:100%}}
